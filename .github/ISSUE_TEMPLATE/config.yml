@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 사용법 질문
+    url: https://github.com/dydals3440/korean-account/discussions
+    about: Discussions 에 올려 주세요.
+  - name: 보안 취약점
+    url: https://github.com/dydals3440/korean-account/security/advisories/new
+    about: 비공개 Security Advisory.

@@ -1,0 +1,28 @@
+name: 기능 제안
+description: 새 기관·패턴·API 등 라이브러리 확장 제안.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: PDF 미명시 영역은 코어가 아닌 컨슈머 `defaultDetector.extend(...)` 영역입니다 — [§ 7](../../README.md#7-pdf-vs-컨슈머-책임-모델).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: 근거
+      description: 새 기관/패턴 추가는 CMS PDF 페이지·표 행 인용 필수.

@@ -1,0 +1,37 @@
+# 의존성
+node_modules
+.pnpm-store
+
+# 빌드 산출물
+dist
+build
+coverage
+*.tsbuildinfo
+
+# 캐시
+.cache
+.turbo
+.vite
+.vitest
+
+# 로그
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# 에디터 / OS
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+Thumbs.db
+
+# 환경
+.env
+.env.local
+.env.*.local
+
+# Changesets 임시
+.changeset/pre.json
