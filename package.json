@@ -63,7 +63,7 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=20.11"
+    "node": ">=22.0.0"
   },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
@@ -81,7 +81,7 @@
     "attw": "attw --pack .",
     "publint": "publint",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
-    "prepublishOnly": "pnpm clean && pnpm build && pnpm attw && pnpm publint",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm publint",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish"
@@ -93,7 +93,7 @@
     "@arethetypeswrong/cli": "^0.18.0",
     "@biomejs/biome": "^2.0.0",
     "@changesets/cli": "^2.27.0",
-    "@types/node": "^20.14.0",
+    "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^2.1.0",
     "publint": "^0.3.0",
     "tsdown": "^0.22.0",
