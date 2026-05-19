@@ -1,0 +1,38 @@
+name: 버그 리포트
+description: 식별·과목 매칭 오류 또는 라이브러리 동작 이상.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: 민감한 계좌번호는 마스킹해 주세요. 자릿수와 식별자 영역의 앞 1~3자리는 분석에 필요합니다.
+
+  - type: textarea
+    id: input
+    attributes:
+      label: 입력 / 기대 / 실제
+      placeholder: |
+        입력: "1000-19**-****"
+        기대: institution.id === "toss", kind === "virtual"
+        실제: institution.id === "kakao-bank"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 코드
+      render: ts
+      placeholder: |
+        import { detectAccount } from "korean-account";
+        detectAccount("...");
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 버전 / 런타임
+      placeholder: "korean-account 0.1.0 · Node 22.5 · macOS 14"
+    validations:
+      required: true
