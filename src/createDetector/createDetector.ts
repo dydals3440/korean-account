@@ -170,8 +170,6 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
   return { institutions, detect, extend, remove };
 }
 
-// ─── Helpers (module-level, pure) ─────────────────────────────────────────
-
 /** detect() 의 옵션 필터를 한 곳에 모아 evaluating 순서를 명시. */
 function passesOptionFilters(
   institution: Institution,
