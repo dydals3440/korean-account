@@ -2,6 +2,10 @@
 
 > 한국 금융기관 계좌번호 식별 라이브러리. [금융결제원 CMS PDF](https://www.cmsedi.or.kr/cms/board/workdata/view/1026) 단일 출처.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/dydals3440/korean-account/main/showcase.gif" alt="korean-account 시연" width="400" />
+</p>
+
 [![npm](https://img.shields.io/npm/v/korean-account.svg?style=flat-square)](https://www.npmjs.com/package/korean-account)
 [![bundle](https://img.shields.io/bundlephobia/minzip/korean-account?style=flat-square)](https://bundlephobia.com/package/korean-account)
 [![license](https://img.shields.io/npm/l/korean-account.svg?style=flat-square)](./LICENSE)
