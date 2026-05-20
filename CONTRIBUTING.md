@@ -6,7 +6,7 @@ Node 20.11+ / pnpm 9.
 
 ```bash
 pnpm install
-pnpm test       # 385 spec
+pnpm test       # 전체 테스트
 ```
 
 ## 작업 흐름
@@ -32,7 +32,7 @@ pnpm build          # tsdown / rolldown
 4. `src/_internal/fixtures` 에 fixture 추가 (양·음성 케이스)
 5. 회귀용 `.spec.ts` 추가
 
-> "관행적으로 통용되는 prefix" 는 PDF 가 enumerate 한 게 아니면 코어가 아닌 컨슈머 보강 영역. [§ 7. PDF vs 컨슈머](./README.md#7-pdf-vs-컨슈머-책임-모델) 참조.
+> "관행적으로 통용되는 prefix" 는 PDF 가 enumerate 한 게 아니면 코어가 아닌 컨슈머 보강 영역. [§ 1. 설계 원칙](./README.md#1-설계-원칙) 참조.
 
 ## 코드 규약
 

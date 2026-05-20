@@ -185,7 +185,6 @@ const kyobo = defineInstitution({
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "53", category: "savings" }),
         defineSubject({ code: "54", category: "savings" }),
-        // '10.9.13 추가
         ...["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].map((code) =>
           defineSubject({ code, category: "savings" }),
         ),

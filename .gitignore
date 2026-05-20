@@ -27,6 +27,8 @@ yarn-debug.log*
 !.vscode/extensions.json
 !.vscode/settings.json
 Thumbs.db
+.claude/
+.cursor/
 
 # 환경
 .env
