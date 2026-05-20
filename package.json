@@ -78,10 +78,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:bench": "vitest bench --run",
-    "attw": "attw --pack .",
     "publint": "publint",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
-    "prepublishOnly": "pnpm clean && pnpm build && pnpm publint",
+    "prepublishOnly": "pnpm build && pnpm publint",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish"
@@ -90,7 +89,6 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.0",
     "@biomejs/biome": "^2.0.0",
     "@changesets/cli": "^2.27.0",
     "@types/node": "^22.0.0",
