@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      zod:
-        specifier: ^3.23.0
-        version: 3.25.76
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.0.0
@@ -36,6 +32,9 @@ importers:
       vitest:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.19)
+      zod:
+        specifier: ^3.23.0
+        version: 3.25.76
 
 packages:
 
