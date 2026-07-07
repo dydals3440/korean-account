@@ -2,6 +2,7 @@ import { suhyupCoop12BranchToBank } from "../_internal/branchRules";
 import { defineSubject } from "../_internal/subjects";
 import { createPatternTemplate as T } from "../createPatternTemplate";
 import { defineInstitution } from "./defineInstitution";
+import { expandTwoDigitRange } from "./expandTwoDigitRange";
 
 /**
  * 비은행 예금 취급 기관 (수협중앙회·농협중앙회·새마을·신협·우체국·산림조합·저축은행)
@@ -422,10 +423,10 @@ const post = defineInstitution({
         ...["31", "32", "33", "49"].map((code) =>
           defineSubject({ code, category: "other", allowsWithdrawal: false }),
         ),
-        ...Array.from({ length: 9 }, (_, i) => String(40 + i)).map((code) =>
+        ...expandTwoDigitRange(40, 48).map((code) =>
           defineSubject({ code, category: "other", allowsWithdrawal: false }),
         ),
-        ...Array.from({ length: 9 }, (_, i) => String(80 + i)).map((code) =>
+        ...expandTwoDigitRange(80, 88).map((code) =>
           defineSubject({ code, category: "other", allowsWithdrawal: false }),
         ),
       ],

@@ -5,37 +5,37 @@ import { pickPattern } from "./pickPattern";
 describe("pickPattern", () => {
   describe("institution 조회 실패", () => {
     test("존재하지 않는 institutionId면 null을 반환한다", () => {
-      // given
+      // Given
       const id = "nonexistent";
 
-      // when
+      // When
       const result = pickPattern(id);
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
 
     test("빈 institutionId면 null을 반환한다", () => {
-      // given
+      // Given
       const id = "";
 
-      // when
+      // When
       const result = pickPattern(id);
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
   });
 
   describe("필터 없이 호출", () => {
     test("filter 없이 호출하면 첫 패턴을 반환한다", () => {
-      // given
+      // Given
       const id = "shinhan";
 
-      // when
+      // When
       const result = pickPattern(id);
 
-      // then
+      // Then
       expect(result).not.toBeNull();
       expect(result?.kind).toBe("new");
     });
@@ -43,48 +43,48 @@ describe("pickPattern", () => {
 
   describe("kind 필터", () => {
     test("kind=new — 신계좌 패턴만 반환한다", () => {
-      // given
+      // Given
       const id = "kb";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "new" });
 
-      // then
+      // Then
       expect(result?.kind).toBe("new");
     });
 
     test("kind=old — 구계좌 패턴만 반환한다", () => {
-      // given
+      // Given
       const id = "kb";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "old" });
 
-      // then
+      // Then
       expect(result?.kind).toBe("old");
     });
 
     test("kind=virtual — 가상계좌 패턴만 반환한다", () => {
-      // given
+      // Given
       const id = "kb";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "virtual" });
 
-      // then
+      // Then
       expect(result?.kind).toBe("virtual");
     });
   });
 
   describe("length 필터", () => {
     test("length=12 — 12자리 패턴만 반환한다", () => {
-      // given
+      // Given
       const id = "shinhan";
 
-      // when
+      // When
       const result = pickPattern(id, { length: 12 });
 
-      // then
+      // Then
       expect(result).not.toBeNull();
       if (result) {
         expect(templateLength(result.template)).toBe(12);
@@ -94,13 +94,13 @@ describe("pickPattern", () => {
 
   describe("kind + length 동시 필터", () => {
     test("IBK 신계좌 14자리 패턴을 반환한다", () => {
-      // given
+      // Given
       const id = "ibk";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "new", length: 14 });
 
-      // then
+      // Then
       expect(result).not.toBeNull();
       expect(result?.kind).toBe("new");
       if (result) {
@@ -111,24 +111,24 @@ describe("pickPattern", () => {
 
   describe("조건 미충족", () => {
     test("KDB에는 lifetime 패턴이 없어 null을 반환한다", () => {
-      // given
+      // Given
       const id = "kdb";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "lifetime" });
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
 
     test("KB에는 lifetime 100자리 패턴이 없어 null을 반환한다", () => {
-      // given
+      // Given
       const id = "kb";
 
-      // when
+      // When
       const result = pickPattern(id, { kind: "new", length: 100 });
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
   });

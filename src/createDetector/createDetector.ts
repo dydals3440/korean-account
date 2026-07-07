@@ -55,6 +55,13 @@ const KIND_ORDER: Record<AccountKind, number> = {
  *
  * `extend` / `remove` 는 새 detector 를 반환한다.
  * `scoring` 으로 점수 가중치를 부분 override 할 수 있다.
+ *
+ * @example
+ * const detector = createDetector({ institutions });
+ * detector.detect("110-436-387740");
+ *
+ * @example 확장 — 저축은행 가상계좌 prefix 보강
+ * const extended = defaultDetector.extend({ institutions: [myCustomInstitution] });
  */
 export function createDetector<I extends Institution>(input: CreateDetectorInput<I>): Detector<I> {
   const institutions = input.institutions;
@@ -170,7 +177,6 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
   return { institutions, detect, extend, remove };
 }
 
-/** detect() 의 옵션 필터를 한 곳에 모아 evaluating 순서를 명시. */
 function passesOptionFilters(
   institution: Institution,
   options: DetectOptions,
@@ -234,7 +240,6 @@ function evaluateBranch<I extends Institution>(
   };
 }
 
-/** kind + subject + override 조합에서 출금·가상 가능 여부를 계산. */
 function computeCapabilities(
   kind: AccountKind,
   normalizedSubject: Subject | undefined,
@@ -294,7 +299,6 @@ function narrowLowConfidence<I extends Institution>(
   return results.filter((result) => result.confidence !== "low");
 }
 
-/** 입력 verifier 맵에서 undefined 를 걸러 비-옵셔널 Map 으로 변환. */
 function buildVerifierMap<I extends Institution>(
   verifiers: CreateDetectorInput<I>["checkDigitVerifiers"],
 ): Map<string, CheckDigitVerifier> {

@@ -9,8 +9,9 @@ import {
 } from "../_internal/branchRules";
 import { defineSubject } from "../_internal/subjects";
 import { createPatternTemplate as T } from "../createPatternTemplate";
-import type { Subject } from "../types";
+import type { AdditionalRule, Subject } from "../types";
 import { defineInstitution } from "./defineInstitution";
+import { expandTwoDigitRange } from "./expandTwoDigitRange";
 
 /**
  * 005 하나은행 외환 통합 14d (`XXX-XXXXXX-XXXXX`) 가 점유하는 prefix set.
@@ -28,6 +29,12 @@ const HANA_FOREIGN_LEGACY_PREFIXES: ReadonlySet<string> = new Set([
   "600",
   "655",
 ]);
+
+const isHanaForeignLegacy14: AdditionalRule = (digits) =>
+  digits.length === 14 && HANA_FOREIGN_LEGACY_PREFIXES.has(digits.slice(0, 3));
+
+const isNotHanaForeignLegacy14: AdditionalRule = (digits) =>
+  digits.length === 14 && !HANA_FOREIGN_LEGACY_PREFIXES.has(digits.slice(0, 3));
 
 /**
  * 시중·특수·지방·인터넷전문·외국계 은행.
@@ -263,8 +270,6 @@ const hana = defineInstitution({
   priority: 80,
   successorOf: ["keb-foreign-exchange"],
   patterns: [
-    // 3자리 입금만 코드 (810/811/817/818/704 등) 는 본 11d 패턴 (2자리 과목) 으로
-    // 표현 불가 — 별도 backlog.
     {
       template: T("XXX-XX-XXXXX-X"),
       kind: "old",
@@ -315,7 +320,7 @@ const hana = defineInstitution({
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["117", "158", "161", "162", "210", "379", "600", "655"],
       // prefix 매칭 시 score boost — hana-cma 같은 약한 매칭과 동률 회피.
-      additionalRules: [(d) => d.length === 14 && HANA_FOREIGN_LEGACY_PREFIXES.has(d.slice(0, 3))],
+      additionalRules: [isHanaForeignLegacy14],
       note: "구 외환 통합 신상품 prefix",
     },
   ],
@@ -620,15 +625,6 @@ const sc = defineInstitution({
 
 // ---- 027 한국씨티 ----
 
-/** 2자리 숫자 코드 범위를 0-padded 문자열 배열로 펼친다 (e.g. 60~69 → ["60",...,"69"]). */
-function expandTwoDigitRange(from: number, to: number): readonly string[] {
-  const codes: string[] = [];
-  for (let n = from; n <= to; n += 1) {
-    codes.push(n.toString().padStart(2, "0"));
-  }
-  return codes;
-}
-
 /**
  * 통합씨티 13자리 ('06.7.18) 과 (구)한미 11자리 가 공유하는 과목 set.
  * PDF "(구)한미 — 통합씨티와 동일" 명시.
@@ -872,7 +868,7 @@ const imBank = defineInstitution({
       template: T("XXX-XX-XXXXXX-XXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
-      additionalRules: [(d) => d.length === 14 && !HANA_FOREIGN_LEGACY_PREFIXES.has(d.slice(0, 3))],
+      additionalRules: [isNotHanaForeignLegacy14],
       subjects: [
         defineSubject({ code: "05", category: "ordinary" }),
         defineSubject({ code: "91", category: "ordinary" }),
@@ -1284,10 +1280,7 @@ const hanaSecuritiesCma = defineInstitution({
     {
       template: T("XXX-XXXXXXXX-X-XX"),
       kind: "new",
-      additionalRules: [
-        (d) => d.length === 14 && d[3] === "9",
-        (d) => d.length === 14 && !HANA_FOREIGN_LEGACY_PREFIXES.has(d.slice(0, 3)),
-      ],
+      additionalRules: [(d) => d.length === 14 && d[3] === "9", isNotHanaForeignLegacy14],
       subjectPosition: { start: 12, length: 2 },
       subjects: [
         defineSubject({ code: "05", category: "ordinary" }),

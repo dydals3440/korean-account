@@ -11,7 +11,10 @@ import { institutionById } from ".";
  */
 describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
   test("하나은행 (외환·하나 통합) — CMS code 005 ≠ 표준 081", () => {
+    // Given / When
     const hana = institutionById("hana");
+
+    // Then
     expect(hana?.code).toBe("005");
     expect(hana?.commonCode).toBe("081");
   });
@@ -35,13 +38,19 @@ describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
     ["kakao", "090"],
     ["toss", "092"],
   ] as const)("%s — CMS code 와 표준은행코드 일치 (commonCode 생략)", (id, code) => {
+    // Given / When
     const inst = institutionById(id);
+
+    // Then
     expect(inst?.code).toBe(code);
     expect(inst?.commonCode).toBeUndefined();
   });
 
   test("hana-securities-cma — CMS 081 (증권사 CMA, 표준은행코드 대상 아님)", () => {
+    // Given / When
     const cma = institutionById("hana-securities-cma");
+
+    // Then
     expect(cma?.code).toBe("081");
     expect(cma?.commonCode).toBeUndefined();
   });

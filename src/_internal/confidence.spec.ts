@@ -20,59 +20,59 @@ describe("scoreToConfidence", () => {
       { score: 100, expected: "high" },
       { score: 1_000_000, expected: "high" },
     ] as const)("score=$score 이면 $expected 를 반환한다", ({ score, expected }) => {
-      // given
+      // Given
       const input = score;
 
-      // when
+      // When
       const result = scoreToConfidence(input);
 
-      // then
+      // Then
       expect(result).toBe(expected);
     });
   });
 
   describe("의미적 매칭", () => {
     test("길이만 맞은 경우 (score=3) low 를 반환한다", () => {
-      // given
+      // Given
       const score = 3;
 
-      // when
+      // When
       const result = scoreToConfidence(score);
 
-      // then
+      // Then
       expect(result).toBe("low");
     });
 
     test("길이 + identifier 매칭 (score=7) high 를 반환한다", () => {
-      // given
+      // Given
       const score = 3 + 4;
 
-      // when
+      // When
       const result = scoreToConfidence(score);
 
-      // then
+      // Then
       expect(result).toBe("high");
     });
 
     test("identifier 만 매칭 (score=4) medium 을 반환한다", () => {
-      // given
+      // Given
       const score = 4;
 
-      // when
+      // When
       const result = scoreToConfidence(score);
 
-      // then
+      // Then
       expect(result).toBe("medium");
     });
 
     test("음수 점수는 low 로 처리한다", () => {
-      // given
+      // Given
       const score = -5;
 
-      // when
+      // When
       const result = scoreToConfidence(score);
 
-      // then
+      // Then
       expect(result).toBe("low");
     });
   });

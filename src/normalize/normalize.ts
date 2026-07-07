@@ -1,3 +1,6 @@
+const ASCII_DIGIT_ZERO = 48;
+const ASCII_DIGIT_NINE = 57;
+
 /**
  * 임의 문자열에서 ASCII 숫자만 순서대로 추출해 반환한다.
  *
@@ -10,9 +13,6 @@
  * normalize("한글110과 숫자436");      // "110436"
  * normalize("");                       // ""
  */
-const ASCII_DIGIT_ZERO = 48;
-const ASCII_DIGIT_NINE = 57;
-
 export function normalize(input: string): string {
   if (typeof input !== "string") {
     return "";

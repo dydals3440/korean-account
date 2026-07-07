@@ -23,9 +23,9 @@ detectBest("110-436-387740");
 // {
 //   institution: { id: "shinhan", code: "088", nameKo: "신한은행", ... },
 //   kind: "new",
-//   subject: { code: "436", category: "ordinary", label: "보통예금" },
+//   subject: { code: "110", category: "savings", label: "저축예금" },
 //   formatted: "110-436-387740",
-//   score: 11,
+//   score: 14,
 //   confidence: "high",
 //   capabilities: { allowsWithdrawal: true, virtual: false, validatedCheckDigit: null },
 // }
@@ -281,7 +281,7 @@ formatAccount("110436387740", T("XXX-XXX-XXXXXX")); // "110-436-387740"
 
 const pattern = pickPattern("shinhan", { kind: "new" })!;
 extractIdentifier("110436387740", pattern); // "110"
-extractSubject("110436387740", pattern);    // { code: "436", category: "ordinary", ... }
+extractSubject("110436387740", pattern);    // { code: "110", category: "savings", ... }
 ```
 
 ### 5.5 검증 스키마 — `korean-account/schema` (Optional)
@@ -309,6 +309,7 @@ import {
   subjectCategoryLabels,   // 13종 과목 카테고리의 한글 라벨
   accountKindLabels,        // 6종 계좌 종류의 한글 라벨
   scoreToConfidence,        // score → "high"|"medium"|"low"
+  normalizeSubject,         // Subject + kind → allowsWithdrawal·label 이 채워진 Subject
   defineSubject,
   defineInstitution,
   defineBranchRule,
@@ -335,6 +336,14 @@ import type {
   DetectionResult, DetectionCapabilities, DetectOptions, Detector,
   InstitutionId, InstitutionCode, InstitutionIdByCategory,
   ScoringWeights, BranchRule, CheckDigitVerifier, GlobalRule,
+  // 확장·필터용 보조 타입
+  RegisteredInstitution,  // 기본 레지스트리에 등록된 institution 의 union
+  InstitutionIdInput,     // 등록 id autocomplete + 외부 확장 id widening
+  CreateDetectorInput,    // createDetector() 입력
+  PickInstitutionsFilter, PickPatternFilter, // 선택자 필터
+  PatternToken,           // PatternTemplate 의 토큰 단위
+  AdditionalRule,         // 패턴별 커스텀 가드 (digits) => boolean
+  BranchRuleResult,       // BranchRule 이 반환하는 라우팅 결과
 } from "korean-account";
 ```
 

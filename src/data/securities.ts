@@ -1,6 +1,7 @@
 import { defineSubject } from "../_internal/subjects";
 import { createPatternTemplate as T } from "../createPatternTemplate";
 import { defineInstitution } from "./defineInstitution";
+import { expandTwoDigitRange } from "./expandTwoDigitRange";
 
 /**
  * 증권사. 자릿수·과목 위치는 사별 차이가 크며 일부는 비공개.
@@ -185,9 +186,7 @@ const kyobo = defineInstitution({
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "53", category: "savings" }),
         defineSubject({ code: "54", category: "savings" }),
-        ...["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].map((code) =>
-          defineSubject({ code, category: "savings" }),
-        ),
+        ...expandTwoDigitRange(60, 69).map((code) => defineSubject({ code, category: "savings" })),
         defineSubject({ code: "71", category: "savings" }),
         defineSubject({ code: "80", category: "savings" }),
       ],

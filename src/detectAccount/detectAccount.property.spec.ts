@@ -32,17 +32,17 @@ const ID_SET = new Set<string>(institutions.map((i) => i.id));
 
 describe("detectAccount property-based invariants", () => {
   test("임의 14자리 digits 1000건: limit·정렬·confidence 일관", () => {
-    // given
+    // Given
     const rng = mulberry32(0xc0ffee);
     const iterations = 1000;
 
     for (let i = 0; i < iterations; i += 1) {
       const input = randomDigits(rng, 14);
 
-      // when
+      // When
       const results = detectAccount(input);
 
-      // then — invariant 검증
+      // Then — invariant 검증
       expect(results.length).toBeLessThanOrEqual(5);
 
       // 점수 내림차순
@@ -81,7 +81,7 @@ describe("detectAccount property-based invariants", () => {
   });
 
   test("임의 길이 5~16자리 500건: 빈 결과 또는 매칭", () => {
-    // given
+    // Given
     const rng = mulberry32(0xbeef);
     const iterations = 500;
 
@@ -89,10 +89,10 @@ describe("detectAccount property-based invariants", () => {
       const length = 5 + Math.floor(rng() * 12);
       const input = randomDigits(rng, length);
 
-      // when
+      // When
       const results = detectAccount(input);
 
-      // then — 모든 결과는 institution / matchedPattern / capabilities 보유
+      // Then — 모든 결과는 institution / matchedPattern / capabilities 보유
       for (const r of results) {
         expect(r.institution).toBeDefined();
         expect(r.matchedPattern).toBeDefined();
@@ -104,7 +104,7 @@ describe("detectAccount property-based invariants", () => {
   });
 
   test("빈 입력 / 비숫자 / 1자리 — 항상 빈 결과", () => {
-    // given / when / then
+    // Given / When / Then
     const inputs = ["", " ", "---", "abc", "한글", "1"];
     for (const input of inputs) {
       expect(detectAccount(input)).toEqual([]);
@@ -112,10 +112,10 @@ describe("detectAccount property-based invariants", () => {
   });
 
   test("매칭된 institution.id 는 InstitutionId union 안에 있다", () => {
-    // given — 모든 등록 institution 의 id 가 type-level InstitutionId 와 동일
+    // Given — 모든 등록 institution 의 id 가 type-level InstitutionId 와 동일
     const ids: InstitutionId[] = institutions.map((i) => i.id);
 
-    // when / then
+    // When / Then
     expect(ids.length).toBe(institutions.length);
     expect(new Set(ids).size).toBe(ids.length); // 중복 없음
   });

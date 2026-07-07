@@ -6,70 +6,70 @@ import { detectBest } from "./detectBest";
 describe("detectBest", () => {
   describe("성공 케이스", () => {
     test("매칭이 있으면 1순위 DetectionResult 를 반환한다", () => {
-      // given
+      // Given
       const input = "110-436-387740";
 
-      // when
+      // When
       const result = detectBest(input);
 
-      // then
+      // Then
       expect(result).not.toBeNull();
       expect(result?.institution.id).toBe("shinhan");
     });
 
     test("옵션 (categories) 을 전달할 수 있다", () => {
-      // given
+      // Given
       const input = "3333-12-3456789";
 
-      // when
+      // When
       const result = detectBest(input, { categories: ["bank"] });
 
-      // then
+      // Then
       expect(result?.institution.category).toBe("bank");
     });
   });
 
   describe("실패 케이스", () => {
     test("빈 입력이면 null 을 반환한다", () => {
-      // given
+      // Given
       const input = "";
 
-      // when
+      // When
       const result = detectBest(input);
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
 
     test("비숫자 입력이면 null 을 반환한다", () => {
-      // given
+      // Given
       const input = "abcd";
 
-      // when
+      // When
       const result = detectBest(input);
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
 
     test("minScore 가 너무 높아 매칭이 없으면 null", () => {
-      // given
+      // Given
       const input = "1";
 
-      // when
+      // When
       const result = detectBest(input, { minScore: 100 });
 
-      // then
+      // Then
       expect(result).toBeNull();
     });
   });
 
   describe("타입 narrow", () => {
     test("반환 타입이 DetectionResult<RegisteredInstitution> | null 이다", () => {
-      // given / when
+      // Given / When
       const result = detectBest("110-436-387740");
 
-      // then
+      // Then
       expectTypeOf(result).toEqualTypeOf<DetectionResult<RegisteredInstitution> | null>();
     });
   });

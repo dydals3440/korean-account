@@ -12,23 +12,23 @@ describe("createPatternTemplate", () => {
       "XXXXXX-XX-XXXXXX",
       "X",
     ])("'%s' 는 그대로 반환된다", (template) => {
-      // given
+      // Given
       const input = template;
 
-      // when
+      // When
       const result = createPatternTemplate(input);
 
-      // then
+      // Then
       expect(result).toBe(input);
     });
   });
 
   describe("빈 문자열 거부", () => {
     test("빈 문자열은 throw 한다", () => {
-      // given
+      // Given
       const input = "";
 
-      // when / then
+      // When / Then
       expect(() => createPatternTemplate(input)).toThrow(/non-empty/);
     });
   });
@@ -48,23 +48,23 @@ describe("createPatternTemplate", () => {
       "XXX.YY",
       "XXX/YY",
     ])("'%s' 는 throw 한다", (template) => {
-      // given
+      // Given
       const input = template;
 
-      // when / then
+      // When / Then
       expect(() => createPatternTemplate(input)).toThrow(/Invalid/);
     });
   });
 
   describe("브랜드 타입", () => {
     test("런타임 동등성은 단순 string 이다", () => {
-      // given
+      // Given
       const input = "XXX-XXX-XXXXXX";
 
-      // when
+      // When
       const tpl = createPatternTemplate(input);
 
-      // then
+      // Then
       expect(typeof tpl).toBe("string");
       expect(tpl.length).toBe(14);
     });

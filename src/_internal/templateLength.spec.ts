@@ -13,42 +13,42 @@ describe("templateLength", () => {
       { template: "XXXXXX-XX-XXXXXX", expected: 14 },
       { template: "X", expected: 1 },
     ])("$template 의 토큰 수는 $expected", ({ template, expected }) => {
-      // given
+      // Given
       const tpl = createPatternTemplate(template);
 
-      // when
+      // When
       const result = templateLength(tpl);
 
-      // then
+      // Then
       expect(result).toBe(expected);
     });
   });
 
   describe("토큰 수만 계산한다", () => {
     test("하이픈 개수와 무관하게 X 토큰 수만 센다", () => {
-      // given
+      // Given
       const sparse = createPatternTemplate("X-X-X-X-X");
       const dense = createPatternTemplate("XXXXX");
 
-      // when
+      // When
       const sparseLen = templateLength(sparse);
       const denseLen = templateLength(dense);
 
-      // then
+      // Then
       expect(sparseLen).toBe(5);
       expect(denseLen).toBe(5);
     });
 
     test("선행/후행 하이픈도 토큰 수에 영향을 주지 않는다", () => {
-      // given
+      // Given
       const leadingDash = createPatternTemplate("-XXXX");
       const trailingDash = createPatternTemplate("XXXX-");
 
-      // when
+      // When
       const leading = templateLength(leadingDash);
       const trailing = templateLength(trailingDash);
 
-      // then
+      // Then
       expect(leading).toBe(4);
       expect(trailing).toBe(4);
     });
@@ -56,13 +56,13 @@ describe("templateLength", () => {
 
   describe("매우 긴 입력", () => {
     test("길이 1000 의 템플릿도 정확히 센다", () => {
-      // given
+      // Given
       const longTemplate = createPatternTemplate("X".repeat(1000));
 
-      // when
+      // When
       const result = templateLength(longTemplate);
 
-      // then
+      // Then
       expect(result).toBe(1000);
     });
   });
