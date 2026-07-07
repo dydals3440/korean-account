@@ -1,0 +1,40 @@
+name: 기관·패턴 추가 요청
+description: 새 금융기관 등록 또는 기존 기관의 누락 패턴 추가를 요청합니다. KFTC CMS PDF 근거가 필요합니다.
+title: "[Institution] "
+labels: ["new institution", "area: data", "needs triage"]
+assignees: ["dydals3440"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        코어 레지스트리는 [금융결제원 CMS 참가기관별 계좌번호체계 PDF](https://www.cmsedi.or.kr/cms/board/workdata/view/1026) 에 **명시된 행만** 등록합니다.
+        PDF 에 없는 관행 prefix 는 코어가 아닌 `detector.extend()` 컨슈머 보강 영역입니다 — [README § 7. 확장](https://github.com/dydals3440/korean-account#7-확장) 참조.
+  - type: input
+    id: institution
+    attributes:
+      label: 기관명 · 기관코드
+      placeholder: "OO은행 (095)"
+    validations:
+      required: true
+  - type: textarea
+    id: pdf-evidence
+    attributes:
+      label: PDF 근거 (필수)
+      description: PDF 페이지 번호와 해당 표 행 내용을 인용해 주세요. 근거 없는 요청은 컨슈머 확장으로 안내됩니다.
+      placeholder: "PDF 2026.05.08 판 p.34 — 과목번호(3)-일련번호(8)-검증번호(1), 보통 100 / 기업자유 150"
+    validations:
+      required: true
+  - type: textarea
+    id: pattern
+    attributes:
+      label: 계좌번호 체계
+      description: 자릿수, 그루핑, 식별·과목·검증 자리 위치.
+      placeholder: "12자리, XXXX-XXXX-XXXX, 앞 3자리가 과목 (100=보통예금)"
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 직접 기여
+      options:
+        - label: PR 로 직접 구현할 의사가 있습니다 (CONTRIBUTING.md 의 5단계 레시피 참조)

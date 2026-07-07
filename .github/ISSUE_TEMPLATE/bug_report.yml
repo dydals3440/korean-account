@@ -1,7 +1,8 @@
 name: 버그 리포트
 description: 식별·과목 매칭 오류 또는 라이브러리 동작 이상.
 title: "[Bug] "
-labels: ["bug"]
+labels: ["bug", "needs triage"]
+assignees: ["dydals3440"]
 body:
   - type: markdown
     attributes:
@@ -33,6 +34,6 @@ body:
     id: env
     attributes:
       label: 버전 / 런타임
-      placeholder: "korean-account 0.1.0 · Node 22.5 · macOS 14"
+      placeholder: "korean-account 0.0.3 · Node 22.5 · macOS 14"
     validations:
       required: true

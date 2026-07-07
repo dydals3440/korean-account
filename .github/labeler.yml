@@ -1,0 +1,56 @@
+# actions/labeler v5 — PR 변경 경로·브랜치 기반 자동 라벨링.
+
+"area: data":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/data/**"
+
+"area: detector":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/createDetector/**"
+          - "src/detectAccount/**"
+          - "src/detectBest/**"
+          - "src/_internal/score*"
+          - "src/_internal/branchRules*"
+          - "src/_internal/confidence*"
+          - "src/_internal/detectorIndex*"
+
+"area: schema":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/schema/**"
+
+"area: types":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/types.ts"
+
+"area: ci":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "README.md"
+          - "DOCS.md"
+          - "CONTRIBUTING.md"
+          - "CHANGELOG.md"
+
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**/*.spec.ts"
+          - "src/_internal/fixtures.ts"
+          - "vitest.config.ts"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "pnpm-lock.yaml"
+
+release:
+  - head-branch:
+      - "^changeset-release/"

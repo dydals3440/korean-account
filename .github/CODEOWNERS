@@ -1,0 +1,6 @@
+# 모든 PR 에 메인테이너가 리뷰어로 자동 지정된다.
+* @dydals3440
+
+# 도메인 데이터 (기관·패턴 레지스트리) 는 PDF 근거 검증이 필요하므로 명시 소유.
+/src/data/ @dydals3440
+/.github/workflows/ @dydals3440
