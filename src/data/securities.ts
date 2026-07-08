@@ -480,6 +480,9 @@ const dbSec = defineInstitution({
     {
       template: T("XXX-XX-XXXX-XX"),
       kind: "new",
+      // `subjects` 가 없어 점수 가산은 없다. 그래도 `matchedPattern` 은 공개 출력이므로
+      // 제거하면 소비자가 관측하는 값이 바뀐다. PDF 표의 과목 위치 그대로 둔다.
+      subjectPosition: { start: 3, length: 2 },
     },
   ],
 });
@@ -669,6 +672,9 @@ const wooriInv = defineInstitution({
     {
       template: T("XXX-XX-XXXXXX"),
       kind: "new",
+      // `subjects` 가 없어 점수 가산은 없다. 그래도 `matchedPattern` 은 공개 출력이므로
+      // 제거하면 소비자가 관측하는 값이 바뀐다. PDF 표의 과목 위치 그대로 둔다.
+      subjectPosition: { start: 3, length: 2 },
       effectiveFrom: "2019-12-20",
     },
   ],
