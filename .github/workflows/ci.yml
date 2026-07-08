@@ -13,6 +13,9 @@ concurrency:
 permissions:
   contents: read
 
+# 아래 잡들은 push 하지 않으므로 checkout 이 GITHUB_TOKEN 을 .git/config 에 남기지
+# 않게 한다. release.yml 은 changesets 가 push 해야 하므로 자격증명을 유지한다.
+
 jobs:
   # 빌드 도구(tsdown)는 `engines: ^22.18.0 || >=24.11.0` 을 요구한다. 이건 툴체인의
   # 제약이지 배포 산출물의 제약이 아니다. 산출물의 Node 하한은 runtime 잡이 검증한다.
@@ -31,6 +34,8 @@ jobs:
             os: windows-latest
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
@@ -72,6 +77,8 @@ jobs:
         node: [20, 22, 24]
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
@@ -106,6 +113,8 @@ jobs:
         zod: [3, 4]
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
@@ -141,6 +150,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 

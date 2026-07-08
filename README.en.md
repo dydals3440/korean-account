@@ -229,9 +229,17 @@ const myBank = defineInstitution({
   ],
 });
 
+// A verifier receives the normalized digits and returns whether they check out.
+const verifyMyBank = (digits: string): boolean => {
+  const body = digits.slice(0, -1);
+  const expected = Number(digits.at(-1));
+  const sum = [...body].reduce((acc, d, i) => acc + Number(d) * (i + 2), 0);
+  return sum % 10 === expected;
+};
+
 const detector = defaultDetector.extend({
   institutions: [myBank],
-  checkDigitVerifiers: { "my-bank": (digits) => luhn(digits) },
+  checkDigitVerifiers: { "my-bank": verifyMyBank },
   scoring: { identifierMatch: 6 },
 });
 ```
@@ -265,7 +273,7 @@ See [DOCS.md → Appendix D](./DOCS.md) for the full extension mechanics.
 
 ## 10. Performance
 
-About **12–20 µs** per `detect()` call on an M-series Mac. Internally an index maps input length to candidate institutions, cutting roughly 170 pattern evaluations down to 10–15.
+About **12–20 µs** per `detectAccount()` call on an M-series Mac. Internally an index maps input length to candidate institutions, cutting roughly 170 pattern evaluations down to 10–15.
 
 ## 11. Contributing
 

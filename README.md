@@ -421,7 +421,7 @@ myDetector.detect("066-43-15-739026-6");
 
 ## 10. 성능
 
-`detect()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 57곳 × ~3 패턴 ≈ 170 평가를 평균 10~15회로 단축한다.
+`detectAccount()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 57곳 × ~3 패턴 ≈ 170 평가를 평균 10~15회로 단축한다.
 
 UI 입력 디바운스에는 `useMemo` / `useDeferredValue` 같은 일반 React 패턴으로 충분히 대응 가능.
 

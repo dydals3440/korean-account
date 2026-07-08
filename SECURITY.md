@@ -11,7 +11,10 @@
 
 ## 취약점 신고
 
-[GitHub Security Advisory](https://github.com/dydals3440/korean-account/security/advisories/new) 를 통해 비공개로 신고해 주세요. 공개 이슈는 사용하지 마세요.
+공개 이슈는 사용하지 마세요. 아래 두 경로 중 하나로 비공개 신고해 주세요.
+
+- [GitHub Security Advisory](https://github.com/dydals3440/korean-account/security/advisories/new) (권장)
+- 이메일: **dydals3440@gmail.com** — GitHub 계정이 없거나 쓰고 싶지 않은 경우
 
 응답 목표: 영업일 기준 3일 이내 접수 확인, 30일 이내 수정 또는 완화 계획 공유.
 
