@@ -1,3 +1,7 @@
+.	ACCOUNT_KINDS
+.	CONFIDENCE_LEVELS
+.	INSTITUTION_CATEGORIES
+.	SUBJECT_CATEGORIES
 .	accountKindLabels
 .	createDetector
 .	createPatternTemplate
@@ -56,6 +60,7 @@
 .	type ScoringWeights
 .	type Subject
 .	type SubjectCategory
+./schema	DetectionPayload
 ./schema	accountKindSchema
 ./schema	accountSchema
 ./schema	detectionSchema

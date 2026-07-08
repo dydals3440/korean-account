@@ -1,11 +1,37 @@
-import { z } from "zod";
+import { type ZodType, z } from "zod";
+import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../constants";
 import type { InstitutionId } from "../data";
 import { INSTITUTION_IDS } from "../data/institutionIds";
+import type { AccountKind, Confidence, SubjectCategory } from "../types";
 
 // `institutions` 대신 id 리터럴 배열만 참조한다 — `korean-account/schema` 만 쓰는
-// 소비자에게 94 KB 레지스트리가 딸려 가지 않도록. (`InstitutionId` 는 type-only
-// import 라 런타임에 지워진다.)
+// 소비자에게 94 KB 레지스트리가 딸려 가지 않도록.
 const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
+
+// 모든 export 에 `ZodType<T>` 를 명시한다. 명시하지 않으면 생성된 d.ts 가
+// `z.ZodEffects` / 튜플형 `z.ZodEnum` 같은 **zod v3 전용** 타입을 하드코딩하는데,
+// 이는 v4 에서 존재하지 않는다. peerDependencies 는 `^3 || ^4` 를 광고하므로
+// v4 소비자는 `skipLibCheck: true` 아래서 조용히 스키마 타입을 잃는다.
+// CI 의 zod 매트릭스가 두 메이저 모두에서 이 파일을 컴파일한다.
+
+/** 직렬화된 detection 결과. `detectionSchema` 의 출력 타입. */
+export interface DetectionPayload {
+  readonly institutionId: InstitutionId;
+  readonly kind: AccountKind;
+  readonly subject?: {
+    readonly code: string;
+    readonly category: SubjectCategory;
+    readonly label?: string;
+  };
+  readonly score: number;
+  readonly confidence: Confidence;
+  readonly formatted: string;
+  readonly capabilities: {
+    readonly allowsWithdrawal: boolean;
+    readonly virtual: boolean;
+    readonly validatedCheckDigit: boolean | null;
+  };
+}
 
 /**
  * 한국 계좌번호 raw 문자열 스키마.
@@ -13,7 +39,7 @@ const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
  * - 숫자/하이픈/공백만 허용
  * - 정규화된 숫자 길이 6~20
  */
-export const accountSchema = z
+export const accountSchema: ZodType<string> = z
   .string()
   .min(1, "계좌번호를 입력해주세요.")
   .max(40, "너무 긴 입력입니다.")
@@ -25,40 +51,26 @@ export const accountSchema = z
     message: "계좌번호 자릿수가 너무 깁니다.",
   });
 
-/** 레지스트리에 등록된 institution id만 허용하는 스키마. */
-export const institutionIdSchema = z.string().refine((v): v is InstitutionId => ID_SET.has(v), {
-  message: "지원하지 않는 금융기관입니다.",
-});
+/**
+ * 레지스트리에 등록된 institution id만 허용하는 스키마.
+ *
+ * `z.custom` 을 쓴다. v3 의 `.refine((v): v is InstitutionId => …)` 는 타입 서술로
+ * 출력을 좁히지만 v4 의 `.refine` 은 좁히지 않아, 같은 코드가 두 메이저에서 다른
+ * 타입을 낸다.
+ */
+export const institutionIdSchema: ZodType<InstitutionId> = z.custom<InstitutionId>(
+  (v) => typeof v === "string" && ID_SET.has(v),
+  { message: "지원하지 않는 금융기관입니다." },
+);
 
 /** 계좌 종류 스키마. */
-export const accountKindSchema = z.enum([
-  "new",
-  "old",
-  "virtual",
-  "lifetime",
-  "incoming-only",
-  "merged-legacy",
-]);
+export const accountKindSchema: ZodType<AccountKind> = z.enum(ACCOUNT_KINDS);
 
 /** 계정과목 카테고리 스키마. */
-export const subjectCategorySchema = z.enum([
-  "ordinary",
-  "treasury",
-  "savings",
-  "free-savings",
-  "household-current",
-  "current",
-  "corporate-free",
-  "yes",
-  "linked",
-  "installment",
-  "trust",
-  "isa",
-  "other",
-]);
+export const subjectCategorySchema: ZodType<SubjectCategory> = z.enum(SUBJECT_CATEGORIES);
 
 /** 직렬화된 detection 결과 스키마. */
-export const detectionSchema = z.object({
+export const detectionSchema: ZodType<DetectionPayload> = z.object({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,
   subject: z
