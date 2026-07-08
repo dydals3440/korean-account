@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { defineSubject } from "../_internal/subjects";
+import { defineSubject } from "../subjects";
 import type { AccountPattern, Subject } from "../types";
 import { extractSubject } from "./extractSubject";
 

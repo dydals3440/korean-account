@@ -7,10 +7,18 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+# 아래 잡들은 push 하지 않으므로 checkout 이 GITHUB_TOKEN 을 .git/config 에 남기지
+# 않게 한다. release.yml 은 changesets 가 push 해야 하므로 자격증명을 유지한다.
+
 jobs:
+  # 빌드 도구(tsdown)는 `engines: ^22.18.0 || >=24.11.0` 을 요구한다. 이건 툴체인의
+  # 제약이지 배포 산출물의 제약이 아니다. 산출물의 Node 하한은 runtime 잡이 검증한다.
   test:
     name: Node ${{ matrix.node }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -25,12 +33,14 @@ jobs:
           - node: 22
             os: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node ${{ matrix.node }}
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
@@ -47,19 +57,53 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다.
-      # attw 가 없으면 d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
+      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다. attw 가 없으면
+      # d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
       - name: Build
         run: pnpm build
 
-      - name: Verify public API is unchanged
-        run: pnpm check:api
+      # 트리셰이킹 회귀는 바이트 예산으로 잡는다 (.size-limit.json).
+      # PURE 어노테이션이 빠지면 `normalize` 가 500 B → 9.5 kB 로 튄다.
+      - name: Size limit
+        run: pnpm size
 
-      - name: Verify tree-shaking
-        run: pnpm check:treeshaking
+  # `engines.node` 하한이 실제로 성립하는지. 여기서만 Node 20 을 쓴다.
+  runtime:
+    name: Runtime Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+
+      - name: Setup Node (build)
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Setup Node ${{ matrix.node }} (run)
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      # dist 를 직접 실행한다 — vitest 는 src 를 보므로 이 검증을 대신하지 못한다.
+      - name: Run dist on Node ${{ matrix.node }}
+        run: node scripts/check-runtime.mjs
 
   # peerDependencies 가 `zod ^3 || ^4` 를 광고한다. 광고한 것을 실제로 검증한다.
-  # 이 잡이 없으면 devDep 에 고정된 메이저만 검증되고 나머지는 조용히 깨진다.
   zod-compat:
     name: zod v${{ matrix.zod }}
     runs-on: ubuntu-latest
@@ -68,14 +112,16 @@ jobs:
       matrix:
         zod: [3, 4]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -103,14 +149,16 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies

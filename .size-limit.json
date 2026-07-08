@@ -1,0 +1,39 @@
+[
+  {
+    "name": "normalize (순수 헬퍼 하나)",
+    "path": "dist/index.js",
+    "import": "{ normalize }",
+    "limit": "500 B"
+  },
+  {
+    "name": "formatAccount + createPatternTemplate",
+    "path": "dist/index.js",
+    "import": "{ formatAccount, createPatternTemplate }",
+    "limit": "700 B"
+  },
+  {
+    "name": "defineInstitution",
+    "path": "dist/index.js",
+    "import": "{ defineInstitution }",
+    "limit": "300 B"
+  },
+  {
+    "name": "순수 유틸 5종",
+    "path": "dist/index.js",
+    "import": "{ normalize, formatAccount, createPatternTemplate, scoreToConfidence, defineSubject }",
+    "limit": "900 B"
+  },
+  {
+    "name": "korean-account/schema (레지스트리 없이)",
+    "path": "dist/schema.js",
+    "import": "*",
+    "ignore": ["zod"],
+    "limit": "1500 B"
+  },
+  {
+    "name": "detectAccount (레지스트리 포함 — 대조군)",
+    "path": "dist/index.js",
+    "import": "{ detectAccount }",
+    "limit": "13 kB"
+  }
+]

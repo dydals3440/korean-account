@@ -1,6 +1,6 @@
-import { suhyupCoop12BranchToBank } from "../_internal/branchRules";
-import { defineSubject } from "../_internal/subjects";
 import { createPatternTemplate as T } from "../createPatternTemplate";
+import { suhyupCoop12BranchToBank } from "../rules";
+import { defineSubject } from "../subjects";
 import { defineInstitution } from "./defineInstitution";
 import { expandTwoDigitRange } from "./expandTwoDigitRange";
 

@@ -1,5 +1,5 @@
-import { defineSubject } from "../_internal/subjects";
 import { createPatternTemplate as T } from "../createPatternTemplate";
+import { defineSubject } from "../subjects";
 import { defineInstitution } from "./defineInstitution";
 import { expandTwoDigitRange } from "./expandTwoDigitRange";
 
@@ -480,7 +480,6 @@ const dbSec = defineInstitution({
     {
       template: T("XXX-XX-XXXX-XX"),
       kind: "new",
-      subjectPosition: { start: 3, length: 2 },
     },
   ],
 });
@@ -670,7 +669,6 @@ const wooriInv = defineInstitution({
     {
       template: T("XXX-XX-XXXXXX"),
       kind: "new",
-      subjectPosition: { start: 3, length: 2 },
       effectiveFrom: "2019-12-20",
     },
   ],

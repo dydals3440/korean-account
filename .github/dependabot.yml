@@ -1,0 +1,40 @@
+version: 2
+
+# 액션은 모두 커밋 SHA 로 핀되어 있다. Dependabot 이 없으면 아무도 갱신하지 않고,
+# 보안 패치도 오지 않는다. (`changesets/action@v1` 은 태그가 아니라 force-push 가능한
+# 브랜치였다 — SHA 핀 + Dependabot 조합이 필요한 이유.)
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - dependencies
+      - "area: ci"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    versioning-strategy: increase-if-necessary
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+    labels:
+      - dependencies
+    groups:
+      # 개별 PR 로 쏟아지지 않게 묶는다. 런타임 의존성이 0 이라 devDeps 가 전부다.
+      dev-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # zod 는 peerDependency 다. 메이저 범위는 CI 의 zod-compat 매트릭스가 검증하므로
+      # devDep 을 자동으로 올리면 하한(^3.23.0) 검증이 사라진다.
+      - dependency-name: zod
+        update-types:
+          - version-update:semver-major

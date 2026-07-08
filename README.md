@@ -1,5 +1,7 @@
 # korean-account
 
+[English](./README.en.md) · **한국어**
+
 > 한국 금융기관 계좌번호를 식별·분류·검증하는 TypeScript 라이브러리. [금융결제원 CMS 참가기관별 계좌번호체계 (2026.05.08)](https://www.cmsedi.or.kr/cms/board/workdata/view/1026) 을 단일 출처로 따른다.
 
 <p align="center">
@@ -31,10 +33,10 @@ detectBest("110-436-387740");
 // }
 ```
 
-- **PDF 충실 코어** — KFTC CMS PDF 표 행을 그대로 옮긴 ~57곳 기관 레지스트리
+- **PDF 충실 코어** — KFTC CMS PDF 표 행을 그대로 옮긴 57곳 기관 레지스트리
 - **strict TypeScript** — `institutionById("shinhan").code` 가 `"088"` literal 로 narrow
 - **런타임 의존성 0** — zod 는 `korean-account/schema` 를 쓸 때만 optional peerDep 로 요구
-- **Universal** — Node 22+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
+- **Universal** — Node 20.19+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
 
 상세 레퍼런스: [DOCS.md](./DOCS.md) · 변경 이력: [CHANGELOG.md](./CHANGELOG.md) · 기여: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
@@ -66,7 +68,7 @@ bun  add korean-account
 ```
 
 요구사항:
-- **Node 22+** (`"engines": { "node": ">=22.0.0" }`)
+- **Node 20.19+** (`"engines": { "node": ">=20.19.0" }`) — 빌드 타겟은 ES2020 이고 `node:` 내장 모듈을 쓰지 않는다
 - **TypeScript** 권장 (literal narrow 의 이점이 큼)
 - **zod** 는 *optional peerDependency* — `korean-account/schema` 서브 엔트리를 import 할 때만 컨슈머 프로젝트에 zod 가 필요 (`^3.23.0 || ^4.0.0`)
 
@@ -250,7 +252,7 @@ shinhan?.category; // "bank" (literal)
 const ibk = institutionByCode("003");
 ibk?.id; // "ibk"
 
-institutions; // readonly RegisteredInstitution[] — 등록 전체 (~57곳)
+institutions; // readonly RegisteredInstitution[] — 등록 전체 (57곳)
 ```
 
 ### 5.3 선택자 (Selectors)
@@ -419,7 +421,7 @@ myDetector.detect("066-43-15-739026-6");
 
 ## 10. 성능
 
-`detect()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 ~57곳 × ~3 패턴 ≈ 170 평가를 평균 10~15회로 단축한다.
+`detectAccount()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 57곳 × ~3 패턴 ≈ 170 평가를 평균 10~15회로 단축한다.
 
 UI 입력 디바운스에는 `useMemo` / `useDeferredValue` 같은 일반 React 패턴으로 충분히 대응 가능.
 
