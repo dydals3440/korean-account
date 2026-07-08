@@ -11,9 +11,10 @@
           - "src/createDetector/**"
           - "src/detectAccount/**"
           - "src/detectBest/**"
+          - "src/rules/**"
+          - "src/subjects/**"
+          - "src/confidence/**"
           - "src/_internal/score*"
-          - "src/_internal/branchRules*"
-          - "src/_internal/confidence*"
           - "src/_internal/detectorIndex*"
 
 "area: schema":
@@ -25,6 +26,13 @@
   - changed-files:
       - any-glob-to-any-file:
           - "src/types.ts"
+          - "src/constants.ts"
+
+"area: build":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tsdown.config.ts"
+          - "scripts/**"
 
 "area: ci":
   - changed-files:
@@ -35,9 +43,12 @@ documentation:
   - changed-files:
       - any-glob-to-any-file:
           - "README.md"
+          - "README.en.md"
           - "DOCS.md"
           - "CONTRIBUTING.md"
           - "CHANGELOG.md"
+          - "SECURITY.md"
+          - "CODE_OF_CONDUCT.md"
 
 test:
   - changed-files:

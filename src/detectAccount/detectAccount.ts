@@ -5,9 +5,8 @@ import type { DetectOptions } from "../types";
 /**
  * 기본 institution 레지스트리로 만든 detector.
  *
- * 아래 pure 어노테이션은 필수다. 이 호출이 최상위 side effect 로 보이면 번들러가
- * `institutions` (94 KB) 를 버리지 못해, `normalize` 하나만 import 한 소비자에게도
- * 레지스트리 전체가 딸려 간다. `scripts/check-treeshaking.mjs` 가 회귀를 막는다.
+ * pure 어노테이션은 필수다. 없으면 번들러가 `institutions` (94 KB) 를 버리지 못해
+ * `normalize` 만 import 한 소비자에게도 레지스트리가 딸려 간다.
  */
 export const defaultDetector = /* @__PURE__ */ createDetector({ institutions });
 

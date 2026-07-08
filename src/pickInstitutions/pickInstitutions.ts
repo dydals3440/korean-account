@@ -1,5 +1,22 @@
 import { type InstitutionIdByCategory, institutions, type RegisteredInstitution } from "../data";
-import type { AccountKind, InstitutionCategory } from "../types";
+import type { AccountKind, Institution, InstitutionCategory } from "../types";
+
+/** id 화이트/블랙리스트 통과 여부. `include` 가 없으면 전부 통과, `exclude` 는 항상 우선. */
+function passesIdFilter(
+  institution: Institution,
+  includeSet: ReadonlySet<string> | null,
+  excludeSet: ReadonlySet<string> | null,
+): boolean {
+  if (includeSet && !includeSet.has(institution.id)) {
+    return false;
+  }
+  return !excludeSet?.has(institution.id);
+}
+
+/** `readonly string[]` → `Set`, 없으면 null (필터 미적용). */
+function toSet(ids: readonly string[] | undefined): ReadonlySet<string> | null {
+  return ids ? new Set<string>(ids) : null;
+}
 
 /**
  * `categories` 가 좁혀지면 `include` / `exclude` 가 받을 수 있는 id 도 자동으로
@@ -48,18 +65,15 @@ export function pickInstitutions<
   filter: PickInstitutionsFilter<Categories> = {},
 ): readonly Extract<RegisteredInstitution, { category: Categories }>[] {
   const categoriesSet = filter.categories ? new Set<InstitutionCategory>(filter.categories) : null;
-  const includeSet = filter.include ? new Set<string>(filter.include) : null;
-  const excludeSet = filter.exclude ? new Set<string>(filter.exclude) : null;
+  const includeSet = toSet(filter.include);
+  const excludeSet = toSet(filter.exclude);
   const kindSet = filter.kinds ? new Set<AccountKind>(filter.kinds) : null;
 
   return institutions.filter((i): i is Extract<RegisteredInstitution, { category: Categories }> => {
     if (categoriesSet && !categoriesSet.has(i.category)) {
       return false;
     }
-    if (includeSet && !includeSet.has(i.id)) {
-      return false;
-    }
-    if (excludeSet?.has(i.id)) {
+    if (!passesIdFilter(i, includeSet, excludeSet)) {
       return false;
     }
     if (kindSet && !i.patterns.some((p) => kindSet.has(p.kind))) {
@@ -90,18 +104,11 @@ export function pickInstitutionsByIds<
 >(
   filter: { readonly include?: readonly IncludeId[]; readonly exclude?: readonly ExcludeId[] } = {},
 ): readonly Extract<RegisteredInstitution, { id: Exclude<IncludeId, ExcludeId> }>[] {
-  const includeSet = filter.include ? new Set<string>(filter.include) : null;
-  const excludeSet = filter.exclude ? new Set<string>(filter.exclude) : null;
+  const includeSet = toSet(filter.include);
+  const excludeSet = toSet(filter.exclude);
 
   return institutions.filter(
-    (i): i is Extract<RegisteredInstitution, { id: Exclude<IncludeId, ExcludeId> }> => {
-      if (includeSet && !includeSet.has(i.id)) {
-        return false;
-      }
-      if (excludeSet?.has(i.id)) {
-        return false;
-      }
-      return true;
-    },
+    (i): i is Extract<RegisteredInstitution, { id: Exclude<IncludeId, ExcludeId> }> =>
+      passesIdFilter(i, includeSet, excludeSet),
   );
 }

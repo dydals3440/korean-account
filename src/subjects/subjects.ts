@@ -30,7 +30,9 @@ export const accountKindLabels = {
 /**
  * `Subject` 객체에 기본값을 적용해 정규화한다.
  *
- * - `allowsWithdrawal` 기본 true. `virtual: true` 또는 `incoming-only` kind면 false 처리.
+ * - `allowsWithdrawal` 은 명시되지 않으면 kind 로부터 유도한다 — `virtual: true`
+ *   이거나 kind 가 `virtual` / `incoming-only` / `lifetime` 이면 false.
+ *   `createDetector` 의 `computeCapabilities` 와 같은 정의를 쓴다.
  * - `label` 기본은 카테고리 라벨.
  */
 export function normalizeSubject(
@@ -39,7 +41,8 @@ export function normalizeSubject(
 ): Subject & { readonly allowsWithdrawal: boolean; readonly label: string } {
   const virtual = subject.virtual ?? false;
   const allowsWithdrawal =
-    subject.allowsWithdrawal ?? (!virtual && kind !== "incoming-only" && kind !== "virtual");
+    subject.allowsWithdrawal ??
+    (!virtual && kind !== "incoming-only" && kind !== "virtual" && kind !== "lifetime");
   const label = subject.label ?? subjectCategoryLabels[subject.category];
   return { ...subject, allowsWithdrawal, virtual, label };
 }

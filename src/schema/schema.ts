@@ -4,15 +4,13 @@ import type { InstitutionId } from "../data";
 import { INSTITUTION_IDS } from "../data/institutionIds";
 import type { AccountKind, Confidence, SubjectCategory } from "../types";
 
-// `institutions` 대신 id 리터럴 배열만 참조한다 — `korean-account/schema` 만 쓰는
+// `institutions` 가 아니라 id 리터럴 배열을 참조한다 — 이 서브엔트리만 쓰는
 // 소비자에게 94 KB 레지스트리가 딸려 가지 않도록.
 const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
 
-// 모든 export 에 `ZodType<T>` 를 명시한다. 명시하지 않으면 생성된 d.ts 가
-// `z.ZodEffects` / 튜플형 `z.ZodEnum` 같은 **zod v3 전용** 타입을 하드코딩하는데,
-// 이는 v4 에서 존재하지 않는다. peerDependencies 는 `^3 || ^4` 를 광고하므로
-// v4 소비자는 `skipLibCheck: true` 아래서 조용히 스키마 타입을 잃는다.
-// CI 의 zod 매트릭스가 두 메이저 모두에서 이 파일을 컴파일한다.
+// 모든 export 에 `ZodType<T>` 를 명시한다. 없으면 생성된 d.ts 가 `z.ZodEffects` 같은
+// zod v3 전용 타입을 하드코딩해, v4 소비자가 `skipLibCheck: true` 아래서 조용히
+// 스키마 타입을 잃는다. CI 의 zod 매트릭스가 두 메이저를 모두 컴파일한다.
 
 /** 직렬화된 detection 결과. `detectionSchema` 의 출력 타입. */
 export interface DetectionPayload {

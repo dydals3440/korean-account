@@ -7,8 +7,11 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -17,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 24]
+        node: [20, 22, 24]
         os: [ubuntu-latest]
         include:
           - node: 22
@@ -25,12 +28,12 @@ jobs:
           - node: 22
             os: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node ${{ matrix.node }}
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
@@ -47,8 +50,8 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다.
-      # attw 가 없으면 d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
+      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다. attw 가 없으면
+      # d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
       - name: Build
         run: pnpm build
 
@@ -59,7 +62,6 @@ jobs:
         run: pnpm check:treeshaking
 
   # peerDependencies 가 `zod ^3 || ^4` 를 광고한다. 광고한 것을 실제로 검증한다.
-  # 이 잡이 없으면 devDep 에 고정된 메이저만 검증되고 나머지는 조용히 깨진다.
   zod-compat:
     name: zod v${{ matrix.zod }}
     runs-on: ubuntu-latest
@@ -68,14 +70,14 @@ jobs:
       matrix:
         zod: [3, 4]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -103,14 +105,14 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies

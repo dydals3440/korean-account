@@ -1,8 +1,8 @@
-import { scoreToConfidence } from "../_internal/confidence";
 import { buildDetectorIndex } from "../_internal/detectorIndex";
 import { DEFAULT_WEIGHTS, scoreInstitution } from "../_internal/score";
-import { normalizeSubject } from "../_internal/subjects";
+import { scoreToConfidence } from "../confidence";
 import { normalize } from "../normalize";
+import { normalizeSubject } from "../subjects";
 import type {
   AccountKind,
   AccountPattern,
@@ -96,10 +96,13 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
         formatted,
         subject,
       } = scoreInstitution(digits, institution, globalRules, weights);
-      if (baseScore < minScore || matchedPattern === null) {
+      if (matchedPattern === null) {
         continue;
       }
 
+      // branchRule 보너스를 minScore 컷오프 *앞* 에서 적용한다. 분기 규칙은 PDF 가
+      // 명시한 강한 식별 신호이므로, 그 덕에 minScore 를 넘겼어야 할 후보가 먼저
+      // 탈락해서는 안 된다.
       const branchOutcome = evaluateBranch(
         matchedPattern,
         digits,
@@ -108,6 +111,9 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
         baseScore,
         weights.branchRuleMatch,
       );
+      if (branchOutcome.score < minScore) {
+        continue;
+      }
 
       if (options.kinds && !options.kinds.includes(branchOutcome.kind)) {
         continue;
@@ -146,6 +152,8 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
   const extend = <E extends Institution>(extra: {
     readonly institutions?: readonly E[];
     readonly globalRules?: readonly GlobalRule[];
+    readonly scoring?: ScoringWeights;
+    readonly checkDigitVerifiers?: Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
   }): Detector<I | E> => {
     // 같은 id 가 들어오면 기존을 새 institution 으로 교체 (silent duplicate 방지).
     const incomingIds = new Set((extra.institutions ?? []).map((institution) => institution.id));
@@ -153,11 +161,18 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
       ...institutions.filter((institution) => !incomingIds.has(institution.id)),
       ...(extra.institutions ?? []),
     ];
+    // 두 맵의 키는 모두 `(I | E)["id"]` 의 부분집합이지만, TS 는 generic key 를 가진
+    // mapped type 의 spread 결과를 그 타입으로 좁히지 못한다.
+    const checkDigitVerifiers = {
+      ...input.checkDigitVerifiers,
+      ...extra.checkDigitVerifiers,
+    } as Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
+
     return createDetector<I | E>({
       institutions: merged,
       globalRules: [...globalRules, ...(extra.globalRules ?? [])],
-      scoring: input.scoring,
-      checkDigitVerifiers: input.checkDigitVerifiers,
+      scoring: { ...input.scoring, ...extra.scoring },
+      checkDigitVerifiers,
     });
   };
 

@@ -68,7 +68,10 @@ export interface Subject {
   readonly category: SubjectCategory;
   /** 표시명 ("정기적금" 등). 없으면 카테고리 라벨 사용. */
   readonly label?: string;
-  /** 자동이체 출금 가능 여부. 기본 true. */
+  /**
+   * 자동이체 출금 가능 여부. 미지정 시 kind 로부터 유도된다 — `virtual: true` 이거나
+   * kind 가 `virtual` / `incoming-only` / `lifetime` 이면 false, 그 외에는 true.
+   */
   readonly allowsWithdrawal?: boolean;
   /** 가상계좌 (입금 전용으로 동작). */
   readonly virtual?: boolean;
@@ -122,6 +125,11 @@ export interface AccountPattern {
   readonly identifierRange?: { readonly from: number; readonly to: number };
   readonly subjectPosition?: Position;
   readonly subjects?: readonly Subject[];
+  /**
+   * @deprecated 어떤 코드 경로도 이 필드를 읽지 않으며, 기본 레지스트리의 152개
+   * 패턴 중 하나도 채우지 않는다. 체크디지트 위치는 `checkDigitVerifiers` 에
+   * 등록하는 함수가 직접 안다. 다음 major 에서 제거 예정.
+   */
   readonly checkDigitPosition?: Position;
   /** `false` 면 명시적 미검증. 기본 `undefined` = 알고리즘 미구현. */
   readonly validatesCheckDigit?: boolean;
@@ -222,7 +230,7 @@ export interface DetectOptions<Id extends string = string> {
 /**
  * Detector 가 패턴 매칭 시 부여하는 점수 가중치. 미지정 키는 `DEFAULT_WEIGHTS`
  * (lengthExact:3 / lengthNear:1 / identifierMatch:4 / subjectMatch:3 /
- * additionalRule:1 / globalRule:1 / kindNewBonus:0) 가 적용된다.
+ * additionalRule:1 / globalRule:1 / branchRuleMatch:2 / kindNewBonus:0) 가 적용된다.
  *
  * 일반 은행 앱과 동일한 추천 흐름을 따르려면 기본값을 그대로 쓰면 된다 —
  * "자릿수가 맞고(+3) prefix 가 맞으면(+4) 카테고리도 맞으면(+3) high(10)" 과
@@ -268,9 +276,18 @@ export interface ScoringWeights {
 export interface Detector<I extends Institution = Institution> {
   readonly institutions: readonly I[];
   detect(input: string, options?: DetectOptions<I["id"]>): readonly DetectionResult<I>[];
+  /**
+   * institution / 룰 / 가중치 / 체크디지트 verifier 를 얹은 새 detector 를 반환.
+   *
+   * `scoring` 은 기존 가중치 위에 얕게 병합되고, `checkDigitVerifiers` 는 기존
+   * 맵과 합쳐진다 (같은 id 는 새 verifier 로 교체). 새로 추가한 institution 의
+   * verifier 를 여기서 바로 등록할 수 있다.
+   */
   extend<E extends Institution>(extra: {
     readonly institutions?: readonly E[];
     readonly globalRules?: readonly GlobalRule[];
+    readonly scoring?: ScoringWeights;
+    readonly checkDigitVerifiers?: Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
   }): Detector<I | E>;
   /** id 또는 술어로 institution 을 제거한 새 detector 를 반환. */
   remove(target: string | ((i: Institution) => boolean)): Detector<I>;

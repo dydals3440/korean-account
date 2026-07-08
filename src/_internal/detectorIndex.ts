@@ -16,8 +16,6 @@ import { templateLength } from "./templateLength";
  * 함께 묶어 둔다.
  */
 export interface DetectorIndex<I extends Institution> {
-  /** 정확 길이 일치 institution. 길이가 인덱스에 없으면 빈 배열. */
-  byLength(length: number): readonly I[];
   /** length-1 / length+1 까지 포함 (부분 입력 매칭용). */
   byLengthNear(length: number): readonly I[];
 }
@@ -41,8 +39,6 @@ export function buildDetectorIndex<I extends Institution>(
     }
   }
 
-  const byLength = (length: number): readonly I[] => exact.get(length) ?? [];
-
   const byLengthNear = (length: number): readonly I[] => {
     const seen = new Set<I>();
     for (const offset of [-1, 0, 1]) {
@@ -57,5 +53,5 @@ export function buildDetectorIndex<I extends Institution>(
     return Array.from(seen);
   };
 
-  return { byLength, byLengthNear };
+  return { byLengthNear };
 }

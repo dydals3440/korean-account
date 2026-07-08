@@ -30,10 +30,18 @@ Thumbs.db
 .claude/
 .cursor/
 
-# 환경
+# 환경 / 자격증명
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+# CI 의 setup-node 와 로컬 배포가 여기에 토큰을 쓴다. 절대 커밋하지 않는다.
+.npmrc
+*.pem
+*.key
+id_rsa*
+
+# npm pack 산출물
+*.tgz
 
 # Changesets 임시
 .changeset/pre.json

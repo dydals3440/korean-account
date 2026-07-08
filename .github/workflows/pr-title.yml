@@ -1,0 +1,32 @@
+name: PR Title
+
+# CONTRIBUTING.md 는 Conventional Commits 를 의무화하지만 강제하는 도구가 없었다.
+# squash merge 를 쓰므로 PR 제목이 곧 커밋 제목이 된다 — 여기만 검사하면 충분하다.
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9 ,/-]+\))?!?: .+'
+          if [[ ! "$TITLE" =~ $pattern ]]; then
+            echo "::error::PR 제목이 Conventional Commits 형식이 아닙니다: '$TITLE'"
+            echo "예) fix(detector): 분기 규칙이 minScore 컷오프보다 먼저 적용되도록"
+            echo "허용 type: feat fix docs style refactor perf test build ci chore revert"
+            exit 1
+          fi
+          echo "OK: $TITLE"

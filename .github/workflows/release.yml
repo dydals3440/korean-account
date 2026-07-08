@@ -4,12 +4,15 @@ on:
   push:
     branches: [main]
 
+# 배포 잡은 cancel-in-progress 를 켜지 않는다 — 중간에 끊기면 npm 에 반쯤 올라간다.
 concurrency:
-  group: release-${{ github.workflow }}-${{ github.ref }}
+  group: release-${{ github.ref }}
 
 permissions:
   contents: write
   pull-requests: write
+  # provenance attestation 서명에 필요. NPM_TOKEN 은 인증용, id-token 은 서명용이라
+  # 둘 다 있어야 한다 (중복이 아니다).
   id-token: write
 
 jobs:
@@ -17,28 +20,33 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # `prepublishOnly` 도 build 를 돌리지만 여기서도 돌린다. dist 는 gitignore 되어
+      # 있어서, 어떤 이유로든 prepublishOnly 가 실행되지 않으면 dist 없는 패키지가
+      # npm 에 올라간다. 중복 2초를 지불하고 그 사고를 막는다.
       - name: Build
         run: pnpm build
 
+      # `version` / `publish` 에 반드시 `changeset` 을 명시해야 한다. `pnpm version` 은
+      # pnpm 내장 명령에 가려져 package.json 의 스크립트가 실행되지 않는다 (88fd0b8).
       - name: Create Release Pull Request or Publish
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           publish: pnpm changeset publish
           version: pnpm changeset version

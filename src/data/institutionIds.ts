@@ -1,13 +1,8 @@
 /**
- * 등록된 institution id 목록 — **순수 리터럴만** 담는다.
+ * 등록된 institution id — 팩토리 호출 없는 순수 리터럴.
  *
- * `institutions` (`./index`) 는 57개 `defineInstitution(...)` 호출로 만들어지므로
- * 번들러가 순수성을 증명하지 못해 통째로 유지된다. id 하나만 필요한 소비자
- * (예: `korean-account/schema` 의 `institutionIdSchema`) 가 레지스트리 94 KB 를
- * 끌고 오지 않도록, 팩토리 호출 없는 배열을 따로 둔다.
- *
- * `./institutionIds.spec.ts` 가 런타임·타입 양쪽에서 `institutions` 와의 동기화를
- * 강제하므로 한쪽만 고치면 CI 가 실패한다.
+ * `korean-account/schema` 가 id 목록 하나 때문에 94 KB 레지스트리를 끌고 오지 않도록
+ * `institutions` 와 분리해 둔다. 동기화는 `institutionIds.types.spec.ts` 가 강제한다.
  */
 export const INSTITUTION_IDS = [
   // banks (25)

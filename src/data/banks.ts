@@ -1,3 +1,4 @@
+import { createPatternTemplate as T } from "../createPatternTemplate";
 import {
   kb11FirstDigit,
   kbank10First9,
@@ -6,9 +7,8 @@ import {
   suhyup12BranchToCoop,
   suhyup14BranchToCoop,
   toss12First1719,
-} from "../_internal/branchRules";
-import { defineSubject } from "../_internal/subjects";
-import { createPatternTemplate as T } from "../createPatternTemplate";
+} from "../rules";
+import { defineSubject } from "../subjects";
 import type { AdditionalRule, Subject } from "../types";
 import { defineInstitution } from "./defineInstitution";
 import { expandTwoDigitRange } from "./expandTwoDigitRange";
@@ -350,7 +350,6 @@ const suhyup = defineInstitution({
     {
       template: T("XXX-XXXXXXXXX"),
       kind: "new",
-      identifierPosition: { start: 0, length: 3 },
       branchRule: suhyup12BranchToCoop,
       validatesCheckDigit: false,
       effectiveFrom: "2025-11-10",
@@ -1196,7 +1195,6 @@ const hsbc = defineInstitution({
     {
       template: T("XXX-XXXXX-X-XXX"),
       kind: "new",
-      subjectPosition: { start: 9, length: 3 },
       note: "서비스 미참가 — 메타데이터 only",
     },
   ],

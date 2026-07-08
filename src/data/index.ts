@@ -29,7 +29,7 @@ export type InstitutionIdByCategory<C extends InstitutionCategory> = Extract<
 >["id"];
 
 // pure 어노테이션이 없으면 번들러가 이 최상위 초기화를 side effect 로 보고
-// `institutions` 를 통째로 유지한다. 조회 헬퍼를 안 쓰는 소비자를 위해 명시한다.
+// `institutions` 를 통째로 유지한다.
 const BY_ID = /* @__PURE__ */ new Map<string, RegisteredInstitution>(
   institutions.map((i) => [i.id, i]),
 );
