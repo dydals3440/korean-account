@@ -69,12 +69,17 @@ Requirements:
 ```ts
 import { detectBest } from "korean-account";
 
-const result = detectBest("3333-12-3456789");
-result?.institution.nameEn; // "KakaoBank"
+const result = detectBest("1002-123-456789");
+result?.institution.nameEn; // "Woori Bank"
 result?.confidence;         // "high"
 ```
 
 `detectBest` returns `null` when nothing matches.
+
+> **Note** — institutions whose identifier codes are absent from the PDF compete on length
+> alone and tie at `low` confidence. KakaoBank's 13-digit format (`3333-XX-XXXXXXX`) is one:
+> it ties at score 3 with other 13-digit institutions, and Shinhan wins on `priority`. Narrow
+> with `include` when you are targeting a specific institution — see [Limitations](#9-limitations).
 
 ### Multiple candidates with filters
 
