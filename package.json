@@ -1,6 +1,6 @@
 {
   "name": "korean-account",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Korean bank account detector · 한국 계좌번호 식별·과목 추출 — KFTC CMS PDF 충실, TypeScript.",
   "keywords": [
     "korean",
