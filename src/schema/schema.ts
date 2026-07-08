@@ -1,7 +1,11 @@
 import { z } from "zod";
-import { type InstitutionId, institutions } from "../data";
+import type { InstitutionId } from "../data";
+import { INSTITUTION_IDS } from "../data/institutionIds";
 
-const ID_SET = new Set<string>(institutions.map((i) => i.id));
+// `institutions` 대신 id 리터럴 배열만 참조한다 — `korean-account/schema` 만 쓰는
+// 소비자에게 94 KB 레지스트리가 딸려 가지 않도록. (`InstitutionId` 는 type-only
+// import 라 런타임에 지워진다.)
+const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
 
 /**
  * 한국 계좌번호 raw 문자열 스키마.
