@@ -14,13 +14,15 @@ permissions:
   contents: read
 
 jobs:
+  # 빌드 도구(tsdown)는 `engines: ^22.18.0 || >=24.11.0` 을 요구한다. 이건 툴체인의
+  # 제약이지 배포 산출물의 제약이 아니다. 산출물의 Node 하한은 runtime 잡이 검증한다.
   test:
     name: Node ${{ matrix.node }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24]
+        node: [22, 24]
         os: [ubuntu-latest]
         include:
           - node: 22
@@ -55,11 +57,44 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Verify public API is unchanged
-        run: pnpm check:api
+      # 트리셰이킹 회귀는 바이트 예산으로 잡는다 (.size-limit.json).
+      # PURE 어노테이션이 빠지면 `normalize` 가 500 B → 9.5 kB 로 튄다.
+      - name: Size limit
+        run: pnpm size
 
-      - name: Verify tree-shaking
-        run: pnpm check:treeshaking
+  # `engines.node` 하한이 실제로 성립하는지. 여기서만 Node 20 을 쓴다.
+  runtime:
+    name: Runtime Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+
+      - name: Setup Node (build)
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Setup Node ${{ matrix.node }} (run)
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      # dist 를 직접 실행한다 — vitest 는 src 를 보므로 이 검증을 대신하지 못한다.
+      - name: Run dist on Node ${{ matrix.node }}
+        run: node scripts/check-runtime.mjs
 
   # peerDependencies 가 `zod ^3 || ^4` 를 광고한다. 광고한 것을 실제로 검증한다.
   zod-compat:

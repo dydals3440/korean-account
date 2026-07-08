@@ -88,14 +88,14 @@
     "test:coverage": "vitest run --coverage",
     "test:bench": "vitest bench --run",
     "publint": "publint",
-    "check:api": "node scripts/check-public-api.mjs",
-    "check:treeshaking": "node scripts/check-treeshaking.mjs",
-    "check:dist": "pnpm publint && pnpm check:api && pnpm check:treeshaking",
+    "check:dist": "pnpm size && pnpm check:runtime",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "prepublishOnly": "pnpm build && pnpm check:dist",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "size": "size-limit",
+    "check:runtime": "node scripts/check-runtime.mjs"
   },
   "peerDependencies": {
     "zod": "^3.23.0 || ^4.0.0"
@@ -109,10 +109,11 @@
     "@arethetypeswrong/core": "^0.18.4",
     "@biomejs/biome": "^2.4.0",
     "@changesets/cli": "^2.27.0",
+    "@size-limit/preset-small-lib": "^12.1.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^2.1.0",
-    "esbuild": "^0.28.1",
     "publint": "^0.3.0",
+    "size-limit": "^12.1.0",
     "tsdown": "^0.22.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0",

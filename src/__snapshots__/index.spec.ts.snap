@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`korean-account 의 공개 export 1`] = `
+[
+  "ACCOUNT_KINDS",
+  "CONFIDENCE_LEVELS",
+  "INSTITUTION_CATEGORIES",
+  "SUBJECT_CATEGORIES",
+  "accountKindLabels",
+  "createDetector",
+  "createPatternTemplate",
+  "defaultDetector",
+  "defineBranchRule",
+  "defineInstitution",
+  "defineSubject",
+  "detectAccount",
+  "detectBest",
+  "extractIdentifier",
+  "extractSubject",
+  "formatAccount",
+  "institutionByCode",
+  "institutionById",
+  "institutions",
+  "kb11FirstDigit",
+  "kbank10First9",
+  "kbank14First79",
+  "normalize",
+  "normalizeSubject",
+  "pickInstitutions",
+  "pickInstitutionsByIds",
+  "pickPattern",
+  "scoreToConfidence",
+  "subjectCategoryLabels",
+  "suhyup11BranchToCoop",
+  "suhyup12BranchToCoop",
+  "suhyup14BranchToCoop",
+  "suhyupCoop12BranchToBank",
+  "toss12First1719",
+]
+`;
+
+exports[`korean-account/schema 의 공개 export 1`] = `
+[
+  "accountKindSchema",
+  "accountSchema",
+  "detectionSchema",
+  "institutionIdSchema",
+  "subjectCategorySchema",
+]
+`;

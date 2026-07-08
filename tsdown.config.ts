@@ -10,7 +10,7 @@ import { defineConfig } from "tsdown";
 //         순환 청크가 생겨 import 시점에 TDZ 로 크래시한다.
 // 함정 3: `institutionIds.ts` 는 두 그룹 모두에서 제외한다 (`/schema` 전용).
 //
-// 회귀 방지: scripts/check-treeshaking.mjs
+// 회귀 방지: .size-limit.json 의 바이트 예산
 const PURE_HELPER_MODULES =
   /src[\\/](?:(?:createPatternTemplate|rules|subjects|confidence)[\\/]|_internal[\\/]templateLength\.ts$|data[\\/](?:defineInstitution|expandTwoDigitRange)\.ts$)/;
 
