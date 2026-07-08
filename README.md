@@ -79,12 +79,19 @@ bun  add korean-account
 ```ts
 import { detectBest } from "korean-account";
 
-const top = detectBest("3333-12-3456789");
+const top = detectBest("1002-123-456789");
 if (top) {
   console.log(top.institution.nameKo, top.kind, top.confidence);
-  // → "카카오뱅크" "new" "high"
+  // → "우리은행" "new" "high"
 }
 ```
+
+`detectBest` 는 매칭이 없으면 `null` 을 반환한다.
+
+> **주의** — 식별 코드가 레지스트리에 없는 기관은 길이만으로 경쟁하므로 동점 `low` 가 된다.
+> 예를 들어 카카오뱅크 13자리(`3333-XX-XXXXXXX`)는 PDF 에 식별 코드가 없어 같은 길이의
+> 다른 기관들과 3점 동률이고, `priority` 가 높은 신한은행이 1순위가 된다. 특정 기관을
+> 겨냥한다면 `include` 로 좁혀라 — [한계](#9-한계) 참고.
 
 ### 여러 후보 + 필터링
 
