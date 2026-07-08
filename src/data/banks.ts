@@ -350,6 +350,9 @@ const suhyup = defineInstitution({
     {
       template: T("XXX-XXXXXXXXX"),
       kind: "new",
+      // `identifiers` 가 없어 점수 가산은 없다. 그래도 필수다 —
+      // 공개 API `extractIdentifier(digits, pattern)` 가 이 위치를 읽는다.
+      identifierPosition: { start: 0, length: 3 },
       branchRule: suhyup12BranchToCoop,
       validatesCheckDigit: false,
       effectiveFrom: "2025-11-10",
@@ -1195,6 +1198,9 @@ const hsbc = defineInstitution({
     {
       template: T("XXX-XXXXX-X-XXX"),
       kind: "new",
+      // `subjects` 가 없어 점수 가산은 없다. 그래도 `matchedPattern` 은 공개 출력이므로
+      // 제거하면 소비자가 관측하는 값이 바뀐다. PDF 표의 과목 위치 그대로 둔다.
+      subjectPosition: { start: 9, length: 3 },
       note: "서비스 미참가 — 메타데이터 only",
     },
   ],

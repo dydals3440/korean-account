@@ -2,10 +2,12 @@ import { describe, expect, test } from "vitest";
 import { templateLength } from "../_internal/templateLength";
 import { institutions } from "./index";
 
-// 데이터 파일은 사람이 PDF 를 보고 손으로 채운다. 아래 불변식이 깨져도 런타임은
-// 조용히 넘어가고 (점수 가산이 0 이 될 뿐) 어떤 테스트도 실패하지 않았다.
-// 실제로 이 spec 을 쓰기 전까지 죽은 subjectPosition 3개와 identifierPosition 1개가
-// 아무 신호 없이 존재했다.
+// 데이터 파일은 사람이 PDF 를 보고 손으로 채운다. 불변식이 깨져도 런타임은 조용히
+// 넘어가므로 (점수 가산이 0 이 될 뿐) 여기서 명시적으로 검사한다.
+//
+// 단, "position 만 있고 subjects/identifiers 가 없다" 는 것은 위반이 아니다.
+// 0.1.0 에서 그렇게 오판해 4개를 지웠다가, 공개 API `extractIdentifier` 의 출력이
+// 바뀌는 것을 발견하고 0.1.1 에서 되돌렸다. 불변식은 한 방향으로만 성립한다.
 
 const patterns = institutions.flatMap((institution) =>
   institution.patterns.map((pattern) => ({ institution, pattern })),
@@ -31,20 +33,30 @@ describe("institution 레지스트리 불변식", () => {
 });
 
 describe("pattern 불변식", () => {
-  test.each(patterns)("$institution.id $pattern.template — subjectPosition ⟺ subjects", ({
-    pattern,
-  }) => {
-    // 한쪽만 있으면 scoreSubjectMatch 가 조용히 0 을 반환한다 (죽은 선언).
-    expect(Boolean(pattern.subjectPosition)).toBe(Boolean(pattern.subjects?.length));
-  });
-
+  // 성립하는 건 한 방향뿐이다. `position` 단독은 죽은 선언이 아니다 —
+  // 점수 가산에는 안 쓰이지만 공개 API (`extractSubject` / `extractIdentifier`) 와
+  // `DetectionResult.matchedPattern` 이 그 값을 노출한다.
+  // 0.1.0 에서 양방향 불변식으로 오판해 4개를 지웠다가 0.1.1 에서 되돌렸다.
   test.each(
     patterns,
-  )("$institution.id $pattern.template — identifierPosition 은 identifiers 나 identifierRange 를 동반한다", ({
+  )("$institution.id $pattern.template — subjects 는 subjectPosition 을 동반한다", ({
     pattern,
   }) => {
-    if (pattern.identifierPosition) {
-      expect(Boolean(pattern.identifiers?.length) || Boolean(pattern.identifierRange)).toBe(true);
+    if (pattern.subjects?.length) {
+      expect(pattern.subjectPosition).toBeDefined();
+    }
+  });
+
+  // 역방향만 성립한다. `identifierPosition` 단독은 죽은 필드가 아니다 —
+  // 점수 가산은 없지만 공개 API `extractIdentifier` 가 이 위치를 읽는다.
+  // (0.1.0 에서 이걸 "죽은 필드" 로 오판해 지웠다가 0.1.1 에서 되돌렸다.)
+  test.each(
+    patterns,
+  )("$institution.id $pattern.template — identifiers / identifierRange 는 identifierPosition 을 동반한다", ({
+    pattern,
+  }) => {
+    if (pattern.identifiers?.length || pattern.identifierRange) {
+      expect(pattern.identifierPosition).toBeDefined();
     }
   });
 
