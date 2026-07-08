@@ -56,6 +56,13 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "schema": [
+        "./dist/schema.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist",
     "README.md",
@@ -98,6 +105,7 @@
     }
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.4",
     "@biomejs/biome": "^2.0.0",
     "@changesets/cli": "^2.27.0",
     "@types/node": "^22.0.0",

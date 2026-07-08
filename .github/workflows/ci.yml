@@ -47,17 +47,57 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다.
+      # attw 가 없으면 d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
       - name: Build
         run: pnpm build
-
-      - name: Verify package (publint)
-        run: pnpm publint
 
       - name: Verify public API is unchanged
         run: pnpm check:api
 
       - name: Verify tree-shaking
         run: pnpm check:treeshaking
+
+  # peerDependencies 가 `zod ^3 || ^4` 를 광고한다. 광고한 것을 실제로 검증한다.
+  # 이 잡이 없으면 devDep 에 고정된 메이저만 검증되고 나머지는 조용히 깨진다.
+  zod-compat:
+    name: zod v${{ matrix.zod }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        zod: [3, 4]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install zod v${{ matrix.zod }}
+        run: pnpm add -D zod@^${{ matrix.zod }}
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test schema
+        run: pnpm vitest run src/schema
+
+      # 생성된 d.ts 가 zod 메이저에 묶이지 않았는지. `z.ZodEffects` 는 v4 에 없다.
+      - name: Build and assert d.ts is zod-version-neutral
+        run: |
+          pnpm build
+          if grep -q "ZodEffects" dist/schema.d.ts dist/schema.d.cts; then
+            echo "::error::dist/schema.d.ts 가 zod v3 전용 타입을 하드코딩했습니다."
+            exit 1
+          fi
 
   coverage:
     name: Coverage

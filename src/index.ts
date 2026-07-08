@@ -17,6 +17,12 @@ export {
   normalizeSubject,
   subjectCategoryLabels,
 } from "./_internal/subjects";
+export {
+  ACCOUNT_KINDS,
+  CONFIDENCE_LEVELS,
+  INSTITUTION_CATEGORIES,
+  SUBJECT_CATEGORIES,
+} from "./constants";
 
 export type { CreateDetectorInput } from "./createDetector";
 export { createDetector } from "./createDetector";
