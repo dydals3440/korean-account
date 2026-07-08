@@ -55,14 +55,15 @@ describe("createDetector — checkDigitVerifiers framework", () => {
       checkDigitVerifiers: { suhyup: alwaysTrue },
     });
 
-    // When — 수협 12d 신계좌 입력
-    const [r] = detector.detect("131-234567890");
+    // When — 수협 12d 신계좌 입력. 같은 자릿수의 신한/신협이 더 높은 점수로 앞서므로
+    // 1순위가 아니라 후보 목록에서 수협을 직접 찾는다. (`const [r] = ...` 로 받으면
+    // 조건이 영원히 거짓이 되어 어서션이 한 번도 실행되지 않는다.)
+    const suhyup = detector.detect("131-234567890").find((r) => r.institution.id === "suhyup");
 
     // Then
-    if (r && r.institution.id === "suhyup") {
-      expect(r.matchedPattern.validatesCheckDigit).toBe(false);
-      expect(r.capabilities.validatedCheckDigit).toBeNull();
-    }
+    expect(suhyup, "수협 12d 신계좌가 후보에 있어야 한다").toBeDefined();
+    expect(suhyup?.matchedPattern.validatesCheckDigit).toBe(false);
+    expect(suhyup?.capabilities.validatedCheckDigit).toBeNull();
   });
 
   test("verifier 는 digits (정규화된 입력) 를 받는다", () => {

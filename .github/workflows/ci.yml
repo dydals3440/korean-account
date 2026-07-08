@@ -52,3 +52,30 @@ jobs:
 
       - name: Verify package (publint)
         run: pnpm publint
+
+      - name: Verify public API is unchanged
+        run: pnpm check:api
+
+      - name: Verify tree-shaking
+        run: pnpm check:treeshaking
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # vitest.config.ts 의 thresholds 가 래칫이다 — 커버리지가 떨어지면 여기서 실패한다.
+      - name: Test with coverage
+        run: pnpm test:coverage
