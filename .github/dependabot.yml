@@ -13,6 +13,11 @@ updates:
     labels:
       - dependencies
       - "area: ci"
+    groups:
+      # 액션 범프가 개별 PR 로 쏟아지지 않게 하나로 묶는다 (메이저 포함).
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: npm
     directory: /
@@ -26,12 +31,14 @@ updates:
       - dependencies
     groups:
       # 개별 PR 로 쏟아지지 않게 묶는다. 런타임 의존성이 0 이라 devDeps 가 전부다.
+      # 메이저까지 한 그룹으로 묶는다 (zod 메이저는 아래 ignore 로 제외됨).
       dev-dependencies:
         patterns:
           - "*"
         update-types:
           - minor
           - patch
+          - major
     ignore:
       # zod 는 peerDependency 다. 메이저 범위는 CI 의 zod-compat 매트릭스가 검증하므로
       # devDep 을 자동으로 올리면 하한(^3.23.0) 검증이 사라진다.

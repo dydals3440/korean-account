@@ -99,24 +99,20 @@ describe("detectAccount", () => {
   });
 
   describe("농협 13자리 끝자리 무관 kind=new 유지", () => {
-    test.each([
-      "01",
-      "02",
-      "03",
-      "04",
-      "05",
-      "09",
-    ])("끝자리 %s 도 보통/저축 prefix 이면 kind=new", (tail) => {
-      // Given
-      const input = `351-1234-5678-${tail}`;
+    test.each(["01", "02", "03", "04", "05", "09"])(
+      "끝자리 %s 도 보통/저축 prefix 이면 kind=new",
+      (tail) => {
+        // Given
+        const input = `351-1234-5678-${tail}`;
 
-      // When
-      const [r] = detectAccount(input);
+        // When
+        const [r] = detectAccount(input);
 
-      // Then
-      expect(r?.institution.id).toBe("nh-coop");
-      expect(r?.kind).toBe("new");
-    });
+        // Then
+        expect(r?.institution.id).toBe("nh-coop");
+        expect(r?.kind).toBe("new");
+      },
+    );
   });
 
   describe("분기 규칙 — 토스 12자리 17/19", () => {
