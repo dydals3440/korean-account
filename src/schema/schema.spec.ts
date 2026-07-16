@@ -119,20 +119,16 @@ describe("institutionIdSchema", () => {
 });
 
 describe("accountKindSchema", () => {
-  test.each([
-    "new",
-    "old",
-    "virtual",
-    "lifetime",
-    "incoming-only",
-    "merged-legacy",
-  ])("'%s' 는 통과한다", (kind) => {
-    // Given / When
-    const result = accountKindSchema.safeParse(kind);
+  test.each(["new", "old", "virtual", "lifetime", "incoming-only", "merged-legacy"])(
+    "'%s' 는 통과한다",
+    (kind) => {
+      // Given / When
+      const result = accountKindSchema.safeParse(kind);
 
-    // Then
-    expect(result.success).toBe(true);
-  });
+      // Then
+      expect(result.success).toBe(true);
+    },
+  );
 
   test("enum 외 값은 거부된다", () => {
     // Given / When / Then
