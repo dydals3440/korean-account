@@ -45,3 +45,16 @@ updates:
       - dependency-name: zod
         update-types:
           - version-update:semver-major
+      # typescript 7 · vitest 4 메이저는 보류한다. 산출물(dist)이 바이트 동일이라
+      # 소비자 이득이 0 인데, vitest 4 는 vite 를 새 peerDep 으로 요구하고
+      # coverage-v8 4 는 브랜치 측정이 달라져 커버리지 래칫 재보정을 강제한다.
+      # minor/patch 는 계속 받되 메이저 재제안만 멈춘다. 채택 시 이 블록을 지운다.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+      - dependency-name: vitest
+        update-types:
+          - version-update:semver-major
+      - dependency-name: "@vitest/coverage-v8"
+        update-types:
+          - version-update:semver-major
