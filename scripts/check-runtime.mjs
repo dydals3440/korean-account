@@ -83,18 +83,44 @@ check("scoped detector from institution constants (CJS)", () => {
   if (top?.institution.id !== "shinhan") throw new Error(`got ${top?.institution.id}`);
 });
 
-// Everything outside the zod adapter must load without zod (`korean-account/zod`
-// is the only entry allowed to touch the optional peerDep).
-check("no module outside adapters/zod imports zod", () => {
-  const files = globSync(`${root}dist/**/*.{js,cjs}`).filter(
-    (file) => !file.includes(`${sep}adapters${sep}zod${sep}`),
-  );
-  for (const file of files) {
-    if (/from\s*["']zod["']|require\(["']zod["']\)/.test(readFileSync(file, "utf8"))) {
-      throw new Error(`${file} imports zod`);
+// Each validator peer may only be imported from its own adapter directory.
+// The regex includes a trailing [/'"] so subpath imports ("yup/lib/…") are
+// caught too.
+const ADAPTER_LIBS = ["zod", "valibot", "yup", "arktype"];
+check("no module outside adapters/<lib> imports <lib>", () => {
+  for (const lib of ADAPTER_LIBS) {
+    const files = globSync(`${root}dist/**/*.{js,cjs}`).filter(
+      (file) => !file.includes(`${sep}adapters${sep}${lib}${sep}`),
+    );
+    if (files.length < 10) throw new Error("glob matched suspiciously few files");
+    const leak = new RegExp(`from\\s*["']${lib}["'/]|require\\(\\s*["']${lib}["'/]`);
+    for (const file of files) {
+      if (leak.test(readFileSync(file, "utf8"))) throw new Error(`${file} imports ${lib}`);
     }
   }
-  if (files.length < 10) throw new Error("glob matched suspiciously few files");
+});
+
+// The standard-schema adapter claims zero dependencies — enforce literally:
+// no bare-specifier import anywhere in its emitted modules.
+check("standard-schema adapter imports no external module", () => {
+  const files = globSync(`${root}dist/adapters/standard-schema/**/*.{js,cjs}`);
+  if (files.length < 2) throw new Error("standard-schema dist files missing");
+  for (const file of files) {
+    if (/from\s*["'][^./]|require\(\s*["'][^./]/.test(readFileSync(file, "utf8"))) {
+      throw new Error(`${file} imports an external module`);
+    }
+  }
+});
+
+const stdEsm = await import(`${root}dist/adapters/standard-schema/index.js`);
+const stdCjs = require(`${root}dist/adapters/standard-schema/index.cjs`);
+
+check("standard-schema adapter validates (ESM+CJS)", () => {
+  for (const std of [stdEsm, stdCjs]) {
+    const pass = std.accountSchema["~standard"].validate("110-436-387740");
+    const failCase = std.accountSchema["~standard"].validate("12345");
+    if (pass.issues || !failCase.issues) throw new Error("unexpected validate result");
+  }
 });
 
 if (failures.length > 0) {

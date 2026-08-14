@@ -101,14 +101,43 @@ jobs:
       - name: Run dist on Node ${{ matrix.node }}
         run: node scripts/check-runtime.mjs
 
-  # peerDependencies advertises `zod ^3 || ^4`. Verify what is advertised.
-  zod-compat:
-    name: zod v${{ matrix.zod }}
+  # Every validator peer we advertise gets a matrix row proving the adapter
+  # works with it; the standard-schema row additionally proves the packed
+  # tarball works with NO peers installed at all.
+  adapter-compat:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        zod: [3, 4]
+        include:
+          - { name: "zod v3 (peer floor)", install: "zod@^3.23.0", dir: zod, forbid: "ZodEffects" }
+          - { name: "zod v4", install: "zod@^4", dir: zod, forbid: "ZodEffects" }
+          - {
+              name: "valibot v1",
+              install: "valibot@^1",
+              dir: valibot,
+              forbid: "SchemaWithPipe|PicklistSchema|CustomSchema",
+            }
+          - {
+              name: "yup 1.4 (peer floor)",
+              install: "yup@1.4.0",
+              dir: yup,
+              forbid: "StringSchema|MixedSchema|BooleanSchema|NumberSchema|ObjectSchema",
+            }
+          - {
+              name: "yup v1",
+              install: "yup@^1",
+              dir: yup,
+              forbid: "StringSchema|MixedSchema|BooleanSchema|NumberSchema|ObjectSchema",
+            }
+          - { name: "arktype v2", install: "arktype@^2.1", dir: arktype, forbid: "" }
+          - {
+              name: "standard-schema (zero-dep)",
+              install: "",
+              dir: standard-schema,
+              forbid: "@standard-schema/spec",
+            }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -125,24 +154,44 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install zod v${{ matrix.zod }}
-        run: pnpm add -D zod@^${{ matrix.zod }}
+      - name: Install ${{ matrix.install }}
+        if: matrix.install != ''
+        run: pnpm add -D ${{ matrix.install }}
 
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Test schema
-        run: pnpm vitest run src/adapters/zod
+      - name: Test adapter
+        run: pnpm vitest run src/adapters/${{ matrix.dir }}
 
-      # Generated d.ts must not be pinned to a zod major. `z.ZodEffects` does
-      # not exist in v4.
-      - name: Build and assert d.ts is zod-version-neutral
+      - name: Build
+        run: pnpm build
+
+      # Generated d.ts must not pin the adapter to a validator release —
+      # public annotations (ZodType<T>, v.GenericSchema<T>, Schema<T>, ...)
+      # keep the declaration surface version-neutral.
+      - name: Assert d.ts is version-neutral
+        if: matrix.forbid != ''
         run: |
-          pnpm build
-          if grep -q "ZodEffects" dist/zod.d.ts dist/zod.d.cts; then
-            echo "::error::dist/schema.d.ts hardcodes zod v3-only types."
+          if grep -Eq "${{ matrix.forbid }}" "dist/${{ matrix.dir }}.d.ts" "dist/${{ matrix.dir }}.d.cts"; then
+            echo "::error::dist/${{ matrix.dir }}.d.ts leaks version-pinned internal types."
             exit 1
           fi
+
+      # The zero-dependency claim, proven against the real artifact: install
+      # the packed tarball into a bare project with peers omitted and run it.
+      - name: Prove zero-dependency install
+        if: matrix.dir == 'standard-schema'
+        run: |
+          pnpm pack
+          mkdir /tmp/std-check && cd /tmp/std-check && npm init -y >/dev/null
+          npm i --omit=peer "$GITHUB_WORKSPACE"/korean-account-*.tgz
+          node -e '
+            import("korean-account/standard-schema").then(({ accountSchema }) => {
+              const ok = accountSchema["~standard"].validate("110-436-387740");
+              const bad = accountSchema["~standard"].validate("12345");
+              if (ok.issues || !bad.issues) process.exit(1);
+            });'
 
   coverage:
     name: Coverage

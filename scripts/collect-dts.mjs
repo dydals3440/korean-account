@@ -16,9 +16,9 @@ if (!existsSync(from)) {
 }
 
 const declarations = globSync(join(from, "**/*.d.{ts,cts}"));
-if (declarations.length < 2) {
+if (declarations.length < 12) {
   console.error(
-    `collect-dts: expected at least index+zod declarations, found ${declarations.length}`,
+    `collect-dts: expected declarations for all six entries, found ${declarations.length}`,
   );
   process.exit(1);
 }
