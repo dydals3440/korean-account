@@ -45,3 +45,4 @@ id_rsa*
 
 # Changesets 임시
 .changeset/pre.json
+dist-dts

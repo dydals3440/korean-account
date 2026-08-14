@@ -1,65 +1,47 @@
 import { defineConfig } from "tsdown";
 
-// The registry must live in its own chunk so `sideEffects: false` works at
-// module granularity. In a shared chunk, the 57 top-level
-// `defineInstitution(...)` calls prevent the bundler from proving purity, and
-// a consumer importing only `normalize` would receive the full registry.
+// JS is published unbundled (`unbundle: true` = rolldown preserveModules):
+// dist mirrors src at module granularity. Combined with `sideEffects: false`
+// and per-call PURE annotations, consumer bundlers drop every institution
+// module they don't import — the whole point of the one-file-per-institution
+// registry. The exports map (not the file layout) is the public API boundary.
 //
-// Trap 1: the `helpers` group must precede `registry` (groups match in order),
-//         or pure helpers get pulled into the registry chunk.
-// Trap 2: never set `includeDependenciesRecursively: false` — it creates an
-//         index <-> registry cyclic chunk that crashes with a TDZ on import.
-// Trap 3: `institution-ids.ts` must stay out of both groups (zod-adapter only).
+// d.ts stays a separate *bundled* build. It writes to its own outDir
+// (dist-dts) because under TypeScript 7 the plugin's `emitDtsOnly` fails to
+// suppress the CJS JS pass — sharing dist made two builds race on index.cjs
+// and intermittently corrupt it. scripts/collect-dts.mjs moves the
+// declarations into dist and drops the stray JS; attw (strict) + publint then
+// run as explicit build steps (see package.json "build") because they must
+// validate the FINAL layout, not the pre-collection one.
 //
-// Regression guard: byte budgets in .size-limit.json
-const PURE_HELPER_MODULES =
-  /src[\\/](?:core[\\/](?:pattern-template|subjects|confidence|template-length|define-institution)\.ts$|registry[\\/](?:rules|expand-range)\.ts$)/;
-
-// Matches everything under registry/ except institution-ids.ts (trap 3) and
-// the pure helpers already captured by the group above (groups match in order).
-const REGISTRY_MODULES = /src[\\/]registry[\\/](?!institution-ids)/;
-
-const ENTRY = {
-  index: "src/index.ts",
-  schema: "src/adapters/zod/index.ts",
-};
-
-// JS and d.ts are built separately. tsdown generates d.ts inside the ESM pass,
-// and `codeSplitting.groups` applied to d.ts emits broken declarations that
-// import a never-emitted `helpers-*.d.ts` (reproduced on 0.22.0 / 0.22.4).
-// publint misses this; attw catches it.
+// Regression guards: byte budgets in .size-limit.json + scripts/check-runtime.mjs.
 export default defineConfig([
   {
-    entry: ENTRY,
+    entry: ["src/index.ts", "src/adapters/zod/index.ts"],
     format: ["esm", "cjs"],
     dts: false,
     sourcemap: true,
     clean: true,
     treeshake: true,
+    unbundle: true,
     minify: false,
     platform: "neutral",
     // Paired with `engines.node`. Without it, source-level syntax leaks through.
     target: "es2020",
     deps: { neverBundle: ["zod"] },
-    outputOptions: {
-      codeSplitting: {
-        groups: [
-          { name: "helpers", test: PURE_HELPER_MODULES },
-          { name: "registry", test: REGISTRY_MODULES },
-        ],
-      },
-    },
   },
   {
-    entry: ENTRY,
+    entry: {
+      index: "src/index.ts",
+      zod: "src/adapters/zod/index.ts",
+    },
+    outDir: "dist-dts",
     format: ["esm", "cjs"],
     // declarationMap stays off — `.d.ts.map` would point at `../src/*.ts`
     // paths that are not published, silently breaking go-to-definition.
     dts: { emitDtsOnly: true, sourcemap: false },
-    clean: false,
+    clean: true,
     platform: "neutral",
     deps: { neverBundle: ["zod"] },
-    attw: { profile: "strict" },
-    publint: true,
   },
 ]);

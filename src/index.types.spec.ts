@@ -31,8 +31,9 @@ import type {
 } from "./index";
 import type { DetectionPayload } from "./adapters/zod";
 
-// 타입 export 를 제거하거나 이름을 바꾸면 이 파일이 컴파일되지 않는다.
-// 값 export 는 `index.spec.ts` 의 스냅샷이 지킨다. 둘이 합쳐 공개 표면 전체다.
+// Removing or renaming a type export breaks compilation of this file. Value
+// exports are guarded by the snapshot in `index.spec.ts`; together they cover
+// the whole public surface.
 type PublicTypeSurface = [
   AccountKind,
   AccountPattern,
@@ -51,7 +52,7 @@ type PublicTypeSurface = [
   InstitutionCategory,
   InstitutionCode,
   InstitutionId,
-  // 유일하게 기본 타입 인자가 없는 제네릭이다.
+  // The only generic without a default type argument.
   InstitutionIdByCategory<"bank">,
   InstitutionIdInput,
   PatternTemplate,

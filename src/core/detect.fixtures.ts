@@ -1,7 +1,7 @@
 import type { InstitutionId } from "../registry";
 import type { AccountKind, SubjectCategory } from "../types";
 
-/** 단일 fixture — 입력 + 1순위 institution 기대값 + (있으면) kind/subject 기대값. */
+/** Single fixture — input + expected top-ranked institution + optional kind/subject expectations. */
 export interface Fixture {
   readonly input: string;
   readonly id: InstitutionId;
@@ -10,13 +10,13 @@ export interface Fixture {
 }
 
 /**
- * 기관별 대표 계좌번호 모음.
+ * Representative account numbers per institution.
  *
- * detectAccount.spec.ts 의 자동 매칭 loop가 가드한다. `subjectCategory` 는 명시된
- * fixture만 검증한다 (모든 fixture가 subject를 갖는 건 아님).
+ * Guarded by the automatic matching loop in detectAccount.spec.ts.
+ * `subjectCategory` is verified only for fixtures that state it (not every
+ * fixture carries a subject).
  */
 export const FIXTURES = [
-  // ===== 시중·인터넷전문 은행 =====
   {
     input: "110-436-387740",
     id: "shinhan",
@@ -80,7 +80,7 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "ordinary",
   },
-  // 끝자리(계좌구분) 변형은 보통/저축 prefix 일 때 kind 영향 없음 회귀 가드.
+  // Regression guard: varying the last digit (계좌구분) must not affect kind for ordinary/savings prefixes.
   {
     input: "351-1234-5678-04",
     id: "nh-coop",
@@ -93,61 +93,64 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "savings",
   },
-  // 카카오 4자리 prefix (3333/7979), K뱅크 100 prefix, 토스 4자리 prefix (1000/1500),
-  // 농협중앙 11d fallback 은 PDF 외 보강 → 컨슈머 (teacher-web) 측 회귀 spec 에서 검증.
+  // Kakao 4-digit prefixes (3333/7979), K Bank 100 prefix, Toss 4-digit
+  // prefixes (1000/1500), and the NH federation 11d fallback are non-PDF
+  // augmentations → verified by the consumer (teacher-web) regression specs.
   { input: "1712-3456-7890", id: "toss", kind: "virtual" },
   { input: "1912-3456-7890", id: "toss", kind: "virtual" },
-  // 농협은행 13d 차세대 적금 (입금만 가능). 과목 304 → installment, 출금 불가.
+  // NH Bank 13d next-gen installment savings (deposit-only). Subject 304 → installment, no withdrawal.
   {
     input: "304-1234-5678-91",
     id: "nh",
     kind: "incoming-only",
     subjectCategory: "installment",
   },
-  // 농협은행 13d 차세대 신탁 (입금만 가능). 과목 031 → trust, 출금 불가.
+  // NH Bank 13d next-gen trust (deposit-only). Subject 031 → trust, no withdrawal.
   {
     input: "031-1234-5678-91",
     id: "nh",
     kind: "incoming-only",
     subjectCategory: "trust",
   },
-  // 농협중앙회 13d 차세대 적금. 과목 354 → installment.
+  // NH federation 13d next-gen installment savings. Subject 354 → installment.
   {
     input: "354-1234-5678-93",
     id: "nh-coop",
     kind: "incoming-only",
     subjectCategory: "installment",
   },
-  // 우체국 14d 입금만 가능 — 듬뿍우대저축(05). 출금 불가지만 카테고리는 savings.
+  // Post office 14d deposit-only — preferential savings (05). No withdrawal, but the category stays savings.
   {
     input: "123456-05-12345-6",
     id: "post",
     kind: "incoming-only",
     subjectCategory: "savings",
   },
-  // 새마을금고 13d 신 저축 (입금만). prefix 9206 = 저축 206.
+  // KFCC 13d new savings (deposit-only). Prefix 9206 = savings 206.
   {
     input: "9206-12-3456789",
     id: "kfcc",
     kind: "incoming-only",
     subjectCategory: "savings",
   },
-  // 새마을금고 13d 신 적금 (입금만). prefix 9200 = 적금 200.
+  // KFCC 13d new installment savings (deposit-only). Prefix 9200 = installment 200.
   {
     input: "9200-12-3456789",
     id: "kfcc",
     kind: "incoming-only",
     subjectCategory: "installment",
   },
-  // 신협 12d 적금 prefix 170~178 은 토스 12d 가상 17/19 와 PDF 차원에서 모호 →
-  // 라이브러리 fixture 에서 제외. 라이브러리에 패턴은 등록되어 있으므로 명시적
-  // include 로 신협을 콕 집어 호출하면 매칭 가능.
-  // K뱅크 14d 첫자리 1 → 여신가상계좌 (원리금 납부 입금전용) — 라이브러리만으론
-  // 식별자 부재로 IBK 14d 와 score 충돌. teacher-web 회귀 spec 에서 검증.
+  // Shinhyup 12d installment prefixes 170~178 are ambiguous with Toss 12d
+  // virtual 17/19 at the PDF level → excluded from library fixtures. The
+  // pattern is still registered, so an explicit include targeting Shinhyup
+  // can match it.
+  // K Bank 14d first digit 1 → loan virtual account (principal/interest,
+  // deposit-only) — with the library alone it ties with IBK 14d for lack of
+  // an identifier. Verified in the teacher-web regression spec.
 
-  // KB 본점 14d 신계좌는 PDF 외 (실세계 prefix) → 컨슈머 회귀 spec 에서 검증.
+  // KB head-office 14d new accounts are non-PDF (real-world prefix) → verified in consumer regression specs.
 
-  // IBK 14d: digits[9:11]="01" → 보통예금 (실제 사용자 보고 계좌)
+  // IBK 14d: digits[9:11]="01" → ordinary deposit (account reported by a real user).
   {
     input: "318-081775-01-014",
     id: "ibk",
@@ -178,8 +181,8 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "household-current",
   },
-  // 한국씨티 12d 첫자리 3 — 신한 12d (100~169) / 수협중앙 (2/7/9) 와 충돌 회피.
-  // digits[8:10]="25" → 보통예금
+  // Citi 12d first digit 3 — avoids collisions with Shinhan 12d (100~169) and
+  // Suhyup federation (2/7/9). digits[8:10]="25" → ordinary deposit.
   {
     input: "3-127086-7-25-08",
     id: "citi",
@@ -210,14 +213,14 @@ export const FIXTURES = [
     kind: "merged-legacy",
     subjectCategory: "linked",
   },
-  // (구)한미 11d prefix digits[3:5]="89" — 신한 11d 식별 set 회피.
+  // Former KorAm 11d prefix digits[3:5]="89" — avoids Shinhan's 11d identifier set.
   {
     input: "300-89012-81-9",
     id: "citi",
     kind: "merged-legacy",
     subjectCategory: "ordinary",
   },
-  // (053) 구씨티 10d suffix digits[8:10]="90" — 키움 10d 코드 set 회피.
+  // (053) former Citi 10d suffix digits[8:10]="90" — avoids Kiwoom's 10d code set.
   {
     input: "30-59-99999-0",
     id: "citi",
@@ -230,7 +233,7 @@ export const FIXTURES = [
     kind: "merged-legacy",
     subjectCategory: "savings",
   },
-  // 081 하나증권 CMA 14d — 일련 첫자리 "9" 고정 identifier 가 디지트 4번째 위치.
+  // 081 Hana Securities CMA 14d — the fixed "9" serial-first-digit identifier sits at digit index 3.
   {
     input: "123-91234567-8-05",
     id: "hana-securities-cma",
@@ -261,14 +264,14 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "ordinary",
   },
-  // 부산 13d new — 식별자 101 (보통). 부산 전용 prefix 라 13d 기관과 충돌 없음.
+  // Busan 13d new — identifier 101 (ordinary). Busan-only prefix, so no collision with other 13d institutions.
   {
     input: "101-1234-5678-90",
     id: "busan",
     kind: "new",
     subjectCategory: "ordinary",
   },
-  // 광주 12d prefix 300 — 수협중앙 (2/7/9) / 우체국 (100~190/530) 회피.
+  // Gwangju 12d prefix 300 — avoids Suhyup federation (2/7/9) and post office (100~190/530).
   {
     input: "300-109-45678-9",
     id: "gwangju",
@@ -288,15 +291,14 @@ export const FIXTURES = [
     subjectCategory: "other",
   },
 
-  // ===== 비은행 =====
   {
     input: "9003-12-3456789",
     id: "kfcc",
     kind: "new",
     subjectCategory: "ordinary",
   },
-  // 신협 12d 보통 731 — 다른 12d 기관과 충돌 없는 신협 전용 prefix.
-  // (177 저축·170 적금은 토스 12d 가상 17/19 prefix 와 PDF 모호성으로 별첨 기록)
+  // Shinhyup 12d ordinary 731 — Shinhyup-only prefix with no 12d collisions.
+  // (177 savings / 170 installment are recorded separately: PDF-ambiguous with Toss 12d virtual 17/19.)
   {
     input: "731-321-98765-4",
     id: "shinhyup",
@@ -304,14 +306,13 @@ export const FIXTURES = [
     subjectCategory: "ordinary",
   },
 
-  // ===== 증권사 =====
   {
     input: "1234-5678-11",
     id: "kiwoom",
     kind: "new",
     subjectCategory: "ordinary",
   },
-  // 키움 10d ISA 코드 55 — 출금 불가
+  // Kiwoom 10d ISA code 55 — no withdrawal.
   {
     input: "1234-5678-55",
     id: "kiwoom",
@@ -324,14 +325,14 @@ export const FIXTURES = [
     kind: "merged-legacy",
     subjectCategory: "savings",
   },
-  // 메리츠 구계좌 10d 코드 99 — 하나증권 코드 set과 안 겹침.
+  // Meritz legacy 10d code 99 — does not overlap Hana Securities' code set.
   {
     input: "1234-5678-99",
     id: "meritz",
     kind: "old",
     subjectCategory: "corporate-free",
   },
-  // 케이프 14d 코드 87 — 87 은 cape 14d (서브번호 포함) 전용 식별 코드.
+  // Cape 14d code 87 — 87 identifies only the cape 14d (sub-number) pattern.
   {
     input: "123-87-123456-789",
     id: "cape-inv",

@@ -4,8 +4,9 @@
 // CI builds on .nvmrc and then executes this script on every supported Node
 // (currently 22 and 24). This prevents lowering `engines` without verifying it.
 
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -66,14 +67,34 @@ check("createDetector with custom scoring", () => {
   if (detector.detect("110-436-387740").length === 0) throw new Error("empty result");
 });
 
-check("registry chunk init order (TDZ regression guard)", () => {
+check("registry barrel integrity", () => {
   if (esm.institutions.length !== 57) throw new Error(`${esm.institutions.length} !== 57`);
 });
 
-// The main entry must load without zod. `/schema` is an optional peerDep.
-check("main entry does not require zod", () => {
-  const source = readFileSync(`${root}dist/index.js`, "utf8");
-  if (/from\s*["']zod["']/.test(source)) throw new Error("dist/index.js imports zod");
+check("scoped detector from institution constants (ESM)", () => {
+  const detector = esm.createDetector([esm.kb, esm.shinhan]);
+  const top = detector.detect("110-436-387740")[0];
+  if (top?.institution.id !== "shinhan") throw new Error(`got ${top?.institution.id}`);
+});
+
+check("scoped detector from institution constants (CJS)", () => {
+  const detector = cjs.createDetector([cjs.kb, cjs.shinhan]);
+  const top = detector.detect("110-436-387740")[0];
+  if (top?.institution.id !== "shinhan") throw new Error(`got ${top?.institution.id}`);
+});
+
+// Everything outside the zod adapter must load without zod (`korean-account/zod`
+// is the only entry allowed to touch the optional peerDep).
+check("no module outside adapters/zod imports zod", () => {
+  const files = globSync(`${root}dist/**/*.{js,cjs}`).filter(
+    (file) => !file.includes(`${sep}adapters${sep}zod${sep}`),
+  );
+  for (const file of files) {
+    if (/from\s*["']zod["']|require\(["']zod["']\)/.test(readFileSync(file, "utf8"))) {
+      throw new Error(`${file} imports zod`);
+    }
+  }
+  if (files.length < 10) throw new Error("glob matched suspiciously few files");
 });
 
 if (failures.length > 0) {

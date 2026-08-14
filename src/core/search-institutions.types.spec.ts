@@ -53,7 +53,7 @@ describe("searchInstitutions cross-narrow", () => {
     // Given / When / Then — OK
     searchInstitutions({ categories: ["bank"], include: ["kb", "shinhan"] });
 
-    // 컴파일 에러: kiwoom 은 securities 라 bank 카테고리 include 에 못 들어감
+    // Compile error: kiwoom is securities, so it cannot appear in a bank-category include
     // @ts-expect-error
     searchInstitutions({ categories: ["bank"], include: ["kiwoom"] });
   });
@@ -62,7 +62,7 @@ describe("searchInstitutions cross-narrow", () => {
     // Given / When / Then — OK
     searchInstitutions({ categories: ["bank"], exclude: ["hsbc"] });
 
-    // 컴파일 에러
+    // Compile error
     // @ts-expect-error
     searchInstitutions({ categories: ["bank"], exclude: ["kiwoom"] });
   });

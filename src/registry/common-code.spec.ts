@@ -2,12 +2,13 @@ import { describe, expect, test } from "vitest";
 import { getInstitution } from ".";
 
 /**
- * `Institution.commonCode` (KFTC 표준은행코드) 회귀 가드.
+ * Regression guard for `Institution.commonCode` (KFTC standard bank code).
  *
- * 같은 KFTC 가 운영하는 두 namespace (CMS 자동이체 vs 금융공동망 표준) 가 별개.
- * 14 메이저 은행 중 하나(외환·하나 통합) 만 두 체계 대표코드가 다름.
- * commonCode 가 silently 누락되거나 추가되면 teacher-web 서버 BankCodeSchema 와
- * 어긋나 form submit boundary 가 깨지므로 회귀 가드.
+ * KFTC runs two separate namespaces (CMS auto-transfer vs the interbank
+ * standard). Among the 14 major banks, only Hana (the KEB merger) has
+ * different representative codes in the two systems. A silently dropped or
+ * added commonCode would diverge from teacher-web's server BankCodeSchema
+ * and break the form submit boundary.
  */
 describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
   test("하나은행 (외환·하나 통합) — CMS code 005 ≠ 표준 081", () => {

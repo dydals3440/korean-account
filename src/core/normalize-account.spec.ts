@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { normalizeAccount } from "./normalize-account";
 
 /**
- * 테스트용 wrapper — runtime guard 동작을 검증하기 위해 비-string 입력을
- * 통과시킨다. `as Type` cast 없이 `@ts-expect-error` 로 타입만 우회한다.
+ * Test wrapper — lets non-string input through to exercise the runtime
+ * guard. Bypasses only the type via `@ts-expect-error`, no `as Type` cast.
  */
 function normalizeUnknown(input: unknown): string {
   // @ts-expect-error — intentionally pass non-string to test runtime guard

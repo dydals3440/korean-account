@@ -7,9 +7,9 @@ import type {
 } from "./constants";
 import type { AccountKind, Confidence, InstitutionCategory, SubjectCategory } from "../types";
 
-// `as const satisfies readonly X[]` 는 "배열의 모든 원소가 X 다" 만 보장한다.
-// 반대 방향 — union 에 멤버를 추가했는데 배열에 안 넣은 경우 — 은 잡지 못하므로
-// 여기서 양방향 동등성을 단언한다.
+// `as const satisfies readonly X[]` only guarantees "every array element is
+// an X". It cannot catch the reverse — a union member added but missing from
+// the array — so bidirectional equality is asserted here.
 describe("리터럴 배열 ↔ union 양방향 exhaustiveness", () => {
   test("ACCOUNT_KINDS", () => {
     expectTypeOf<(typeof ACCOUNT_KINDS)[number]>().toEqualTypeOf<AccountKind>();

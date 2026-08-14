@@ -139,7 +139,7 @@ jobs:
       - name: Build and assert d.ts is zod-version-neutral
         run: |
           pnpm build
-          if grep -q "ZodEffects" dist/schema.d.ts dist/schema.d.cts; then
+          if grep -q "ZodEffects" dist/zod.d.ts dist/zod.d.cts; then
             echo "::error::dist/schema.d.ts hardcodes zod v3-only types."
             exit 1
           fi

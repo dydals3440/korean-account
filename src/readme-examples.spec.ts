@@ -1,17 +1,21 @@
 import { describe, expect, test } from "vitest";
 import {
   accountKindLabels,
+  createDetector,
   detectBest,
+  kb,
+  shinhan,
+  toss,
   getInstitution,
   institutions,
   normalizeAccount,
   scoreToConfidence,
 } from "./index";
 
-// README 는 tarball 에 실려 나가는 계약이다. 실제로 v0.0.3 부터 0.1.1 까지
-// `detectBest("3333-12-3456789")` 가 "카카오뱅크" / "high" 를 반환한다고 적혀 있었지만,
-// 실제 반환값은 신한은행 / low 였다. 아무 테스트도 이걸 잡지 못했다.
-// README 의 모든 코드 예제가 주장하는 값을 여기서 그대로 단언한다.
+// The README ships in the tarball, so it is a contract. From v0.0.3 through
+// 0.1.1 it claimed `detectBest("3333-12-3456789")` returns KakaoBank / "high"
+// while the actual result was Shinhan / low — and no test caught it. Every
+// value the README's code examples claim is asserted verbatim here.
 describe("README 코드 예제가 주장하는 값", () => {
   test("빠른 시작 — detectBest", () => {
     const top = detectBest("1002-123-456789");
@@ -45,7 +49,7 @@ describe("README 코드 예제가 주장하는 값", () => {
   test("조회 — getInstitution / getInstitution", () => {
     expect(getInstitution("shinhan")?.code).toBe("088");
     expect(getInstitution("088")?.id).toBe("shinhan");
-    // README 의 commonCode 주의사항: CMS 코드와 KFTC 공통 은행코드가 다르다.
+    // README's commonCode caveat: the CMS code and KFTC common bank code differ.
     expect(getInstitution("hana")?.code).toBe("005");
     expect(getInstitution("hana")?.commonCode).toBe("081");
   });
@@ -63,7 +67,12 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(accountKindLabels.virtual).toBe("가상계좌");
   });
 
-  // README 가 명시하는 실세계 보강 — 이 동작이 바뀌면 README 도 같이 고쳐야 한다.
+  test("필요한 은행만 — createDetector([kb, shinhan, toss]) 도 신한을 1순위로 낸다", () => {
+    const scoped = createDetector([kb, shinhan, toss]);
+    expect(scoped.detect("110-436-387740")[0]?.institution.id).toBe("shinhan");
+  });
+
+  // Real-world augmentation the README states explicitly — if this behavior changes, the README must change too.
   test("실세계 보강 — 카카오뱅크 3333/7979 프리픽스가 core 에 반영", () => {
     const personal = detectBest("3333-12-3456789");
     expect(personal?.institution.nameKo).toBe("카카오뱅크");

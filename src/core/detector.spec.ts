@@ -245,8 +245,8 @@ describe("detector.extend", () => {
     // When
     const extended = base.extend({ globalRules: [() => true] });
 
-    // Then — 기존 1개 + 추가 1개 = globalRule 가산 2회 발생해야 함
-    // length 3 + identifier 4 + 길이 보너스(3자리=2) + globalRule 5 × 2
+    // Then — 1 existing + 1 added = the globalRule bonus must fire twice:
+    // length 3 + identifier 4 + length bonus (3 digits = 2) + globalRule 5 × 2
     const [r] = extended.detect("110-436-387740");
     expect(r?.score).toBe(3 + 4 + 2 + 5 * 2);
   });
@@ -297,7 +297,7 @@ describe("scoring override", () => {
     // When
     const [r] = detector.detect("110-436-387740");
 
-    // Then — identifierMatch=0이면 길이만 +3
+    // Then — with identifierMatch=0, only length counts: +3
     expect(r?.score).toBe(3);
   });
 
@@ -310,7 +310,7 @@ describe("scoring override", () => {
     // When
     const [r] = detector.detect("110-436-387740");
 
-    // Then — length +3, identifier +4, 길이 보너스(3자리=2), kindNew +1
+    // Then — length +3, identifier +4, length bonus (3 digits = 2), kindNew +1
     expect(r?.score).toBe(3 + 4 + 2 + 1);
   });
 
@@ -326,7 +326,7 @@ describe("scoring override", () => {
             template: patternTemplate("XXX-XXX-XXXXXX"),
             kind: "new",
             identifierPosition: { start: 0, length: 3 },
-            identifiers: ["999"], // 일부러 다른 prefix
+            identifiers: ["999"], // deliberately different prefix
           },
         ],
       };
@@ -335,7 +335,7 @@ describe("scoring override", () => {
       // When
       const replacedHit = extended.detect("999-436-387740");
 
-      // Then — replacement 가 999 prefix 로 매칭되고 이름도 교체된 본
+      // Then — the replacement matches the 999 prefix and carries the replaced name
       expect(replacedHit[0]?.institution.id).toBe("shinhan");
       expect(replacedHit[0]?.institution.nameKo).toBe("신한은행 (교체본)");
     });
@@ -348,7 +348,7 @@ describe("scoring override", () => {
       // When
       const extended = baseline.extend({ institutions: [replacement] });
 
-      // Then — silent duplicate 가 생기지 않고 1개만 남음
+      // Then — no silent duplicate; exactly one remains
       expect(extended.institutions.length).toBe(1);
       expect(extended.institutions[0]?.nameKo).toBe("교체본");
     });
@@ -363,7 +363,7 @@ describe("scoring override", () => {
       const shinhanHit = detector.detect("110-436-387740");
       const kakaoHit = detector.detect("3333-12-3456789");
 
-      // Then — 둘 다 매칭
+      // Then — both match
       expect(shinhanHit[0]?.institution.id).toBe("shinhan");
       expect(kakaoHit[0]?.institution.id).toBe("kakao");
     });
@@ -375,7 +375,7 @@ describe("scoring override", () => {
       // When
       baseline.extend({ institutions: [KAKAO] });
 
-      // Then — 원본 detector 의 institutions 는 1건 그대로
+      // Then — the original detector still holds exactly 1 institution
       expect(baseline.institutions.length).toBe(1);
       expect(baseline.institutions[0]?.id).toBe("shinhan");
     });

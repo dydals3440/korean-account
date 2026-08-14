@@ -12,20 +12,20 @@
     "limit": "700 B"
   },
   {
-    "name": "defineInstitution",
+    "name": "one institution only ({ kb })",
     "path": "dist/index.js",
-    "import": "{ defineInstitution }",
-    "limit": "300 B"
+    "import": "{ kb }",
+    "limit": "1 KB"
   },
   {
-    "name": "five pure utilities",
+    "name": "scoped detector ({ createDetector, kb, shinhan, toss })",
     "path": "dist/index.js",
-    "import": "{ normalizeAccount, formatAccount, patternTemplate, scoreToConfidence, defineSubject }",
-    "limit": "900 B"
+    "import": "{ createDetector, kb, shinhan, toss }",
+    "limit": "4.5 KB"
   },
   {
-    "name": "korean-account/schema (without the registry)",
-    "path": "dist/schema.js",
+    "name": "korean-account/zod (without the registry)",
+    "path": "dist/adapters/zod/index.js",
     "import": "*",
     "ignore": ["zod"],
     "limit": "1500 B"

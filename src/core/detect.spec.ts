@@ -152,8 +152,9 @@ describe("detect", () => {
       expect(r?.kind).toBe("virtual");
     });
 
-    // PDF-strict 모드에서 1000/1500 prefix 의 토스 단독 매칭은 컨슈머 (teacher-web)
-    // 4자리 prefix 확장으로 보장. 라이브러리만으로는 신한 100 prefix 와 동률.
+    // In PDF-strict mode, a Toss-only match on the 1000/1500 prefixes is
+    // guaranteed by the consumer's (teacher-web) 4-digit prefix extension;
+    // the library alone ties with Shinhan's 100 prefix.
   });
 
   describe("회귀 가드", () => {

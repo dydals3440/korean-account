@@ -3,7 +3,7 @@
  *
  * Codes, digit counts, and identifier/subject positions follow the KFTC CMS
  * per-participant account number layout (2026.05.08):
- * https://www.cmsedi.or.kr/cms/board/workdata/view/1026
+ * https://www.cmsedi.or.kr/cms/board/workdata/cms
  *
  * Patterns are split by `kind`, so new/old/virtual/lifetime/incoming-only/
  * merged-legacy patterns coexist within one institution. Patterns with

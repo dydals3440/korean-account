@@ -1,14 +1,14 @@
 import type { AccountKind, Confidence, InstitutionCategory, SubjectCategory } from "../types";
 
 /**
- * `AccountKind` 리터럴 배열.
+ * `AccountKind` literals as a runtime array.
  *
- * `types.ts` 의 union 이 단일 진실이고, 이 배열은 그것의 런타임 표현이다. 한쪽만
- * 고치면 `satisfies` 가 (배열 → union) 방향을, `constants.types.spec.ts` 의
- * `toEqualTypeOf` 가 (union → 배열) 방향을 잡는다.
+ * The union in `types.ts` is the single source of truth. Editing only one
+ * side is caught both ways: `satisfies` checks array → union, and
+ * `toEqualTypeOf` in `constants.types.spec.ts` checks union → array.
  *
- * zod 스키마가 `.options` 접근자 대신 이걸 쓴다 — v3/v4 어느 쪽에서도 동작하도록
- * 스키마를 `ZodType<T>` 로 좁혀 두었기 때문이다.
+ * The zod schema reads this instead of the `.options` accessor — the schema
+ * is narrowed to `ZodType<T>` so it works on both zod v3 and v4.
  */
 export const ACCOUNT_KINDS = [
   "new",
@@ -19,7 +19,7 @@ export const ACCOUNT_KINDS = [
   "merged-legacy",
 ] as const satisfies readonly AccountKind[];
 
-/** `SubjectCategory` 리터럴 배열. [[ACCOUNT_KINDS]] 와 같은 규약. */
+/** `SubjectCategory` literals as a runtime array. Same contract as [[ACCOUNT_KINDS]]. */
 export const SUBJECT_CATEGORIES = [
   "ordinary",
   "treasury",
@@ -36,7 +36,7 @@ export const SUBJECT_CATEGORIES = [
   "other",
 ] as const satisfies readonly SubjectCategory[];
 
-/** `InstitutionCategory` 리터럴 배열. */
+/** `InstitutionCategory` literals as a runtime array. */
 export const INSTITUTION_CATEGORIES = [
   "bank",
   "non-bank",
@@ -44,5 +44,5 @@ export const INSTITUTION_CATEGORIES = [
   "clearing",
 ] as const satisfies readonly InstitutionCategory[];
 
-/** `Confidence` 리터럴 배열. 높은 신뢰도부터. */
+/** `Confidence` literals as a runtime array, highest confidence first. */
 export const CONFIDENCE_LEVELS = ["high", "medium", "low"] as const satisfies readonly Confidence[];
