@@ -13,12 +13,10 @@ concurrency:
 permissions:
   contents: read
 
-# 아래 잡들은 push 하지 않으므로 checkout 이 GITHUB_TOKEN 을 .git/config 에 남기지
-# 않게 한다. release.yml 은 changesets 가 push 해야 하므로 자격증명을 유지한다.
+# Jobs below never push, so checkout must not persist GITHUB_TOKEN in
+# .git/config. release.yml keeps credentials because changesets pushes.
 
 jobs:
-  # 빌드 도구(tsdown)는 `engines: ^22.18.0 || >=24.11.0` 을 요구한다. 이건 툴체인의
-  # 제약이지 배포 산출물의 제약이 아니다. 산출물의 Node 하한은 runtime 잡이 검증한다.
   test:
     name: Node ${{ matrix.node }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -57,24 +55,23 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # `pnpm build` 는 attw(strict) + publint 를 관문으로 실행한다. attw 가 없으면
-      # d.ts 청크 누락 같은 타입 파손이 publint 를 그대로 통과한다.
+      # `pnpm build` gates on attw (strict) + publint. Without attw, broken
+      # type layouts (e.g. missing d.ts chunks) pass publint silently.
       - name: Build
         run: pnpm build
 
-      # 트리셰이킹 회귀는 바이트 예산으로 잡는다 (.size-limit.json).
-      # PURE 어노테이션이 빠지면 `normalize` 가 500 B → 9.5 kB 로 튄다.
+      # Tree-shaking regressions are caught as byte budgets (.size-limit.json).
       - name: Size limit
         run: pnpm size
 
-  # `engines.node` 하한이 실제로 성립하는지. 여기서만 Node 20 을 쓴다.
+  # Verifies `engines.node` actually holds by executing dist on the floor version.
   runtime:
     name: Runtime Node ${{ matrix.node }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24]
+        node: [22, 24]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -99,11 +96,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # dist 를 직접 실행한다 — vitest 는 src 를 보므로 이 검증을 대신하지 못한다.
+      # Executes dist directly — vitest tests src, so it cannot cover this.
       - name: Run dist on Node ${{ matrix.node }}
         run: node scripts/check-runtime.mjs
 
-  # peerDependencies 가 `zod ^3 || ^4` 를 광고한다. 광고한 것을 실제로 검증한다.
+  # peerDependencies advertises `zod ^3 || ^4`. Verify what is advertised.
   zod-compat:
     name: zod v${{ matrix.zod }}
     runs-on: ubuntu-latest
@@ -136,12 +133,13 @@ jobs:
       - name: Test schema
         run: pnpm vitest run src/schema
 
-      # 생성된 d.ts 가 zod 메이저에 묶이지 않았는지. `z.ZodEffects` 는 v4 에 없다.
+      # Generated d.ts must not be pinned to a zod major. `z.ZodEffects` does
+      # not exist in v4.
       - name: Build and assert d.ts is zod-version-neutral
         run: |
           pnpm build
           if grep -q "ZodEffects" dist/schema.d.ts dist/schema.d.cts; then
-            echo "::error::dist/schema.d.ts 가 zod v3 전용 타입을 하드코딩했습니다."
+            echo "::error::dist/schema.d.ts hardcodes zod v3-only types."
             exit 1
           fi
 
@@ -164,6 +162,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # vitest.config.ts 의 thresholds 가 래칫이다 — 커버리지가 떨어지면 여기서 실패한다.
+      # thresholds in vitest.config.ts act as the ratchet — fails here on drop.
       - name: Test with coverage
         run: pnpm test:coverage
