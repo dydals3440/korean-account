@@ -17,11 +17,11 @@ export default defineConfig({
       exclude: [
         "src/**/*.spec.ts",
         "src/**/*.bench.ts",
-        "src/_internal/fixtures.ts",
+        "src/**/*.fixtures.ts",
         // The registry is declarative data, not logic. Including it would drown
         // real logic coverage in data volume.
-        "src/data/**",
-        // Single-line re-export barrels have no executable statements.
+        "src/registry/**",
+        // Re-export barrels have no executable statements.
         "src/**/index.ts",
       ],
       // Ratchet: pinned just below measured coverage (97.83 / 94.73 / 96.92 / 98.33

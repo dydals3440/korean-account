@@ -1,33 +1,3 @@
-export { scoreToConfidence } from "./confidence";
-export {
-  ACCOUNT_KINDS,
-  CONFIDENCE_LEVELS,
-  INSTITUTION_CATEGORIES,
-  SUBJECT_CATEGORIES,
-} from "./constants";
-export type { CreateDetectorInput } from "./createDetector";
-export { createDetector } from "./createDetector";
-export { createPatternTemplate } from "./createPatternTemplate";
-export {
-  defineInstitution,
-  type InstitutionCode,
-  type InstitutionId,
-  type InstitutionIdByCategory,
-  institutionByCode,
-  institutionById,
-  institutions,
-  type RegisteredInstitution,
-} from "./data";
-export { defaultDetector, detectAccount } from "./detectAccount";
-export { detectBest } from "./detectBest";
-export { extractIdentifier } from "./extractIdentifier";
-export { extractSubject } from "./extractSubject";
-export { formatAccount } from "./formatAccount";
-export { normalize } from "./normalize";
-export type { PickInstitutionsFilter } from "./pickInstitutions";
-export { pickInstitutions, pickInstitutionsByIds } from "./pickInstitutions";
-export type { PickPatternFilter } from "./pickPattern";
-export { pickPattern } from "./pickPattern";
 export {
   defineBranchRule,
   kb11FirstDigit,
@@ -38,13 +8,43 @@ export {
   suhyup14BranchToCoop,
   suhyupCoop12BranchToBank,
   toss12First1719,
-} from "./rules";
+} from "./registry/rules";
+export { scoreToConfidence } from "./core/confidence";
+export type { CreateDetectorInput } from "./core/detector";
+export { createDetector } from "./core/detector";
+export { createPatternTemplate } from "./core/pattern-template";
+export { defaultDetector, detectAccount } from "./core/detect-account";
+export { detectBest } from "./core/detect-best";
+export { extractIdentifier } from "./core/extract-identifier";
+export { extractSubject } from "./core/extract-subject";
+export { formatAccount } from "./core/format-account";
+export { normalize } from "./core/normalize";
+export type { PickInstitutionsFilter } from "./core/pick-institutions";
+export { pickInstitutions, pickInstitutionsByIds } from "./core/pick-institutions";
+export type { PickPatternFilter } from "./core/pick-pattern";
+export { pickPattern } from "./core/pick-pattern";
+export { defineInstitution } from "./core/define-institution";
 export {
   accountKindLabels,
   defineSubject,
   normalizeSubject,
   subjectCategoryLabels,
-} from "./subjects";
+} from "./core/subjects";
+export {
+  type InstitutionCode,
+  type InstitutionId,
+  type InstitutionIdByCategory,
+  institutionByCode,
+  institutionById,
+  institutions,
+  type RegisteredInstitution,
+} from "./registry";
+export {
+  ACCOUNT_KINDS,
+  CONFIDENCE_LEVELS,
+  INSTITUTION_CATEGORIES,
+  SUBJECT_CATEGORIES,
+} from "./shared/constants";
 
 export type {
   AccountKind,

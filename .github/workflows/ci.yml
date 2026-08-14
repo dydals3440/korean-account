@@ -132,7 +132,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Test schema
-        run: pnpm vitest run src/schema
+        run: pnpm vitest run src/adapters/zod
 
       # Generated d.ts must not be pinned to a zod major. `z.ZodEffects` does
       # not exist in v4.

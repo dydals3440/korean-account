@@ -27,9 +27,9 @@ pnpm build          # tsdown / rolldown
 가장 흔한 기여 시나리오.
 
 1. PR 본문에 [금융결제원 CMS PDF](https://www.cmsedi.or.kr/cms/board/workdata/view/1026) 의 페이지·표 행 인용
-2. `src/data/<category>.ts` 에 institution / pattern 추가
+2. `src/registry/<category>/` 에 institution / pattern 추가
 3. `DOCS.md` 의 매핑 표 갱신
-4. `src/_internal/fixtures` 에 fixture 추가 (양·음성 케이스)
+4. `src/core/detect-account.fixtures` 에 fixture 추가 (양·음성 케이스)
 5. 회귀용 `.spec.ts` 추가
 
 > "관행적으로 통용되는 prefix" 는 PDF 가 enumerate 한 게 아니면 코어가 아닌 컨슈머 보강 영역. [§ 8. 설계 원칙](./README.md#8-설계-원칙) 참조.
@@ -37,7 +37,7 @@ pnpm build          # tsdown / rolldown
 ## 코드 규약
 
 - public 타입은 `src/types.ts` 에 모음, 전부 `readonly`
-- 새 외부 의존성 추가 금지 — `zod` 가 유일하며 `src/schema/*` 한정
+- 새 외부 의존성 추가 금지 — `zod` 가 유일하며 `src/adapters/zod/*` 한정
 - `node:` / DOM API 금지 (`platform: "neutral"`)
 
 ## 릴리스

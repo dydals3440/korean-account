@@ -1,32 +1,25 @@
-# actions/labeler v5 — PR 변경 경로·브랜치 기반 자동 라벨링.
+# actions/labeler v5 — path/branch based auto-labeling for PRs.
 
-"area: data":
+"area: registry":
   - changed-files:
       - any-glob-to-any-file:
-          - "src/data/**"
+          - "src/registry/**"
 
-"area: detector":
+"area: core":
   - changed-files:
       - any-glob-to-any-file:
-          - "src/createDetector/**"
-          - "src/detectAccount/**"
-          - "src/detectBest/**"
-          - "src/rules/**"
-          - "src/subjects/**"
-          - "src/confidence/**"
-          - "src/_internal/score*"
-          - "src/_internal/detectorIndex*"
+          - "src/core/**"
 
-"area: schema":
+"area: adapters":
   - changed-files:
       - any-glob-to-any-file:
-          - "src/schema/**"
+          - "src/adapters/**"
 
 "area: types":
   - changed-files:
       - any-glob-to-any-file:
           - "src/types.ts"
-          - "src/constants.ts"
+          - "src/shared/**"
 
 "area: build":
   - changed-files:
@@ -54,7 +47,7 @@ test:
   - changed-files:
       - any-glob-to-any-file:
           - "src/**/*.spec.ts"
-          - "src/_internal/fixtures.ts"
+          - "src/**/*.fixtures.ts"
           - "vitest.config.ts"
 
 dependencies:
