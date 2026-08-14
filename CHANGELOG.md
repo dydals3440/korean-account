@@ -83,7 +83,6 @@
   **후보 920건이 복구되고 사라진 후보는 0건** 입니다. `limit` 에 걸린 꼬리에서 동점 후보가 교체된 3건을 제외하면 상위 후보 순서는 그대로입니다.
 
   ### 함께 고친 것
-
   - `normalizeSubject` 가 `lifetime` kind 를 출금 차단으로 보지 않아, `subject.allowsWithdrawal` 은 `true` 인데 `capabilities.allowsWithdrawal` 은 `false` 인 모순이 났습니다. 이제 `computeCapabilities` 와 같은 정의를 씁니다. 기본 레지스트리에는 `lifetime` + `subjects` 를 동시에 가진 패턴이 없어 **출력 변화는 0건** 이며, 커스텀 기관에만 영향이 있습니다.
   - 아무 효과도 없던 죽은 선언 4개를 제거했습니다 — `subjects` 없는 `subjectPosition` 3개(HSBC, DB증권, 우리투자증권), `identifiers` 없는 `identifierPosition` 1개(수협 12자리). 런타임 동작은 그대로입니다.
   - 데이터 레지스트리 불변식 테스트 923개를 추가했습니다. 위 죽은 선언들은 이 테스트가 없어 아무 신호 없이 존재했습니다.
@@ -150,7 +149,6 @@
   `scoring` 은 기존 가중치 위에 얕게 병합되고, `checkDigitVerifiers` 는 기존 맵과 합쳐집니다 (같은 id 는 교체). 둘 다 생략하면 기존 설정이 그대로 이어집니다.
 
   ### 내부 정리 (공개 API 불변)
-
   - `_internal/` 이 사실상 공개 API 였습니다 — `kb11FirstDigit`, `toss12First1719` 등 8개 분기 룰과 `scoreToConfidence`, `normalizeSubject` 가 `_internal` 이라는 이름 아래 semver 로 얼어붙어 있었습니다. 파일을 `src/rules/`, `src/subjects/`, `src/confidence/` 로 옮겼습니다. **export 목록은 68개 그대로입니다** — 값은 `src/index.spec.ts` 스냅샷이, 타입은 `src/index.types.spec.ts` 가 강제합니다.
   - 아무도 import 하지 않으면서 테스트 픽스처를 re-export 하던 죽은 배럴 `src/_internal/index.ts` 를 삭제했습니다.
   - 구현·반환되지만 한 번도 호출되지 않던 내부 함수 `DetectorIndex.byLength()` 를 제거했습니다.
@@ -168,7 +166,6 @@
   기존 Node 22+ 사용자에게는 영향이 없습니다 (하한을 낮추기만 함).
 
   ### 저장소 하드닝
-
   - `.github/dependabot.yml` 신설 — npm · GitHub Actions 주간 갱신.
   - GitHub Actions 를 모두 커밋 SHA 로 고정했습니다. `changesets/action@v1` 은 태그가 아니라 force-push 가능한 브랜치를 가리키고 있었습니다.
   - `ci.yml` 에 `permissions: contents: read` 를 추가했습니다 (세 워크플로 중 유일하게 없었습니다).
