@@ -35,5 +35,32 @@
     "path": "dist/index.js",
     "import": "{ detect }",
     "limit": "13 kB"
+  },
+  {
+    "name": "korean-account/valibot (without the registry)",
+    "path": "dist/adapters/valibot/index.js",
+    "import": "*",
+    "ignore": ["valibot"],
+    "limit": "1500 B"
+  },
+  {
+    "name": "korean-account/yup (without the registry)",
+    "path": "dist/adapters/yup/index.js",
+    "import": "*",
+    "ignore": ["yup"],
+    "limit": "1250 B"
+  },
+  {
+    "name": "korean-account/arktype (without the registry)",
+    "path": "dist/adapters/arktype/index.js",
+    "import": "*",
+    "ignore": ["arktype"],
+    "limit": "1250 B"
+  },
+  {
+    "name": "korean-account/standard-schema (zero-dep)",
+    "path": "dist/adapters/standard-schema/index.js",
+    "import": "*",
+    "limit": "1900 B"
   }
 ]

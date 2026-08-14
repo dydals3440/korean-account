@@ -17,7 +17,14 @@ import { defineConfig } from "tsdown";
 // Regression guards: byte budgets in .size-limit.json + scripts/check-runtime.mjs.
 export default defineConfig([
   {
-    entry: ["src/index.ts", "src/adapters/zod/index.ts"],
+    entry: [
+      "src/index.ts",
+      "src/adapters/zod/index.ts",
+      "src/adapters/valibot/index.ts",
+      "src/adapters/yup/index.ts",
+      "src/adapters/arktype/index.ts",
+      "src/adapters/standard-schema/index.ts",
+    ],
     format: ["esm", "cjs"],
     dts: false,
     sourcemap: true,
@@ -28,12 +35,16 @@ export default defineConfig([
     platform: "neutral",
     // Paired with `engines.node`. Without it, source-level syntax leaks through.
     target: "es2020",
-    deps: { neverBundle: ["zod"] },
+    deps: { neverBundle: ["zod", "valibot", "yup", "arktype"] },
   },
   {
     entry: {
       index: "src/index.ts",
       zod: "src/adapters/zod/index.ts",
+      valibot: "src/adapters/valibot/index.ts",
+      yup: "src/adapters/yup/index.ts",
+      arktype: "src/adapters/arktype/index.ts",
+      "standard-schema": "src/adapters/standard-schema/index.ts",
     },
     outDir: "dist-dts",
     format: ["esm", "cjs"],
@@ -42,6 +53,6 @@ export default defineConfig([
     dts: { emitDtsOnly: true, sourcemap: false },
     clean: true,
     platform: "neutral",
-    deps: { neverBundle: ["zod"] },
+    deps: { neverBundle: ["zod", "valibot", "yup", "arktype"] },
   },
 ]);

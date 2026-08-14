@@ -85,6 +85,18 @@ export const ADAPTER_CONTRACT = {
         capabilities: { allowsWithdrawal: true, virtual: false },
       },
       { ...baseDetection, subject: { category: "savings" } },
+      { ...baseDetection, subject: "not-an-object" },
+      { ...baseDetection, subject: { code: 110, category: "savings" } },
+      { ...baseDetection, subject: { code: "110", category: "savings", label: 123 } },
+      {
+        ...baseDetection,
+        capabilities: { allowsWithdrawal: "yes", virtual: false, validatedCheckDigit: null },
+      },
+      {
+        ...baseDetection,
+        capabilities: { allowsWithdrawal: true, virtual: 1, validatedCheckDigit: null },
+      },
+      { ...baseDetection, formatted: 42 },
       null,
       "not-an-object",
       undefined,

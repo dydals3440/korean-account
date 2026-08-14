@@ -47,6 +47,18 @@
     "*": {
       "zod": [
         "./dist/zod.d.ts"
+      ],
+      "valibot": [
+        "./dist/valibot.d.ts"
+      ],
+      "yup": [
+        "./dist/yup.d.ts"
+      ],
+      "arktype": [
+        "./dist/arktype.d.ts"
+      ],
+      "standard-schema": [
+        "./dist/standard-schema.d.ts"
       ]
     }
   },
@@ -68,6 +80,42 @@
       "import": "./dist/adapters/zod/index.js",
       "require": "./dist/adapters/zod/index.cjs",
       "default": "./dist/adapters/zod/index.js"
+    },
+    "./valibot": {
+      "types": {
+        "import": "./dist/valibot.d.ts",
+        "require": "./dist/valibot.d.cts"
+      },
+      "import": "./dist/adapters/valibot/index.js",
+      "require": "./dist/adapters/valibot/index.cjs",
+      "default": "./dist/adapters/valibot/index.js"
+    },
+    "./yup": {
+      "types": {
+        "import": "./dist/yup.d.ts",
+        "require": "./dist/yup.d.cts"
+      },
+      "import": "./dist/adapters/yup/index.js",
+      "require": "./dist/adapters/yup/index.cjs",
+      "default": "./dist/adapters/yup/index.js"
+    },
+    "./arktype": {
+      "types": {
+        "import": "./dist/arktype.d.ts",
+        "require": "./dist/arktype.d.cts"
+      },
+      "import": "./dist/adapters/arktype/index.js",
+      "require": "./dist/adapters/arktype/index.cjs",
+      "default": "./dist/adapters/arktype/index.js"
+    },
+    "./standard-schema": {
+      "types": {
+        "import": "./dist/standard-schema.d.ts",
+        "require": "./dist/standard-schema.d.cts"
+      },
+      "import": "./dist/adapters/standard-schema/index.js",
+      "require": "./dist/adapters/standard-schema/index.cjs",
+      "default": "./dist/adapters/standard-schema/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -96,7 +144,8 @@
     "version": "changeset version",
     "release": "changeset publish",
     "size": "size-limit",
-    "check:runtime": "node scripts/check-runtime.mjs"
+    "check:runtime": "node scripts/check-runtime.mjs",
+    "test:adapters": "vitest run src/adapters"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
@@ -104,21 +153,36 @@
     "@size-limit/preset-small-lib": "^13.0.3",
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.10",
+    "arktype": "^2.2.3",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
     "publint": "^0.3.23",
     "size-limit": "^13.0.3",
     "tsdown": "^0.22.14",
     "typescript": "^7.0.2",
+    "valibot": "^1.4.2",
     "vite": "^8.2.1",
     "vitest": "^4.1.10",
+    "yup": "^1.7.1",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
+    "arktype": "^2.1.0",
+    "valibot": "^1.0.0",
+    "yup": "^1.4.0",
     "zod": "^3.23.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {
+      "optional": true
+    },
+    "valibot": {
+      "optional": true
+    },
+    "yup": {
+      "optional": true
+    },
+    "arktype": {
       "optional": true
     }
   },
