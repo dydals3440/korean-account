@@ -1,8 +1,9 @@
 /**
- * 등록된 institution id — 팩토리 호출 없는 순수 리터럴.
+ * Registered institution ids as pure literals — no factory calls.
  *
- * `korean-account/schema` 가 id 목록 하나 때문에 94 KB 레지스트리를 끌고 오지 않도록
- * `institutions` 와 분리해 둔다. 동기화는 `institutionIds.types.spec.ts` 가 강제한다.
+ * Kept separate from `institutions` so the zod adapter can validate ids
+ * without dragging the full registry into the bundle. Kept in sync by
+ * `institution-ids.types.spec.ts` (order-sensitive).
  */
 export const INSTITUTION_IDS = [
   // banks (25)

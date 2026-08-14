@@ -4,15 +4,16 @@ import type { InstitutionId } from "../../registry";
 import { INSTITUTION_IDS } from "../../registry/institution-ids";
 import type { AccountKind, Confidence, SubjectCategory } from "../../types";
 
-// `institutions` 가 아니라 id 리터럴 배열을 참조한다 — 이 서브엔트리만 쓰는
-// 소비자에게 94 KB 레지스트리가 딸려 가지 않도록.
+// References the pure id-literal array, not `institutions`, so consumers of
+// this sub-entry alone never pull in the full registry.
 const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
 
-// 모든 export 에 `ZodType<T>` 를 명시한다. 없으면 생성된 d.ts 가 `z.ZodEffects` 같은
-// zod v3 전용 타입을 하드코딩해, v4 소비자가 `skipLibCheck: true` 아래서 조용히
-// 스키마 타입을 잃는다. CI 의 zod 매트릭스가 두 메이저를 모두 컴파일한다.
+// Every export is annotated `ZodType<T>`. Without it, the generated d.ts
+// hardcodes zod v3-only types such as `z.ZodEffects`, and v4 consumers under
+// `skipLibCheck: true` silently lose the schema types. The zod CI matrix
+// compiles both majors.
 
-/** 직렬화된 detection 결과. `detectionSchema` 의 출력 타입. */
+/** Serialized detection result — the output type of `detectionSchema`. */
 export interface DetectionPayload {
   readonly institutionId: InstitutionId;
   readonly kind: AccountKind;
@@ -32,10 +33,10 @@ export interface DetectionPayload {
 }
 
 /**
- * 한국 계좌번호 raw 문자열 스키마.
+ * Schema for a raw Korean account-number string.
  *
- * - 숫자/하이픈/공백만 허용
- * - 정규화된 숫자 길이 6~20
+ * - digits, hyphens, and spaces only
+ * - 6–20 digits after normalization
  */
 export const accountSchema: ZodType<string> = z
   .string()
@@ -50,24 +51,24 @@ export const accountSchema: ZodType<string> = z
   });
 
 /**
- * 레지스트리에 등록된 institution id만 허용하는 스키마.
+ * Schema accepting only registered institution ids.
  *
- * `z.custom` 을 쓴다. v3 의 `.refine((v): v is InstitutionId => …)` 는 타입 서술로
- * 출력을 좁히지만 v4 의 `.refine` 은 좁히지 않아, 같은 코드가 두 메이저에서 다른
- * 타입을 낸다.
+ * Uses `z.custom`: v3's `.refine((v): v is InstitutionId => …)` narrows the
+ * output via the type predicate but v4's `.refine` does not, so the same code
+ * would produce different types across majors.
  */
 export const institutionIdSchema: ZodType<InstitutionId> = z.custom<InstitutionId>(
   (v) => typeof v === "string" && ID_SET.has(v),
   { message: "지원하지 않는 금융기관입니다." },
 );
 
-/** 계좌 종류 스키마. */
+/** Account kind schema. */
 export const accountKindSchema: ZodType<AccountKind> = z.enum(ACCOUNT_KINDS);
 
-/** 계정과목 카테고리 스키마. */
+/** Subject category schema. */
 export const subjectCategorySchema: ZodType<SubjectCategory> = z.enum(SUBJECT_CATEGORIES);
 
-/** 직렬화된 detection 결과 스키마. */
+/** Serialized detection result schema. */
 export const detectionSchema: ZodType<DetectionPayload> = z.object({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,

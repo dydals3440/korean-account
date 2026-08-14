@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPatternTemplate } from "./pattern-template";
+import { patternTemplate } from "./pattern-template";
 import type { Institution } from "../types";
 import { createDetector } from "./detector";
 
@@ -13,7 +13,7 @@ const SHINHAN: Institution = {
   priority: 100,
   patterns: [
     {
-      template: createPatternTemplate("XXX-XXX-XXXXXX"),
+      template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["110"],
@@ -31,7 +31,7 @@ const KAKAO: Institution = {
   priority: 90,
   patterns: [
     {
-      template: createPatternTemplate("XXXX-XX-XXXXXXX"),
+      template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["3333"],
@@ -43,7 +43,7 @@ describe("createDetector", () => {
   describe("기본 동작", () => {
     test("institutions 없이 (빈 배열) 생성 가능하고 모든 입력에 빈 결과를 반환한다", () => {
       // Given
-      const detector = createDetector({ institutions: [] });
+      const detector = createDetector([]);
 
       // When
       const result = detector.detect("110-436-387740");
@@ -54,7 +54,7 @@ describe("createDetector", () => {
 
     test("빈 입력은 빈 결과를 반환한다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] });
+      const detector = createDetector([SHINHAN]);
 
       // When
       const empty = detector.detect("");
@@ -67,7 +67,7 @@ describe("createDetector", () => {
 
     test("매칭되는 institution을 점수 내림차순으로 반환한다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("110-436-387740");
@@ -80,7 +80,7 @@ describe("createDetector", () => {
 
     test("결과에 capabilities 필드가 포함된다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] });
+      const detector = createDetector([SHINHAN]);
 
       // When
       const [r] = detector.detect("110-436-387740");
@@ -97,7 +97,7 @@ describe("createDetector", () => {
   describe("옵션 필터", () => {
     test("minScore — 미만 결과 제외", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] });
+      const detector = createDetector([SHINHAN]);
 
       // When
       const results = detector.detect("110-436-387740", { minScore: 100 });
@@ -108,7 +108,7 @@ describe("createDetector", () => {
 
     test("minScore = 0 — 모든 매칭 후보 통과", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] });
+      const detector = createDetector([SHINHAN]);
 
       // When
       const results = detector.detect("110-436-387740", { minScore: 0 });
@@ -119,7 +119,7 @@ describe("createDetector", () => {
 
     test("limit — 결과 개수 제한 (limit=1)", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("110-436-387740", { limit: 1 });
@@ -130,7 +130,7 @@ describe("createDetector", () => {
 
     test("limit이 결과 수보다 크면 가능한 만큼만 반환한다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] });
+      const detector = createDetector([SHINHAN]);
 
       // When
       const results = detector.detect("110-436-387740", { limit: 100 });
@@ -142,7 +142,7 @@ describe("createDetector", () => {
 
     test("categories — 카테고리 일치만", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("3333-12-3456789", {
@@ -155,7 +155,7 @@ describe("createDetector", () => {
 
     test("kinds — kind 일치만", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("110-436-387740", { kinds: ["old"] });
@@ -166,7 +166,7 @@ describe("createDetector", () => {
 
     test("include + exclude — exclude가 include를 덮어쓴다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("110-436-387740", {
@@ -180,7 +180,7 @@ describe("createDetector", () => {
 
     test("categories + kinds 동시 필터", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN, KAKAO] });
+      const detector = createDetector([SHINHAN, KAKAO]);
 
       // When
       const results = detector.detect("110-436-387740", {
@@ -200,7 +200,7 @@ describe("createDetector", () => {
       const a: Institution = { ...SHINHAN, id: "a", priority: 10 };
       const b: Institution = { ...SHINHAN, id: "b", priority: 50 };
       const c: Institution = { ...SHINHAN, id: "c", priority: 30 };
-      const detector = createDetector({ institutions: [a, b, c] });
+      const detector = createDetector([a, b, c]);
 
       // When
       const results = detector.detect("110-436-387740");
@@ -214,7 +214,7 @@ describe("createDetector", () => {
 describe("detector.extend", () => {
   test("새 institution이 추가된 detector를 반환한다", () => {
     // Given
-    const base = createDetector({ institutions: [SHINHAN] });
+    const base = createDetector([SHINHAN]);
 
     // When
     const extended = base.extend({ institutions: [KAKAO] });
@@ -226,7 +226,7 @@ describe("detector.extend", () => {
 
   test("원본 detector는 변경되지 않는다 (immutability)", () => {
     // Given
-    const base = createDetector({ institutions: [SHINHAN] });
+    const base = createDetector([SHINHAN]);
 
     // When
     base.extend({ institutions: [KAKAO] });
@@ -237,8 +237,7 @@ describe("detector.extend", () => {
 
   test("globalRules 도 누적된다", () => {
     // Given
-    const base = createDetector({
-      institutions: [SHINHAN],
+    const base = createDetector([SHINHAN], {
       globalRules: [() => true],
       scoring: { globalRule: 5 },
     });
@@ -256,7 +255,7 @@ describe("detector.extend", () => {
 describe("detector.remove", () => {
   test("id로 institution을 제거한다", () => {
     // Given
-    const base = createDetector({ institutions: [SHINHAN, KAKAO] });
+    const base = createDetector([SHINHAN, KAKAO]);
 
     // When
     const trimmed = base.remove("kakao");
@@ -267,7 +266,7 @@ describe("detector.remove", () => {
 
   test("predicate로 institution을 제거한다", () => {
     // Given
-    const base = createDetector({ institutions: [SHINHAN, KAKAO] });
+    const base = createDetector([SHINHAN, KAKAO]);
 
     // When
     const trimmed = base.remove((i) => i.priority === 90);
@@ -278,7 +277,7 @@ describe("detector.remove", () => {
 
   test("원본은 변경되지 않는다 (immutability)", () => {
     // Given
-    const base = createDetector({ institutions: [SHINHAN, KAKAO] });
+    const base = createDetector([SHINHAN, KAKAO]);
 
     // When
     base.remove("kakao");
@@ -291,8 +290,7 @@ describe("detector.remove", () => {
 describe("scoring override", () => {
   test("identifierMatch override가 적용된다", () => {
     // Given
-    const detector = createDetector({
-      institutions: [SHINHAN],
+    const detector = createDetector([SHINHAN], {
       scoring: { identifierMatch: 0 },
     });
 
@@ -305,8 +303,7 @@ describe("scoring override", () => {
 
   test("kindNewBonus override로 신계좌 가산점을 부여한다", () => {
     // Given
-    const detector = createDetector({
-      institutions: [SHINHAN],
+    const detector = createDetector([SHINHAN], {
       scoring: { kindNewBonus: 1 },
     });
 
@@ -320,13 +317,13 @@ describe("scoring override", () => {
   describe("extend — 같은 id 가 들어오면 기존 institution 을 교체한다", () => {
     test("동일 id 로 extend 하면 incoming 가 기존을 replace 한다", () => {
       // Given
-      const baseline = createDetector({ institutions: [SHINHAN] });
+      const baseline = createDetector([SHINHAN]);
       const replacement: Institution = {
         ...SHINHAN,
         nameKo: "신한은행 (교체본)",
         patterns: [
           {
-            template: createPatternTemplate("XXX-XXX-XXXXXX"),
+            template: patternTemplate("XXX-XXX-XXXXXX"),
             kind: "new",
             identifierPosition: { start: 0, length: 3 },
             identifiers: ["999"], // 일부러 다른 prefix
@@ -345,7 +342,7 @@ describe("scoring override", () => {
 
     test("동일 id 로 extend 후 institutions 길이는 1 (중복 없음)", () => {
       // Given
-      const baseline = createDetector({ institutions: [SHINHAN] });
+      const baseline = createDetector([SHINHAN]);
       const replacement: Institution = { ...SHINHAN, nameKo: "교체본" };
 
       // When
@@ -358,7 +355,7 @@ describe("scoring override", () => {
 
     test("새 id 로 extend 하면 기존 institutions 와 병합된다", () => {
       // Given
-      const detector = createDetector({ institutions: [SHINHAN] }).extend({
+      const detector = createDetector([SHINHAN]).extend({
         institutions: [KAKAO],
       });
 
@@ -373,7 +370,7 @@ describe("scoring override", () => {
 
     test("extend 는 immutable — 원본 detector 의 institutions 는 보존된다", () => {
       // Given
-      const baseline = createDetector({ institutions: [SHINHAN] });
+      const baseline = createDetector([SHINHAN]);
 
       // When
       baseline.extend({ institutions: [KAKAO] });

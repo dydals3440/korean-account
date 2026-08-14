@@ -34,7 +34,7 @@ detectBest("110-436-387740");
 ```
 
 - **Faithful to the PDF** — a registry of 57 institutions transcribed row-by-row from the KFTC CMS document
-- **Strict TypeScript** — `institutionById("shinhan").code` narrows to the literal `"088"`
+- **Strict TypeScript** — `getInstitution("shinhan").code` narrows to the literal `"088"`
 - **Zero runtime dependencies** — `zod` is an optional peer dependency, required only for `korean-account/schema`
 - **Universal** — Node 22.12+ · Bun · Deno · browsers · ESM and CJS
 
@@ -84,9 +84,9 @@ result?.confidence; // "high"
 ### Multiple candidates with filters
 
 ```ts
-import { detectAccount } from "korean-account";
+import { detect } from "korean-account";
 
-detectAccount("110-436-387740", {
+detect("110-436-387740", {
   categories: ["bank"], // banks only
   exclude: ["hsbc"], // minus HSBC
   limit: 3,
@@ -101,7 +101,7 @@ Results are sorted by score (descending), then by institution `priority`, then b
 | You want                            | Use                               |
 | ----------------------------------- | --------------------------------- |
 | One answer                          | `detectBest(input)`               |
-| Ranked candidates                   | `detectAccount(input, options)`   |
+| Ranked candidates                   | `detect(input, options)`          |
 | Your own registry / rules / weights | `createDetector({ ... })`         |
 | Add to the default registry         | `defaultDetector.extend({ ... })` |
 | Form validation                     | `korean-account/schema`           |
@@ -111,10 +111,10 @@ Results are sorted by score (descending), then by institution `priority`, then b
 57 institutions: 25 banks, 7 non-banks, 24 securities firms, 1 clearing house. See the [Korean README](./README.md#4-지원-금융기관) for the full table with codes, names, and digit counts, or query it at runtime:
 
 ```ts
-import { institutions, pickInstitutions } from "korean-account";
+import { institutions, searchInstitutions } from "korean-account";
 
 institutions.length; // 57
-pickInstitutions({ categories: ["bank"] }); // narrowed to bank institutions
+searchInstitutions({ categories: ["bank"] }); // narrowed to bank institutions
 ```
 
 If an institution or pattern is not in the PDF, it is not in the core registry. Add it yourself with `defineInstitution` + `extend` — see [Extending](#7-extending).
@@ -124,9 +124,9 @@ If an institution or pattern is not in the PDF, it is not in the core registry. 
 ### 5.1 Detection
 
 ```ts
-detectAccount(input: string, options?: DetectOptions): readonly DetectionResult[]
+detect(input: string, options?: DetectOptions): readonly DetectionResult[]
 detectBest(input: string, options?: DetectOptions): DetectionResult | null
-createDetector(input: CreateDetectorInput): Detector
+createDetector(input: CreateDetectorOptions): Detector
 defaultDetector: Detector
 ```
 
@@ -159,9 +159,9 @@ interface DetectionResult {
 ### 5.2 Lookup
 
 ```ts
-institutionById("shinhan"); // narrowed: code is the literal "088"
-institutionByCode("088");
-institutionByCode("078"); // alias code → widened to Institution | null
+getInstitution("shinhan"); // narrowed: code is the literal "088"
+getInstitution("088");
+getInstitution("078"); // alias code → widened to Institution | null
 ```
 
 Note: `institution.code` is the **CMS** code. Some institutions carry a different KFTC common bank code — read `institution.commonCode ?? institution.code` if your backend uses the standard code. (`hana` is `code: "005"` but `commonCode: "081"`.)
@@ -169,16 +169,16 @@ Note: `institution.code` is the **CMS** code. Some institutions carry a differen
 ### 5.3 Selectors
 
 ```ts
-pickInstitutions({ categories: ["bank"], exclude: ["hsbc"] });
-pickInstitutionsByIds({ include: ["kb", "shinhan", "hana"] });
+searchInstitutions({ categories: ["bank"], exclude: ["hsbc"] });
+searchInstitutions({ include: ["kb", "shinhan", "hana"] });
 pickPattern("shinhan", { kind: "new" });
 ```
 
 ### 5.4 Normalize · format · extract
 
 ```ts
-normalize("110-436-387740"); // "110436387740"
-formatAccount("110436387740", createPatternTemplate("XXX-XXX-XXXXXX"));
+normalizeAccount("110-436-387740"); // "110436387740"
+formatAccount("110436387740", patternTemplate("XXX-XXX-XXXXXX"));
 extractIdentifier(digits, pattern);
 extractSubject(digits, pattern);
 scoreToConfidence(9); // "high"
@@ -208,14 +208,14 @@ This subpath does **not** pull in the institution registry — importing it cost
 
 ## 6. Exported types
 
-`AccountKind`, `AccountPattern`, `AdditionalRule`, `BranchRule`, `BranchRuleResult`, `CheckDigitVerifier`, `Confidence`, `CreateDetectorInput`, `DetectOptions`, `DetectionCapabilities`, `DetectionResult`, `Detector`, `GlobalRule`, `Institution`, `InstitutionCategory`, `InstitutionCode`, `InstitutionId`, `InstitutionIdByCategory`, `InstitutionIdInput`, `PatternTemplate`, `PatternToken`, `PickInstitutionsFilter`, `PickPatternFilter`, `Position`, `RegisteredInstitution`, `ScoringWeights`, `Subject`, `SubjectCategory` — plus `DetectionPayload` from `korean-account/schema`.
+`AccountKind`, `AccountPattern`, `AdditionalRule`, `BranchRule`, `BranchRuleResult`, `CheckDigitVerifier`, `Confidence`, `CreateDetectorOptions`, `DetectOptions`, `DetectionCapabilities`, `DetectionResult`, `Detector`, `GlobalRule`, `Institution`, `InstitutionCategory`, `InstitutionCode`, `InstitutionId`, `InstitutionIdByCategory`, `InstitutionIdInput`, `PatternTemplate`, `PatternToken`, `SearchInstitutionsFilter`, `PickPatternFilter`, `Position`, `RegisteredInstitution`, `ScoringWeights`, `Subject`, `SubjectCategory` — plus `DetectionPayload` from `korean-account/schema`.
 
 ## 7. Extending
 
 Detectors are immutable. `extend` and `remove` return new instances.
 
 ```ts
-import { createPatternTemplate, defaultDetector, defineInstitution } from "korean-account";
+import { patternTemplate, defaultDetector, defineInstitution } from "korean-account";
 
 const myBank = defineInstitution({
   id: "my-bank",
@@ -226,7 +226,7 @@ const myBank = defineInstitution({
   aliases: [],
   patterns: [
     {
-      template: createPatternTemplate("XXX-XXXXXXXXXXX"),
+      template: patternTemplate("XXX-XXXXXXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["999"],
@@ -278,7 +278,7 @@ See [DOCS.md → Appendix D](./DOCS.md) for the full extension mechanics.
 
 ## 10. Performance
 
-About **12–20 µs** per `detectAccount()` call on an M-series Mac. Internally an index maps input length to candidate institutions, cutting roughly 170 pattern evaluations down to 10–15.
+About **12–20 µs** per `detect()` call on an M-series Mac. Internally an index maps input length to candidate institutions, cutting roughly 170 pattern evaluations down to 10–15.
 
 ## 11. Contributing
 

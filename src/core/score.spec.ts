@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPatternTemplate } from "./pattern-template";
+import { patternTemplate } from "./pattern-template";
 import type { Institution } from "../types";
 import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
 
@@ -27,7 +27,7 @@ describe("scoreInstitution", () => {
     test("빈 digits면 0점과 디지트 그대로 formatted를 반환한다", () => {
       // Given
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
 
       // When
@@ -57,7 +57,7 @@ describe("scoreInstitution", () => {
       // Given
       const digits = "123456789012";
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
 
       // When
@@ -71,7 +71,7 @@ describe("scoreInstitution", () => {
       // Given
       const digits = "123456789012";
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "new" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "new" },
       ]);
 
       // When
@@ -85,7 +85,7 @@ describe("scoreInstitution", () => {
       // Given
       const digits = "12345678901";
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
 
       // When
@@ -99,7 +99,7 @@ describe("scoreInstitution", () => {
       // Given
       const digits = "1234567890123";
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
 
       // When
@@ -112,7 +112,7 @@ describe("scoreInstitution", () => {
     test("자릿수 차이가 2 이상이면 0점", () => {
       // Given
       const institution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
 
       // When
@@ -131,7 +131,7 @@ describe("scoreInstitution", () => {
       const digits = "110436387740";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           identifierPosition: { start: 0, length: 3 },
           identifiers: ["110"],
@@ -150,7 +150,7 @@ describe("scoreInstitution", () => {
       const digits = "12345604789012";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXXXXX-XX-XXXXXX"),
+          template: patternTemplate("XXXXXX-XX-XXXXXX"),
           kind: "new",
           identifierPosition: { start: 6, length: 2 },
           identifiers: ["04"],
@@ -169,7 +169,7 @@ describe("scoreInstitution", () => {
       const digits = "550436387740";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           identifierPosition: { start: 0, length: 3 },
           identifierRange: { from: 500, to: 599 },
@@ -188,7 +188,7 @@ describe("scoreInstitution", () => {
       const digits = "110";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "new",
           identifierPosition: { start: 0, length: 3 },
           identifiers: ["110"],
@@ -209,7 +209,7 @@ describe("scoreInstitution", () => {
       const digits = "12345604789012";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXXXXX-XX-XXXXXX"),
+          template: patternTemplate("XXXXXX-XX-XXXXXX"),
           kind: "new",
           subjectPosition: { start: 6, length: 2 },
           subjects: [{ code: "04", category: "free-savings" }],
@@ -229,7 +229,7 @@ describe("scoreInstitution", () => {
       const digits = "12345699789012";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXXXXX-XX-XXXXXX"),
+          template: patternTemplate("XXXXXX-XX-XXXXXX"),
           kind: "old",
           subjectPosition: { start: 6, length: 2 },
           subjects: [{ code: "04", category: "free-savings" }],
@@ -249,7 +249,7 @@ describe("scoreInstitution", () => {
       const digits = "12345604";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXXXXX-XX-XXXXXX"),
+          template: patternTemplate("XXXXXX-XX-XXXXXX"),
           kind: "new",
           subjectPosition: { start: 6, length: 2 },
           subjects: [{ code: "04", category: "free-savings" }],
@@ -271,7 +271,7 @@ describe("scoreInstitution", () => {
       const digits = "97202762901013";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XX-XXXXXX"),
+          template: patternTemplate("XXX-XX-XXXXXX"),
           kind: "old",
           identifierPosition: { start: 3, length: 2 },
           identifiers: ["02"],
@@ -290,7 +290,7 @@ describe("scoreInstitution", () => {
       const digits = "110";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "new",
           identifierPosition: { start: 0, length: 3 },
           identifiers: ["110"],
@@ -311,7 +311,7 @@ describe("scoreInstitution", () => {
       const digits = "110436387740";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           additionalRules: [
             (d) => d.startsWith("1"),
@@ -335,7 +335,7 @@ describe("scoreInstitution", () => {
       const digits = "110436387740";
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           additionalRules: [(d) => d.startsWith("999")],
         },
@@ -354,7 +354,7 @@ describe("scoreInstitution", () => {
       const digits = "11"; // expected 12 보다 10자리 짧음
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           additionalRules: [(d) => d.startsWith("999")],
         },
@@ -373,7 +373,7 @@ describe("scoreInstitution", () => {
       // Given
       const institution = makeInstitution([
         {
-          template: createPatternTemplate("XXX-XXX-XXXXXX"),
+          template: patternTemplate("XXX-XXX-XXXXXX"),
           kind: "old",
           identifierPosition: { start: 0, length: 3 },
           identifiers: ["110"],
@@ -397,10 +397,10 @@ describe("scoreInstitution", () => {
       // Given
       const digits = "123456789012";
       const newInstitution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "new" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "new" },
       ]);
       const oldInstitution = makeInstitution([
-        { template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
+        { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
       const weights = { ...W, kindNewBonus: 2 };
 

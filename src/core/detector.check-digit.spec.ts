@@ -6,7 +6,7 @@ import { createDetector } from "./detector";
 describe("createDetector — checkDigitVerifiers framework", () => {
   test("verifier 미등록 시 capabilities.validatedCheckDigit 가 null", () => {
     // Given
-    const detector = createDetector({ institutions });
+    const detector = createDetector(institutions);
 
     // When
     const [r] = detector.detect("110-436-387740");
@@ -18,8 +18,7 @@ describe("createDetector — checkDigitVerifiers framework", () => {
   test("verifier 등록 + 통과 시 true", () => {
     // Given
     const alwaysTrue: CheckDigitVerifier = () => true;
-    const detector = createDetector({
-      institutions,
+    const detector = createDetector(institutions, {
       checkDigitVerifiers: { shinhan: alwaysTrue },
     });
 
@@ -34,8 +33,7 @@ describe("createDetector — checkDigitVerifiers framework", () => {
   test("verifier 등록 + 실패 시 false", () => {
     // Given
     const alwaysFalse: CheckDigitVerifier = () => false;
-    const detector = createDetector({
-      institutions,
+    const detector = createDetector(institutions, {
       checkDigitVerifiers: { shinhan: alwaysFalse },
     });
 
@@ -50,8 +48,7 @@ describe("createDetector — checkDigitVerifiers framework", () => {
     // Given — 광주 12d 과목 731 패턴은 validatesCheckDigit: false 명시.
     // 동일 정책의 수협 12d 신계좌 (validatesCheckDigit: false) 도 테스트 가능.
     const alwaysTrue: CheckDigitVerifier = () => true;
-    const detector = createDetector({
-      institutions,
+    const detector = createDetector(institutions, {
       checkDigitVerifiers: { suhyup: alwaysTrue },
     });
 
@@ -69,8 +66,7 @@ describe("createDetector — checkDigitVerifiers framework", () => {
   test("verifier 는 digits (정규화된 입력) 를 받는다", () => {
     // Given
     let received: string | null = null;
-    const detector = createDetector({
-      institutions,
+    const detector = createDetector(institutions, {
       checkDigitVerifiers: {
         shinhan: (digits) => {
           received = digits;
@@ -89,8 +85,7 @@ describe("createDetector — checkDigitVerifiers framework", () => {
   test("extend / remove 후에도 verifier 가 전파된다", () => {
     // Given
     const verifier: CheckDigitVerifier = () => true;
-    const detector = createDetector({
-      institutions,
+    const detector = createDetector(institutions, {
       checkDigitVerifiers: { shinhan: verifier },
     });
 

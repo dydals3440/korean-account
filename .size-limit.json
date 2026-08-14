@@ -1,14 +1,14 @@
 [
   {
-    "name": "normalize (순수 헬퍼 하나)",
+    "name": "normalizeAccount (single pure helper)",
     "path": "dist/index.js",
-    "import": "{ normalize }",
+    "import": "{ normalizeAccount }",
     "limit": "500 B"
   },
   {
-    "name": "formatAccount + createPatternTemplate",
+    "name": "formatAccount + patternTemplate",
     "path": "dist/index.js",
-    "import": "{ formatAccount, createPatternTemplate }",
+    "import": "{ formatAccount, patternTemplate }",
     "limit": "700 B"
   },
   {
@@ -18,22 +18,22 @@
     "limit": "300 B"
   },
   {
-    "name": "순수 유틸 5종",
+    "name": "five pure utilities",
     "path": "dist/index.js",
-    "import": "{ normalize, formatAccount, createPatternTemplate, scoreToConfidence, defineSubject }",
+    "import": "{ normalizeAccount, formatAccount, patternTemplate, scoreToConfidence, defineSubject }",
     "limit": "900 B"
   },
   {
-    "name": "korean-account/schema (레지스트리 없이)",
+    "name": "korean-account/schema (without the registry)",
     "path": "dist/schema.js",
     "import": "*",
     "ignore": ["zod"],
     "limit": "1500 B"
   },
   {
-    "name": "detectAccount (레지스트리 포함 — 대조군)",
+    "name": "detect (full registry — control)",
     "path": "dist/index.js",
-    "import": "{ detectAccount }",
+    "import": "{ detect }",
     "limit": "13 kB"
   }
 ]

@@ -2,21 +2,18 @@ import type { Institution } from "../types";
 import { templateLength } from "./template-length";
 
 /**
- * detect 의 후보 institution 을 빠르게 좁히는 인덱스.
+ * Pre-built length → institution[] index that narrows detect() candidates.
  *
- * 입력 digits 의 길이에 부합하는 패턴을 가진 institution 만 골라 평가하도록
- * 미리 length → institution[] 매핑을 만든다. 60개 × 평균 3패턴 ≈ 180회
- * scorePattern 호출이 평균 ~10회 수준으로 감소.
+ * Only institutions with a pattern matching the input's digit count get
+ * evaluated, cutting ~180 scorePattern calls (57 institutions × ~3 patterns)
+ * down to ~10 on average.
  *
- * institution 한 곳에 다양한 자릿수 패턴이 공존할 수 있으므로 같은
- * institution 이 여러 length 버킷에 등장할 수 있다. 그러나 detect 내부에선
- * `Set` 으로 중복을 제거해 한 번만 평가한다.
- *
- * length 가 템플릿보다 ±1 인 부분 입력에 대비해, `near` (length ± 1) 도
- * 함께 묶어 둔다.
+ * An institution with patterns of several lengths appears in several buckets;
+ * detect() deduplicates via a Set so each is evaluated once. Buckets also
+ * cover length ± 1 to keep partial inputs matching while the user types.
  */
 export interface DetectorIndex<I extends Institution> {
-  /** length-1 / length+1 까지 포함 (부분 입력 매칭용). */
+  /** Institutions whose pattern length is within ±1 of `length`. */
   byLengthNear(length: number): readonly I[];
 }
 

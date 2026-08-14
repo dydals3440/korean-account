@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalize } from "./normalize";
+import { normalizeAccount } from "./normalize-account";
 
 /**
  * 테스트용 wrapper — runtime guard 동작을 검증하기 위해 비-string 입력을
@@ -7,10 +7,10 @@ import { normalize } from "./normalize";
  */
 function normalizeUnknown(input: unknown): string {
   // @ts-expect-error — intentionally pass non-string to test runtime guard
-  return normalize(input);
+  return normalizeAccount(input);
 }
 
-describe("normalize", () => {
+describe("normalizeAccount", () => {
   describe("숫자만 추출한다", () => {
     test.each([
       { input: "110-436-387740", expected: "110436387740" },
@@ -27,7 +27,7 @@ describe("normalize", () => {
       const raw = input;
 
       // When
-      const result = normalize(raw);
+      const result = normalizeAccount(raw);
 
       // Then
       expect(result).toBe(expected);
@@ -40,7 +40,7 @@ describe("normalize", () => {
       const raw = input;
 
       // When
-      const result = normalize(raw);
+      const result = normalizeAccount(raw);
 
       // Then
       expect(result).toBe("");
@@ -121,7 +121,7 @@ describe("normalize", () => {
       const input = "💰110-436";
 
       // When
-      const result = normalize(input);
+      const result = normalizeAccount(input);
 
       // Then
       expect(result).toBe("110436");
@@ -132,7 +132,7 @@ describe("normalize", () => {
       const input = "𝟏𝟐𝟑110"; // bold mathematical digits are NOT ASCII
 
       // When
-      const result = normalize(input);
+      const result = normalizeAccount(input);
 
       // Then
       expect(result).toBe("110");
@@ -143,7 +143,7 @@ describe("normalize", () => {
       const input = "１２３456";
 
       // When
-      const result = normalize(input);
+      const result = normalizeAccount(input);
 
       // Then
       expect(result).toBe("456");
@@ -156,7 +156,7 @@ describe("normalize", () => {
       const digits = "1".repeat(100);
 
       // When
-      const result = normalize(digits);
+      const result = normalizeAccount(digits);
 
       // Then
       expect(result).toBe(digits);
@@ -167,7 +167,7 @@ describe("normalize", () => {
       const digits = "9".repeat(10_000);
 
       // When
-      const result = normalize(digits);
+      const result = normalizeAccount(digits);
 
       // Then
       expect(result.length).toBe(10_000);
@@ -180,7 +180,7 @@ describe("normalize", () => {
       const input = "1-1 0/4*3#6%3@8 7 7+4=0";
 
       // When
-      const result = normalize(input);
+      const result = normalizeAccount(input);
 
       // Then
       expect(result).toBe("110436387740");
@@ -191,8 +191,8 @@ describe("normalize", () => {
       const input = "110-436-387740";
 
       // When
-      const a = normalize(input);
-      const b = normalize(input);
+      const a = normalizeAccount(input);
+      const b = normalizeAccount(input);
 
       // Then
       expect(a).toBe(b);

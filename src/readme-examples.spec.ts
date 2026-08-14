@@ -1,12 +1,11 @@
 import { describe, expect, test } from "vitest";
 import {
   accountKindLabels,
-  detectAccount,
+  detect,
   detectBest,
-  institutionByCode,
-  institutionById,
+  getInstitution,
   institutions,
-  normalize,
+  normalizeAccount,
   scoreToConfidence,
 } from "./index";
 
@@ -44,16 +43,16 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(detectBest("1")).toBeNull();
   });
 
-  test("조회 — institutionById / institutionByCode", () => {
-    expect(institutionById("shinhan")?.code).toBe("088");
-    expect(institutionByCode("088")?.id).toBe("shinhan");
+  test("조회 — getInstitution / getInstitution", () => {
+    expect(getInstitution("shinhan")?.code).toBe("088");
+    expect(getInstitution("088")?.id).toBe("shinhan");
     // README 의 commonCode 주의사항: CMS 코드와 KFTC 공통 은행코드가 다르다.
-    expect(institutionById("hana")?.code).toBe("005");
-    expect(institutionById("hana")?.commonCode).toBe("081");
+    expect(getInstitution("hana")?.code).toBe("005");
+    expect(getInstitution("hana")?.commonCode).toBe("081");
   });
 
   test("정규화·포맷팅", () => {
-    expect(normalize("110-436-387740")).toBe("110436387740");
+    expect(normalizeAccount("110-436-387740")).toBe("110436387740");
     expect(scoreToConfidence(9)).toBe("high");
   });
 
@@ -67,7 +66,7 @@ describe("README 코드 예제가 주장하는 값", () => {
 
   // README 가 새로 명시하는 한계. 이 동작이 바뀌면 README 도 같이 고쳐야 한다.
   test("한계 — 식별 코드가 없는 기관은 길이만으로 동점 low 가 된다", () => {
-    const results = detectAccount("3333-12-3456789");
+    const results = detect("3333-12-3456789");
     expect(results[0]?.institution.id, "priority 가 높은 신한이 1순위").toBe("shinhan");
     expect(results.every((r) => r.confidence === "low")).toBe(true);
     expect(results.every((r) => r.score === 3)).toBe(true);

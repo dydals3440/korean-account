@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { type InstitutionId, institutions } from "../registry";
-import { detectAccount } from "./detect-account";
+import { detect } from "./detect";
 
 /**
  * Property-based 스타일 검증.
@@ -30,7 +30,7 @@ function randomDigits(rng: () => number, length: number): string {
 
 const ID_SET = new Set<string>(institutions.map((i) => i.id));
 
-describe("detectAccount property-based invariants", () => {
+describe("detect property-based invariants", () => {
   test("임의 14자리 digits 1000건: limit·정렬·confidence 일관", () => {
     // Given
     const rng = mulberry32(0xc0ffee);
@@ -40,7 +40,7 @@ describe("detectAccount property-based invariants", () => {
       const input = randomDigits(rng, 14);
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then — invariant 검증
       expect(results.length).toBeLessThanOrEqual(5);
@@ -90,7 +90,7 @@ describe("detectAccount property-based invariants", () => {
       const input = randomDigits(rng, length);
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then — 모든 결과는 institution / matchedPattern / capabilities 보유
       for (const r of results) {
@@ -107,7 +107,7 @@ describe("detectAccount property-based invariants", () => {
     // Given / When / Then
     const inputs = ["", " ", "---", "abc", "한글", "1"];
     for (const input of inputs) {
-      expect(detectAccount(input)).toEqual([]);
+      expect(detect(input)).toEqual([]);
     }
   });
 

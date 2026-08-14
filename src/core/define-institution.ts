@@ -1,10 +1,10 @@
 import type { Institution, InstitutionCategory } from "../types";
 
 /**
- * type-safe `Institution` 생성 헬퍼.
+ * Type-safe `Institution` construction helper.
  *
- * `id` / `code` / `category` literal 을 generic 으로 보존해 소비자 측에서
- * `Extract<RegisteredInstitution, { category: "bank" }>` 같은 narrow 가 가능하게 한다.
+ * Preserves the `id` / `code` / `category` literals as generics so consumers
+ * can narrow, e.g. `Extract<RegisteredInstitution, { category: "bank" }>`.
  *
  * @example
  * const myBank = defineInstitution({
@@ -14,9 +14,9 @@ import type { Institution, InstitutionCategory } from "../types";
  *   nameEn: "My Bank",
  *   category: "bank",
  *   aliases: [],
- *   patterns: [{ template: createPatternTemplate("XXX-XXX-XXXXXX"), kind: "new" }],
+ *   patterns: [{ template: patternTemplate("XXX-XXX-XXXXXX"), kind: "new" }],
  * });
- * defaultDetector.extend({ institutions: [myBank] });
+ * const detector = createDetector([...institutions, myBank]);
  */
 export function defineInstitution<
   const Id extends string,
