@@ -3,35 +3,53 @@
   "version": "0.1.3",
   "description": "Korean bank account detector · 한국 계좌번호 식별·과목 추출 — KFTC CMS PDF 충실, TypeScript.",
   "keywords": [
-    "korean",
     "account",
     "bank",
-    "validation",
+    "cms",
     "detection",
     "fintech",
     "kftc",
-    "한국",
+    "korean",
+    "validation",
     "계좌",
     "계좌번호",
-    "은행",
     "금융결제원",
-    "cms"
+    "은행",
+    "한국"
   ],
   "homepage": "https://github.com/dydals3440/korean-account#readme",
   "bugs": {
     "url": "https://github.com/dydals3440/korean-account/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dydals3440/korean-account.git"
   },
   "license": "MIT",
   "author": {
     "name": "Matthew Kim",
     "email": "dydals3440@gmail.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dydals3440/korean-account.git"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.en.md",
+    "DOCS.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "schema": [
+        "./dist/schema.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": {
@@ -53,36 +71,19 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "schema": [
-        "./dist/schema.d.ts"
-      ]
-    }
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "README.en.md",
-    "DOCS.md",
-    "LICENSE",
-    "CHANGELOG.md"
-  ],
-  "engines": {
-    "node": ">=20.19.0"
-  },
-  "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
+    "lint": "oxlint --deny-warnings && oxfmt --check",
+    "lint:fix": "oxlint --fix && oxfmt",
+    "format": "oxfmt",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -97,6 +98,22 @@
     "size": "size-limit",
     "check:runtime": "node scripts/check-runtime.mjs"
   },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@changesets/cli": "^2.31.1",
+    "@size-limit/preset-small-lib": "^13.0.3",
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "oxfmt": "^0.63.0",
+    "oxlint": "^1.78.0",
+    "publint": "^0.3.23",
+    "size-limit": "^13.0.3",
+    "tsdown": "^0.22.14",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10",
+    "zod": "^4.4.3"
+  },
   "peerDependencies": {
     "zod": "^3.23.0 || ^4.0.0"
   },
@@ -105,23 +122,8 @@
       "optional": true
     }
   },
-  "devDependencies": {
-    "@arethetypeswrong/core": "^0.18.5",
-    "@biomejs/biome": "^2.5.4",
-    "@changesets/cli": "^2.27.0",
-    "@size-limit/preset-small-lib": "^12.1.0",
-    "@types/node": "^26.1.1",
-    "@vitest/coverage-v8": "^2.1.0",
-    "publint": "^0.3.0",
-    "size-limit": "^12.1.0",
-    "tsdown": "^0.22.8",
-    "typescript": "^6.0.3",
-    "vitest": "^2.1.0",
-    "zod": "^3.23.0"
+  "engines": {
+    "node": ">=22.12.0"
   },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true,
-    "registry": "https://registry.npmjs.org/"
-  }
+  "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800"
 }
