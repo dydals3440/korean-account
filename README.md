@@ -35,7 +35,7 @@ detectBest("110-436-387740");
 
 - **PDF 충실 코어** — KFTC CMS PDF 를 기관 단위로 전수 대조한 57곳 레지스트리 (은행 25 · 비은행 8 · 증권 24)
 - **필요한 은행만** — `createDetector([kb, shinhan, toss])` 로 3.6 KB, 전체 레지스트리도 10 KB (min+brotli)
-- **런타임 의존성 0** — zod 는 `korean-account/zod` 를 쓸 때만 optional peerDep (v3 · v4 모두 지원)
+- **밸리데이터 프리** — zod·valibot·yup·arktype 어댑터(전부 optional peer) + 의존성 0 의 Standard Schema 어댑터
 - **strict TypeScript** — `getInstitution("shinhan").code` 가 `"088"` literal 로 narrow
 - **Universal** — Node 22+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
 
@@ -218,16 +218,36 @@ createDetector(institutions, { checkDigitVerifiers: { kb: myKbVerifier } });
 
 기본 레지스트리는 위 PDF 표에 적힌 행(+ 명시된 소수의 실세계 확립 신호)만 포함한다. PDF 가 enumerate 하지 않은 케이스 — 저축은행 가상계좌 운영 prefix, 사내 정산 계좌, 파트너사별 특화 prefix 등 — 은 [원하는 결과가 안 나올 때](#원하는-결과가-안-나올-때) 의 `extend` 패턴과 [DOCS Appendix D](./DOCS.md) 레시피로 보강한다.
 
-## 검증 스키마 — `korean-account/zod` (선택)
+## 검증 어댑터 (선택)
 
-zod 를 쓰는 프로젝트라면 폼/API 경계 검증용 스키마를 제공한다. **zod v3 (≥3.23) 과 v4 를 모두 지원** 하며, CI 가 두 메이저를 매트릭스로 검증한다. 이 서브패스를 import 하지 않으면 zod 는 전혀 필요 없다.
+폼/API 경계 검증용 스키마를 **쓰는 밸리데이터에 맞는 서브패스**로 제공한다 — @hookform/resolvers 처럼 플러그인식으로 갈아끼운다. 다섯 어댑터 모두 같은 5개 스키마(`accountSchema` · `institutionIdSchema` · `accountKindSchema` · `subjectCategorySchema` · `detectionSchema`)를 내보내고, 하나의 계약 테스트가 동작 동일성을 보증한다. peer 는 전부 optional — import 하지 않는 어댑터의 라이브러리는 필요 없다.
+
+| 서브패스                         | peer                                     | 언제                                                                           |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------ |
+| `korean-account/zod`             | zod ^3.23 \|\| ^4 (CI 가 두 메이저 검증) | zod 프로젝트                                                                   |
+| `korean-account/valibot`         | valibot ^1                               | 번들 민감 프론트엔드                                                           |
+| `korean-account/yup`             | yup ^1.4                                 | Formik·구형 RHF 코드베이스                                                     |
+| `korean-account/arktype`         | arktype ^2.1                             | arktype 프로젝트                                                               |
+| `korean-account/standard-schema` | **없음 (의존성 0)**                      | TanStack Form·tRPC v11 등 [Standard Schema](https://standardschema.dev) 소비자 |
 
 ```ts
-import { accountSchema, institutionIdSchema, detectionSchema } from "korean-account/zod";
+import { accountSchema } from "korean-account/zod"; // ← 서브패스만 바꾸면 끝
 
 accountSchema.parse("110-436-387740"); // 숫자·하이픈·공백, 정규화 6~20자리
-institutionIdSchema.parse("shinhan"); // 등록된 기관 id 만 허용
 ```
+
+```ts
+// react-hook-form — resolver 와 어댑터를 세트로 교체
+useForm({ resolver: zodResolver(z.object({ account: accountSchema })) }); // korean-account/zod
+useForm({ resolver: valibotResolver(v.object({ account: accountSchema })) }); // korean-account/valibot
+useForm({ resolver: yupResolver(yup.object({ account: accountSchema })) }); // korean-account/yup
+
+// TanStack Form — 의존성 0 어댑터를 그대로 밸리데이터로
+import { accountSchema } from "korean-account/standard-schema";
+useForm({ validators: { onChange: accountSchema } });
+```
+
+자체 밸리데이터용 어댑터를 추가하고 싶다면 [CONTRIBUTING](./CONTRIBUTING.md) 의 "새 어댑터 3단계" 참고 — shared 술어를 재사용하고 계약 테스트만 통과하면 된다.
 
 ## API 한눈에
 

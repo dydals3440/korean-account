@@ -1,4 +1,11 @@
+import { type } from "arktype";
+import * as v from "valibot";
 import { describe, expect, test } from "vitest";
+import { accountSchema as arktypeAccount } from "./adapters/arktype";
+import { accountSchema as standardAccount } from "./adapters/standard-schema";
+import { accountSchema as valibotAccount } from "./adapters/valibot";
+import { accountSchema as yupAccount } from "./adapters/yup";
+import { accountSchema as zodAccount } from "./adapters/zod";
 import {
   accountKindLabels,
   createDetector,
@@ -80,5 +87,25 @@ describe("README 코드 예제가 주장하는 값", () => {
 
     const group = detectBest("7979-01-2345678");
     expect(group?.institution.id).toBe("kakao");
+  });
+});
+
+// README claims all five adapters expose behaviorally identical schemas.
+describe("README — 검증 어댑터 5종 동작 동일", () => {
+  const accepts = {
+    zod: (input: unknown) => zodAccount.safeParse(input).success,
+    valibot: (input: unknown) => v.safeParse(valibotAccount, input).success,
+    yup: (input: unknown) => yupAccount.isValidSync(input, { strict: true }),
+    arktype: (input: unknown) => !(arktypeAccount(input) instanceof type.errors),
+    "standard-schema": (input: unknown) => {
+      const result = standardAccount["~standard"].validate(input);
+      if (result instanceof Promise) throw new Error("sync only");
+      return result.issues === undefined;
+    },
+  } as const;
+
+  test.each(Object.entries(accepts))("%s — 통과/거부가 일치한다", (_, accept) => {
+    expect(accept("110-436-387740")).toBe(true);
+    expect(accept("12345")).toBe(false);
   });
 });
