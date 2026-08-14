@@ -45,16 +45,17 @@ describe("createDetector — checkDigitVerifiers framework", () => {
   });
 
   test("패턴 validatesCheckDigit: false 면 verifier 가 있어도 null", () => {
-    // Given — 광주 12d 과목 731 패턴은 validatesCheckDigit: false 명시.
-    // 동일 정책의 수협 12d 신계좌 (validatesCheckDigit: false) 도 테스트 가능.
+    // Given — the Gwangju 12d subject-731 pattern states validatesCheckDigit:
+    // false. The Suhyup 12d new pattern shares the policy and would also work.
     const alwaysTrue: CheckDigitVerifier = () => true;
     const detector = createDetector(institutions, {
       checkDigitVerifiers: { suhyup: alwaysTrue },
     });
 
-    // When — 수협 12d 신계좌 입력. 같은 자릿수의 신한/신협이 더 높은 점수로 앞서므로
-    // 1순위가 아니라 후보 목록에서 수협을 직접 찾는다. (`const [r] = ...` 로 받으면
-    // 조건이 영원히 거짓이 되어 어서션이 한 번도 실행되지 않는다.)
+    // When — Suhyup 12d new-account input. Same-length Shinhan/Shinhyup rank
+    // higher, so Suhyup is looked up in the candidate list rather than taken
+    // as the top result. (With `const [r] = ...` the condition would be
+    // forever false and the assertion would never run.)
     const suhyup = detector.detect("131-234567890").find((r) => r.institution.id === "suhyup");
 
     // Then

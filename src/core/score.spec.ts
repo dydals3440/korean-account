@@ -17,7 +17,7 @@ function makeInstitution(patterns: Institution["patterns"]): Institution {
 
 const W = DEFAULT_WEIGHTS;
 
-/** 정확 길이 매칭일 때의 identifier/subject 길이 보너스 — `len - 1`. */
+/** Identifier/subject length bonus on an exact-length match — `len - 1`. */
 function lengthBonus(len: number): number {
   return Math.max(0, len - 1);
 }
@@ -141,7 +141,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 3자리 식별자 → 보너스 +2
+      // Then — 3-digit identifier → bonus +2
       expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(3));
     });
 
@@ -160,7 +160,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 2자리 식별자 → 보너스 +1
+      // Then — 2-digit identifier → bonus +1
       expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(2));
     });
 
@@ -179,7 +179,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — identifierRange 3자리 → 보너스 +2
+      // Then — 3-digit identifierRange → bonus +2
       expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(3));
     });
 
@@ -198,7 +198,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 부분 입력: 기본 점수 절반 + 길이 보너스(3자리=2) 절반
+      // Then — partial input: half the base score + half the length bonus (3 digits = 2)
       expect(result.score).toBe(Math.floor(W.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2));
     });
   });
@@ -219,7 +219,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 2자리 과목 → 보너스 +1
+      // Then — 2-digit subject → bonus +1
       expect(result.subject?.code).toBe("04");
       expect(result.score).toBe(W.lengthExact + W.subjectMatch + lengthBonus(2));
     });
@@ -245,7 +245,7 @@ describe("scoreInstitution", () => {
     });
 
     test("subject 부분 입력은 절반 점수만 부여한다", () => {
-      // Given — digits 가 subjectPosition 끝(8)에 막 도달, 템플릿 14d 보다 짧음
+      // Given — digits just reach the end of subjectPosition (8), shorter than the 14d template
       const digits = "12345604";
       const institution = makeInstitution([
         {
@@ -259,7 +259,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 부분 입력: 기본 점수 절반 + 길이 보너스(2자리=1) 절반
+      // Then — partial input: half the base score + half the length bonus (2 digits = 1)
       expect(result.subject?.code).toBe("04");
       expect(result.score).toBe(Math.floor(W.subjectMatch / 2) + Math.floor(lengthBonus(2) / 2));
     });
@@ -267,7 +267,7 @@ describe("scoreInstitution", () => {
 
   describe("양방향 길이 가드 (회귀 가드)", () => {
     test("입력이 템플릿보다 훨씬 길면 우연한 identifier 일치를 무시한다", () => {
-      // Given — 14d 입력, 11d 템플릿
+      // Given — 14d input against an 11d template
       const digits = "97202762901013";
       const institution = makeInstitution([
         {
@@ -300,7 +300,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — 부분 입력: 기본 점수 절반 + 길이 보너스(3자리=2) 절반
+      // Then — partial input: half the base score + half the length bonus (3 digits = 2)
       expect(result.score).toBe(Math.floor(W.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2));
     });
   });
@@ -329,9 +329,9 @@ describe("scoreInstitution", () => {
     });
 
     test("자릿수가 일치하는 입력에 대해 가드가 실패하면 패턴이 매칭되지 않는다", () => {
-      // Given — additionalRules 는 PDF·실세계 도메인 제약을 매칭 조건으로 갖는다.
-      // 자릿수가 일치하는 부분 입력 까지는 가드를 적용해 부적합 패턴을 후보에서 빼고,
-      // 통과 시에만 룰 1건당 가산점도 함께 부여한다.
+      // Given — additionalRules carry PDF/real-world domain constraints as match
+      // conditions. The guard applies down to length-matching partial input,
+      // removing unfit patterns; only on pass does each rule also add its bonus.
       const digits = "110436387740";
       const institution = makeInstitution([
         {
@@ -349,9 +349,10 @@ describe("scoreInstitution", () => {
     });
 
     test("자릿수가 한참 짧은 부분 입력에는 가드를 면제 — 사용자가 입력 중인 경우 보호", () => {
-      // Given — 가드 적용 범위는 ±1 자리. 그보다 짧으면 가드를 평가할 정보가
-      // 부족해 면제. 단 가드 면제 시에는 통과 가산도 면제 (점수 인플레이션 방지).
-      const digits = "11"; // expected 12 보다 10자리 짧음
+      // Given — the guard applies within ±1 digit. Shorter input lacks the
+      // information to evaluate it, so it is exempt — but exemption also skips
+      // the pass bonus (prevents score inflation).
+      const digits = "11"; // 10 digits shorter than the expected 12
       const institution = makeInstitution([
         {
           template: patternTemplate("XXX-XXX-XXXXXX"),
@@ -363,7 +364,7 @@ describe("scoreInstitution", () => {
       // When
       const result = scoreInstitution(digits, institution, []);
 
-      // Then — length-near 도 아니므로 모든 가산 면제, score 0.
+      // Then — not even length-near, so every bonus is skipped: score 0.
       expect(result.score).toBe(0);
     });
   });
@@ -384,7 +385,7 @@ describe("scoreInstitution", () => {
       const noMatch = scoreInstitution("999999999", institution, [() => true]);
       const matched = scoreInstitution("110436387740", institution, [() => true, () => true]);
 
-      // Then — 3자리 식별자 → 보너스 +2 포함
+      // Then — includes the 3-digit identifier bonus +2
       expect(noMatch.score).toBe(0);
       expect(matched.score).toBe(
         W.lengthExact + W.identifierMatch + lengthBonus(3) + 2 * W.globalRule,

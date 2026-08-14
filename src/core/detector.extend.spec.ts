@@ -5,8 +5,9 @@ import { defineInstitution } from "./define-institution";
 import type { CheckDigitVerifier } from "../types";
 import { createDetector } from "./detector";
 
-// identifier 를 준다. 없으면 score 3 (lengthExact) 에 그쳐 confidence 가 low 가 되고,
-// 같은 자릿수의 실제 은행이 high 로 잡히는 순간 `narrowLowConfidence` 가 걸러 버린다.
+// The test institution carries an identifier on purpose. Without one it
+// stalls at score 3 (lengthExact), confidence low — and the moment a
+// same-length real bank scores high, `narrowLowConfidence` filters it out.
 const myBank = defineInstitution({
   id: "my-bank",
   code: "999",
@@ -25,7 +26,7 @@ const myBank = defineInstitution({
 
 describe("Detector.extend — scoring / checkDigitVerifiers", () => {
   test("새로 추가한 institution 의 checkDigitVerifier 를 extend 에서 바로 등록할 수 있다", () => {
-    // Given — 예전에는 extend 가 verifier 를 받지 않아 createDetector 로 되돌아가야 했다.
+    // Given — extend previously did not accept a verifier, forcing a fallback to createDetector.
     const detector = createDetector(institutions).extend({
       institutions: [myBank],
       checkDigitVerifiers: { "my-bank": () => true },
@@ -59,7 +60,7 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
       checkDigitVerifiers: { shinhan: (() => false) as CheckDigitVerifier },
     });
 
-    // When — shinhan 을 교체하고 kb 를 추가
+    // When — replace shinhan and add kb
     const extended = base.extend({
       checkDigitVerifiers: { shinhan: () => true, kb: () => true },
     });
@@ -67,13 +68,13 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
     // Then
     const shinhan = extended.detect("110-436-387740").find((r) => r.institution.id === "shinhan");
     expect(shinhan?.capabilities.validatedCheckDigit).toBe(true);
-    // 교체 전 detector 는 영향받지 않는다 (immutable).
+    // The pre-replacement detector is unaffected (immutable).
     const before = base.detect("110-436-387740").find((r) => r.institution.id === "shinhan");
     expect(before?.capabilities.validatedCheckDigit).toBe(false);
   });
 
   test("scoring 은 기존 가중치 위에 얕게 병합된다", () => {
-    // Given — base 는 lengthExact 를 0 으로, extend 는 identifierMatch 만 건드린다.
+    // Given — base sets lengthExact to 0; extend touches only identifierMatch.
     const base = createDetector(institutions, { scoring: { lengthExact: 0 } });
     const extended = base.extend({ scoring: { identifierMatch: 0 } });
 
@@ -81,7 +82,7 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
     const baseScore = base.detect("110-436-387740")[0]?.score ?? 0;
     const extendedScore = extended.detect("110-436-387740")[0]?.score ?? 0;
 
-    // Then — extend 가 lengthExact: 0 을 덮어쓰지 않았다면 extended 가 더 낮아야 한다.
+    // Then — if extend did not overwrite lengthExact: 0, extended must score lower.
     expect(extendedScore).toBeLessThan(baseScore);
   });
 

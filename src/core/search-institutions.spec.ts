@@ -96,7 +96,7 @@ describe("searchInstitutions", () => {
       // When
       const picked = searchInstitutions(filter);
 
-      // Then — id 를 string 으로 펼쳐 런타임 검증 (타입은 이미 narrow)
+      // Then — widen ids to string for the runtime check (the type is already narrow)
       const ids: readonly string[] = picked.map((i) => i.id);
       expect(ids).not.toContain("shinhan");
     });
@@ -135,8 +135,8 @@ describe("searchInstitutions", () => {
     });
 
     test("categories + include — include 는 카테고리 안의 id 로 제한된다", () => {
-      // Given — kis (securities) 를 bank 카테고리에 함께 넣으면 컴파일 에러.
-      // 컴파일 가능한 조합: bank 안의 id 들만.
+      // Given — putting kis (securities) into the bank category would be a
+      // compile error; only ids within bank compile.
       const filter = {
         categories: ["bank"],
         include: ["shinhan", "kakao", "kb"],

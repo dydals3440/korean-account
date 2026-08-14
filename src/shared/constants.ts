@@ -44,5 +44,5 @@ export const INSTITUTION_CATEGORIES = [
   "clearing",
 ] as const satisfies readonly InstitutionCategory[];
 
-/** `Confidence` 리터럴 배열. 높은 신뢰도부터. */
+/** `Confidence` literals as a runtime array, highest confidence first. */
 export const CONFIDENCE_LEVELS = ["high", "medium", "low"] as const satisfies readonly Confidence[];

@@ -12,7 +12,7 @@ describe("INSTITUTION_IDS ↔ institutions 동기화", () => {
   });
 
   test("타입: 두 union 이 서로를 완전히 덮는다 (양방향 exhaustiveness)", () => {
-    // Given / When / Then — 한쪽에만 id 를 추가하면 여기서 컴파일이 깨진다.
+    // Given / When / Then — adding an id to only one side breaks compilation here.
     expectTypeOf<(typeof INSTITUTION_IDS)[number]>().toEqualTypeOf<InstitutionId>();
   });
 

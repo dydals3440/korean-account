@@ -3,10 +3,10 @@ import { type InstitutionId, institutions } from "../registry";
 import { detect } from "./detect";
 
 /**
- * Property-based 스타일 검증.
+ * Property-based style checks.
  *
- * 외부 generator (fast-check 등) 없이 deterministic seed 로 random digit 생성.
- * detect 의 invariant 만 가볍게 검증한다.
+ * Random digits come from a deterministic seed — no external generator
+ * (fast-check etc.). Only detect's invariants are verified, lightly.
  */
 
 function mulberry32(seed: number): () => number {
@@ -42,10 +42,10 @@ describe("detect property-based invariants", () => {
       // When
       const results = detect(input);
 
-      // Then — invariant 검증
+      // Then — verify the invariants
       expect(results.length).toBeLessThanOrEqual(5);
 
-      // 점수 내림차순
+      // Scores in descending order
       for (let k = 1; k < results.length; k += 1) {
         const prev = results[k - 1];
         const curr = results[k];
@@ -55,13 +55,13 @@ describe("detect property-based invariants", () => {
         expect(prev.score).toBeGreaterThanOrEqual(curr.score);
       }
 
-      // top 이 high/medium 이면 low 제거 (narrowing)
+      // A high/medium top result removes low candidates (narrowing)
       const top = results[0];
       if (top && (top.confidence === "high" || top.confidence === "medium")) {
         expect(results.every((r) => r.confidence !== "low")).toBe(true);
       }
 
-      // confidence 가 score 와 일관
+      // Confidence consistent with score
       for (const r of results) {
         if (r.score >= 7) {
           expect(r.confidence).toBe("high");
@@ -72,7 +72,7 @@ describe("detect property-based invariants", () => {
         }
       }
 
-      // institution.id 는 등록된 InstitutionId
+      // institution.id is a registered InstitutionId
       for (const r of results) {
         const id: string = r.institution.id;
         expect(ID_SET.has(id)).toBe(true);
@@ -92,7 +92,7 @@ describe("detect property-based invariants", () => {
       // When
       const results = detect(input);
 
-      // Then — 모든 결과는 institution / matchedPattern / capabilities 보유
+      // Then — every result carries institution / matchedPattern / capabilities
       for (const r of results) {
         expect(r.institution).toBeDefined();
         expect(r.matchedPattern).toBeDefined();
@@ -112,7 +112,7 @@ describe("detect property-based invariants", () => {
   });
 
   test("매칭된 institution.id 는 InstitutionId union 안에 있다", () => {
-    // Given — 모든 등록 institution 의 id 가 type-level InstitutionId 와 동일
+    // Given — every registered institution's id equals the type-level InstitutionId
     const ids: InstitutionId[] = institutions.map((i) => i.id);
 
     // When / Then

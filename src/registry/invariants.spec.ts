@@ -2,12 +2,14 @@ import { describe, expect, test } from "vitest";
 import { templateLength } from "../core/template-length";
 import { institutions } from "./index";
 
-// 데이터 파일은 사람이 PDF 를 보고 손으로 채운다. 불변식이 깨져도 런타임은 조용히
-// 넘어가므로 (점수 가산이 0 이 될 뿐) 여기서 명시적으로 검사한다.
+// Registry data files are filled in by hand from the PDF. A broken invariant
+// fails silently at runtime (the score bonus just becomes 0), so it is
+// checked explicitly here.
 //
-// 단, "position 만 있고 subjects/identifiers 가 없다" 는 것은 위반이 아니다.
-// 0.1.0 에서 그렇게 오판해 4개를 지웠다가, 공개 API `extractIdentifier` 의 출력이
-// 바뀌는 것을 발견하고 0.1.1 에서 되돌렸다. 불변식은 한 방향으로만 성립한다.
+// Note: "position present without subjects/identifiers" is NOT a violation.
+// 0.1.0 misjudged it as one and deleted 4 such fields, which changed the
+// output of the public API `extractIdentifier`; 0.1.1 reverted. The
+// invariants hold in one direction only.
 
 const patterns = institutions.flatMap((institution) =>
   institution.patterns.map((pattern) => ({ institution, pattern })),
@@ -33,10 +35,10 @@ describe("institution 레지스트리 불변식", () => {
 });
 
 describe("pattern 불변식", () => {
-  // 성립하는 건 한 방향뿐이다. `position` 단독은 죽은 선언이 아니다 —
-  // 점수 가산에는 안 쓰이지만 공개 API (`extractSubject` / `extractIdentifier`) 와
-  // `DetectionResult.matchedPattern` 이 그 값을 노출한다.
-  // 0.1.0 에서 양방향 불변식으로 오판해 4개를 지웠다가 0.1.1 에서 되돌렸다.
+  // One direction only. A bare `position` is not a dead declaration — it is
+  // unused for scoring, but the public API (`extractSubject` /
+  // `extractIdentifier`) and `DetectionResult.matchedPattern` expose it.
+  // 0.1.0 misread this as bidirectional and deleted 4 fields; 0.1.1 reverted.
   test.each(patterns)(
     "$institution.id $pattern.template — subjects 는 subjectPosition 을 동반한다",
     ({ pattern }) => {
@@ -46,9 +48,9 @@ describe("pattern 불변식", () => {
     },
   );
 
-  // 역방향만 성립한다. `identifierPosition` 단독은 죽은 필드가 아니다 —
-  // 점수 가산은 없지만 공개 API `extractIdentifier` 가 이 위치를 읽는다.
-  // (0.1.0 에서 이걸 "죽은 필드" 로 오판해 지웠다가 0.1.1 에서 되돌렸다.)
+  // Reverse direction only. A bare `identifierPosition` is not a dead field —
+  // no score bonus, but the public API `extractIdentifier` reads the position.
+  // (0.1.0 misjudged it as dead and deleted it; 0.1.1 reverted.)
   test.each(patterns)(
     "$institution.id $pattern.template — identifiers / identifierRange 는 identifierPosition 을 동반한다",
     ({ pattern }) => {
@@ -110,7 +112,7 @@ describe("branchRule 이 가리키는 institutionId 는 실재한다", () => {
   test.each(patterns.filter((p) => p.pattern.branchRule))(
     "$institution.id $pattern.template",
     ({ pattern }) => {
-      // 모든 digits 를 다 볼 수는 없으니, 룰이 반환할 수 있는 id 를 스모크로 훑는다.
+      // Exhausting every digits value is impossible; smoke-test the ids the rule can return.
       for (let d = 0; d < 10; d++) {
         const digits = String(d).repeat(templateLength(pattern.template));
         const result = pattern.branchRule?.evaluate(digits);

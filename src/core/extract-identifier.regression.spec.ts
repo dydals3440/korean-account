@@ -4,10 +4,10 @@ import { normalizeAccount } from "./normalize-account";
 import type { AccountPattern } from "../types";
 import { extractIdentifier } from "./extract-identifier";
 
-// 0.1.0 에서 `identifiers` 가 없다는 이유로 `identifierPosition` 을 "죽은 필드" 로
-// 판단해 지웠다. 점수 가산에는 실제로 쓰이지 않지만, 공개 API `extractIdentifier`
-// 가 이 위치를 읽는다. 그 결과 12자리 수협 계좌에서 "965" 대신 "" 가 반환됐다.
-// 0.1.1 에서 되돌렸고, 여기서 못 박는다.
+// 0.1.0 deleted `identifierPosition` as a "dead field" because `identifiers`
+// was absent. It is indeed unused for scoring, but the public API
+// `extractIdentifier` reads the position — so 12-digit Suhyup accounts began
+// returning "" instead of "965". 0.1.1 reverted; this spec pins it down.
 describe("extractIdentifier 는 identifiers 없이 identifierPosition 만으로도 동작한다", () => {
   let suhyup12: AccountPattern;
 

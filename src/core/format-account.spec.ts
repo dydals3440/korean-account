@@ -137,7 +137,7 @@ describe("formatAccount", () => {
       const result = formatAccount(digits, template);
 
       // Then
-      // 첫 12자리는 그루핑, 나머지 48자리는 끝에 그대로 붙음
+      // First 12 digits grouped; the remaining 48 appended verbatim
       expect(result).toBe(`111-111-111111${"1".repeat(48)}`);
     });
   });
