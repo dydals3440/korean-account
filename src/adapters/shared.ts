@@ -18,7 +18,7 @@ export const ACCOUNT_MAX_DIGITS = 20;
 export const MESSAGES = {
   required: "계좌번호를 입력해주세요.",
   tooLong: "너무 긴 입력입니다.",
-  charset: "숫자와 하이픈만 입력해주세요.",
+  charset: "숫자, 공백, 하이픈만 입력해주세요.",
   minDigits: "계좌번호 자릿수가 부족합니다.",
   maxDigits: "계좌번호 자릿수가 너무 깁니다.",
   institution: "지원하지 않는 금융기관입니다.",
