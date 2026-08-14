@@ -9,7 +9,7 @@ export const savingsBank = /* @__PURE__ */ defineInstitution({
   nameEn: "Mutual Savings Bank",
   category: "non-bank",
   aliases: ["저축은행", "상호저축은행", "SBI저축", "OK저축", "웰컴저축"],
-  priority: 35,
+  userBaseMillions: 6,
   patterns: [
     {
       template: T("XXX-XX-XX-XXXXXX-X"),

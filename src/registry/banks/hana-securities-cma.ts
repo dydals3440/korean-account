@@ -14,7 +14,7 @@ export const hanaSecuritiesCma = /* @__PURE__ */ defineInstitution({
   nameEn: "Hana Securities CMA",
   category: "bank",
   aliases: ["하나증권 CMA", "하나증권CMA"],
-  priority: 25,
+  userBaseMillions: 1,
   patterns: [
     // An identifier here would absorb valid Hana foreign-exchange 14d inputs
     // and break their match, so two additionalRules instead: (1) serial's
@@ -39,13 +39,15 @@ export const hanaSecuritiesCma = /* @__PURE__ */ defineInstitution({
           virtual: true,
           label: "증권가상",
         }),
+        // PDF p.11: withdrawal transfer excluded for 37 and 60 (출금이체 37,60불가).
         defineSubject({
           code: "37",
           category: "ordinary",
           virtual: true,
+          allowsWithdrawal: false,
           label: "일반가상",
         }),
-        defineSubject({ code: "60", category: "isa" }),
+        defineSubject({ code: "60", category: "isa", allowsWithdrawal: false }),
       ],
       note: "CMA 계좌만 가능, 평생계좌 자동이체 등록 불가",
     },

@@ -41,8 +41,10 @@ const integratedCitiSubjects: readonly Subject[] = [
     category: "household-current",
     label: "가계종합",
   }),
-  defineSubject({ code: "91", category: "linked" }),
-  defineSubject({ code: "92", category: "linked" }),
+  // PDF p.6: 91/92 are virtual (가상 ○) and excluded from withdrawal transfer
+  // (출금이체 91,92불가).
+  defineSubject({ code: "91", category: "linked", virtual: true, allowsWithdrawal: false }),
+  defineSubject({ code: "92", category: "linked", virtual: true, allowsWithdrawal: false }),
 ];
 
 /**
@@ -95,7 +97,7 @@ export const citi = /* @__PURE__ */ defineInstitution({
   nameEn: "Citibank Korea",
   category: "bank",
   aliases: ["씨티", "Citi", "씨티은행"],
-  priority: 15,
+  userBaseMillions: 0.5,
   patterns: [
     {
       template: T("X-XXXXXX-XX-X"),

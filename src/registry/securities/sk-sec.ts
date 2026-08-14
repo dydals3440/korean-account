@@ -8,7 +8,7 @@ export const skSec = /* @__PURE__ */ defineInstitution({
   nameEn: "SK Securities",
   category: "securities",
   aliases: ["SK증권"],
-  priority: 30,
+  userBaseMillions: 3.8,
   patterns: [
     { template: T("XXXXXXXXXXX"), kind: "new" },
     { template: T("XXXXXXXXX"), kind: "new" },

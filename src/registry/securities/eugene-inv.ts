@@ -8,6 +8,6 @@ export const eugeneInv = /* @__PURE__ */ defineInstitution({
   nameEn: "Eugene Investment & Securities",
   category: "securities",
   aliases: ["유진투자", "유진투자증권"],
-  priority: 25,
+  userBaseMillions: 2.2,
   patterns: [{ template: T("XXXXXXXXXXX"), kind: "new" }],
 });

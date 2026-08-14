@@ -10,6 +10,7 @@ export {
   toss12First1719,
 } from "./registry/rules";
 export { scoreToConfidence } from "./core/confidence";
+export { prevalence } from "./core/prevalence";
 export type { CreateDetectorOptions } from "./core/detector";
 export { createDetector } from "./core/detector";
 export { patternTemplate } from "./core/pattern-template";

@@ -10,7 +10,7 @@ export const shinhyup = /* @__PURE__ */ defineInstitution({
   nameEn: "Credit Union Central",
   category: "non-bank",
   aliases: ["신협", "신용협동조합", "CU"],
-  priority: 40,
+  userBaseMillions: 12,
   patterns: [
     { template: T("XXX-XXX-XXXX"), kind: "new" },
     { template: T("XXX-XXXX-XXXX"), kind: "new" },
@@ -33,6 +33,8 @@ export const shinhyup = /* @__PURE__ */ defineInstitution({
         "133",
         "136",
         "135",
+        // Virtual-account prefix in the same 12d scheme (PDF p.9).
+        "910",
       ],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
@@ -102,7 +104,8 @@ export const shinhyup = /* @__PURE__ */ defineInstitution({
       template: T("XXXXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 5, length: 2 },
-      subjects: [defineSubject({ code: "14", category: "ordinary" })],
+      // PDF p.9 marks 14 as deposit-only (××○×).
+      subjects: [defineSubject({ code: "14", category: "ordinary", allowsWithdrawal: false })],
     },
   ],
 });

@@ -9,7 +9,7 @@ export const capeInv = /* @__PURE__ */ defineInstitution({
   nameEn: "Cape Investment & Securities",
   category: "securities",
   aliases: ["케이프투자증권", "케이프", "LIG투자증권"],
-  priority: 15,
+  userBaseMillions: 0.8,
   successorOf: ["lig-investment"],
   patterns: [
     {
@@ -19,6 +19,13 @@ export const capeInv = /* @__PURE__ */ defineInstitution({
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
         defineSubject({ code: "11", category: "ordinary" }),
+        // PDF p.21 changelog: 2021.12.27 중개형 ISA (24) added.
+        defineSubject({
+          code: "24",
+          category: "isa",
+          label: "중개형 ISA",
+          effectiveFrom: "2021-12-27",
+        }),
         defineSubject({ code: "33", category: "savings" }),
         defineSubject({ code: "55", category: "savings" }),
         defineSubject({ code: "75", category: "savings" }),

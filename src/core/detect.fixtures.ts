@@ -41,6 +41,8 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "savings",
   },
+  { input: "3333-12-3456789", id: "kakao", kind: "new" },
+  { input: "7979-01-2345678", id: "kakao", kind: "new" },
   {
     input: "1006-123-456789",
     id: "woori",
@@ -61,26 +63,26 @@ export const FIXTURES = [
   },
   { input: "161-910278-72907", id: "hana", kind: "merged-legacy" },
   {
-    input: "301-1234-5678-90",
+    input: "301-1234-5678-91",
     id: "nh",
     kind: "new",
     subjectCategory: "ordinary",
   },
   {
-    input: "302-1234-5678-90",
+    input: "302-1234-5678-91",
     id: "nh",
     kind: "new",
     subjectCategory: "savings",
   },
   {
-    input: "351-1234-5678-09",
+    input: "351-1234-5678-03",
     id: "nh-coop",
     kind: "new",
     subjectCategory: "ordinary",
   },
   // 끝자리(계좌구분) 변형은 보통/저축 prefix 일 때 kind 영향 없음 회귀 가드.
   {
-    input: "351-1234-5678-01",
+    input: "351-1234-5678-04",
     id: "nh-coop",
     kind: "new",
     subjectCategory: "ordinary",
@@ -97,21 +99,21 @@ export const FIXTURES = [
   { input: "1912-3456-7890", id: "toss", kind: "virtual" },
   // 농협은행 13d 차세대 적금 (입금만 가능). 과목 304 → installment, 출금 불가.
   {
-    input: "304-1234-5678-99",
+    input: "304-1234-5678-91",
     id: "nh",
     kind: "incoming-only",
     subjectCategory: "installment",
   },
   // 농협은행 13d 차세대 신탁 (입금만 가능). 과목 031 → trust, 출금 불가.
   {
-    input: "031-1234-5678-99",
+    input: "031-1234-5678-91",
     id: "nh",
     kind: "incoming-only",
     subjectCategory: "trust",
   },
   // 농협중앙회 13d 차세대 적금. 과목 354 → installment.
   {
-    input: "354-1234-5678-99",
+    input: "354-1234-5678-93",
     id: "nh-coop",
     kind: "incoming-only",
     subjectCategory: "installment",
@@ -179,13 +181,13 @@ export const FIXTURES = [
   // 한국씨티 12d 첫자리 3 — 신한 12d (100~169) / 수협중앙 (2/7/9) 와 충돌 회피.
   // digits[8:10]="25" → 보통예금
   {
-    input: "3-123456-7-25-08",
+    input: "3-127086-7-25-08",
     id: "citi",
     kind: "new",
     subjectCategory: "ordinary",
   },
   {
-    input: "3-123456-7-41-08",
+    input: "3-127086-7-41-08",
     id: "citi",
     kind: "new",
     subjectCategory: "current",
@@ -274,10 +276,10 @@ export const FIXTURES = [
     subjectCategory: "treasury",
   },
   {
-    input: "500-37-678901",
+    input: "500-23-678901-2",
     id: "jeonbuk",
     kind: "old",
-    subjectCategory: "savings",
+    subjectCategory: "corporate-free",
   },
   {
     input: "220-123456789-0",

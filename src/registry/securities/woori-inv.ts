@@ -8,7 +8,7 @@ export const wooriInv = /* @__PURE__ */ defineInstitution({
   nameEn: "Woori Investment & Securities",
   category: "securities",
   aliases: ["우리투자증권", "우리투자", "한국포스증권"],
-  priority: 30,
+  userBaseMillions: 4,
   successorOf: ["korea-fos-sec"],
   patterns: [
     {

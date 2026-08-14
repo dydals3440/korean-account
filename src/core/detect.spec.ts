@@ -98,19 +98,30 @@ describe("detect", () => {
     });
   });
 
-  describe("농협 13자리 끝자리 무관 kind=new 유지", () => {
-    test.each(["01", "02", "03", "04", "05", "09"])(
-      "끝자리 %s 도 보통/저축 prefix 이면 kind=new",
+  describe("농협 13자리 계좌구분 게이트 (PDF p.4)", () => {
+    test.each(["03", "04", "05"])("끝자리 %s → 농협중앙회 kind=new", (tail) => {
+      // Given
+      const input = `351-1234-5678-${tail}`;
+
+      // When
+      const [r] = detect(input);
+
+      // Then
+      expect(r?.institution.id).toBe("nh-coop");
+      expect(r?.kind).toBe("new");
+    });
+
+    test.each(["01", "02"])(
+      "끝자리 %s (은행 소유 구분) 은 중앙회 351 prefix 와 매칭되지 않는다",
       (tail) => {
         // Given
         const input = `351-1234-5678-${tail}`;
 
         // When
-        const [r] = detect(input);
+        const results = detect(input);
 
         // Then
-        expect(r?.institution.id).toBe("nh-coop");
-        expect(r?.kind).toBe("new");
+        expect(results.find((r) => r.institution.id === "nh-coop")).toBeUndefined();
       },
     );
   });

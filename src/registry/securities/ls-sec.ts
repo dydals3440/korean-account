@@ -9,7 +9,7 @@ export const lsSec = /* @__PURE__ */ defineInstitution({
   nameEn: "LS Securities",
   category: "securities",
   aliases: ["엘에스투자증권", "LS투자증권", "이베스트투자증권", "이베스트"],
-  priority: 25,
+  userBaseMillions: 3,
   successorOf: ["ebest-legacy"],
   patterns: [
     {

@@ -9,6 +9,12 @@ const nhCoopSubjectsNew = [
   /* @__PURE__ */ defineSubject({ code: "355", category: "corporate-free" }),
 ];
 
+// PDF p.4: the coop 13d scheme applies only when 계좌구분 (last digit) is 3–5
+// (농협은행 owns 1–2). 028 exists on both sides; this digit is the only
+// disambiguator.
+const ACCOUNT_CLASS_3_TO_5 = (digits: string) =>
+  digits[12] === "3" || digits[12] === "4" || digits[12] === "5";
+
 export const nhCoop = /* @__PURE__ */ defineInstitution({
   id: "nh-coop",
   code: "012",
@@ -17,7 +23,7 @@ export const nhCoop = /* @__PURE__ */ defineInstitution({
   nameEn: "NongHyup Central",
   category: "non-bank",
   aliases: ["농협중앙회", "지역농협", "단위농협", "농축협", "축협"],
-  priority: 70,
+  userBaseMillions: 18,
   patterns: [
     {
       template: T("XXX-XXXX-XXXX-XX"),
@@ -26,12 +32,16 @@ export const nhCoop = /* @__PURE__ */ defineInstitution({
       identifiers: ["351", "352", "356", "355"],
       subjectPosition: { start: 0, length: 3 },
       subjects: nhCoopSubjectsNew,
+      // PDF p.4: the coop 13d scheme applies only when 계좌구분 (last digit)
+      // is 3, 4, or 5 (1/2 belong to NH Bank).
+      additionalRules: [ACCOUNT_CLASS_3_TO_5],
       effectiveFrom: "2009-01-28",
     },
     // 13d next-gen installment savings (incoming only) — 5 codes listed in the PDF.
     {
       template: T("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["354", "360", "384", "394", "398"],
       subjectPosition: { start: 0, length: 3 },
@@ -47,6 +57,7 @@ export const nhCoop = /* @__PURE__ */ defineInstitution({
     {
       template: T("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["028"],
       subjectPosition: { start: 0, length: 3 },

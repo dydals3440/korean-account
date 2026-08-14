@@ -9,8 +9,14 @@ export const kbank = /* @__PURE__ */ defineInstitution({
   nameEn: "K Bank",
   category: "bank",
   aliases: ["K뱅크", "케이뱅크", "Kbank"],
-  priority: 65,
+  userBaseMillions: 15,
   patterns: [
+    // PDF p.13: 12 digits = product(4)-random(4)-serial(4), printed format 3-3-6.
+    {
+      template: T("XXX-XXX-XXXXXX"),
+      kind: "new",
+      note: "개인/법인 실계좌 (3-3-6)",
+    },
     {
       template: T("X-XXXXXXXXX"),
       kind: "incoming-only",

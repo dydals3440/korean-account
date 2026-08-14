@@ -1,6 +1,7 @@
 import { buildDetectorIndex } from "./detector-index";
 import { scoreToConfidence } from "./confidence";
 import { normalizeAccount } from "./normalize-account";
+import { prevalence } from "./prevalence";
 import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
 import { normalizeSubject } from "./subjects";
 import type {
@@ -304,15 +305,15 @@ function resolveCheckDigit(
   return verifier(digits);
 }
 
-/** Sort by score (desc), then institution priority (desc), then kind order (desc). */
+/** Sort by score (desc), then prevalence prior (desc), then kind order (desc). */
 function compareDetections(a: DetectionResult, b: DetectionResult): number {
   if (b.score !== a.score) {
     return b.score - a.score;
   }
-  const aPriority = a.institution.priority ?? 0;
-  const bPriority = b.institution.priority ?? 0;
-  if (bPriority !== aPriority) {
-    return bPriority - aPriority;
+  const aPrevalence = prevalence(a.institution);
+  const bPrevalence = prevalence(b.institution);
+  if (bPrevalence !== aPrevalence) {
+    return bPrevalence - aPrevalence;
   }
   return KIND_ORDER[b.kind] - KIND_ORDER[a.kind];
 }

@@ -9,7 +9,7 @@ export const kiwoom = /* @__PURE__ */ defineInstitution({
   nameEn: "Kiwoom Securities",
   category: "securities",
   aliases: ["키움", "키움증권"],
-  priority: 65,
+  userBaseMillions: 14,
   patterns: [
     {
       template: T("XXXX-XXXX-XX"),

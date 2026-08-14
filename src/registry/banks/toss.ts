@@ -10,7 +10,7 @@ export const toss = /* @__PURE__ */ defineInstitution({
   nameEn: "Toss Bank",
   category: "bank",
   aliases: ["토스", "토스뱅크"],
-  priority: 75,
+  userBaseMillions: 13.8,
   patterns: [
     // PDF: `subject(3)-serial(8)-check(1)`. ordinary: 100 / corporate-free: 150.
     {
@@ -36,8 +36,9 @@ export const toss = /* @__PURE__ */ defineInstitution({
       identifiers: ["17", "19"],
       subjectPosition: { start: 0, length: 2 },
       subjects: [
-        defineSubject({ code: "17", category: "ordinary", virtual: true }),
-        defineSubject({ code: "19", category: "ordinary", virtual: true }),
+        // PDF p.13: withdrawal transfer unavailable (○×○×).
+        defineSubject({ code: "17", category: "ordinary", virtual: true, allowsWithdrawal: false }),
+        defineSubject({ code: "19", category: "ordinary", virtual: true, allowsWithdrawal: false }),
       ],
       branchRule: toss12First1719,
       effectiveFrom: "2023-08-01",

@@ -8,6 +8,6 @@ export const deutsche = /* @__PURE__ */ defineInstitution({
   nameEn: "Deutsche Bank",
   category: "bank",
   aliases: ["도이치"],
-  priority: 5,
+  userBaseMillions: 0.01,
   patterns: [{ template: T("XXXXXXXXXX"), kind: "new" }],
 });

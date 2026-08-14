@@ -9,7 +9,7 @@ export const hanaSec = /* @__PURE__ */ defineInstitution({
   nameEn: "Hana Securities",
   category: "securities",
   aliases: ["하나증권", "하나금융투자"],
-  priority: 35,
+  userBaseMillions: 4.8,
   successorOf: ["hana-fin-invest"],
   patterns: [
     { template: T("XXXXXXX-X"), kind: "new" },

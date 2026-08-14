@@ -9,7 +9,7 @@ export const kdb = /* @__PURE__ */ defineInstitution({
   nameEn: "Korea Development Bank",
   category: "bank",
   aliases: ["산업은행", "KDB", "산은"],
-  priority: 40,
+  userBaseMillions: 0.5,
   patterns: [
     {
       template: T("XXX-XX-XXXXX-X"),
@@ -37,18 +37,16 @@ export const kdb = /* @__PURE__ */ defineInstitution({
         defineSubject({ code: "022", category: "corporate-free" }),
       ],
     },
+    // PDF p.1: the 010 row is ×○○○ (withdrawal transfer available); only
+    // 036 (정기적금) is deposit-only per the 비고.
     {
       template: T("XXX-XXXXXXXX-XXX"),
-      kind: "incoming-only",
+      kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["010", "036"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({
-          code: "010",
-          category: "treasury",
-          allowsWithdrawal: false,
-        }),
+        defineSubject({ code: "010", category: "treasury" }),
         defineSubject({
           code: "036",
           category: "installment",

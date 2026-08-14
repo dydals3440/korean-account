@@ -9,7 +9,7 @@ export const gwangju = /* @__PURE__ */ defineInstitution({
   nameEn: "Gwangju Bank",
   category: "bank",
   aliases: ["광주", "광주은행", "JB광주"],
-  priority: 25,
+  userBaseMillions: 1.5,
   patterns: [
     {
       template: T("XXX-XXX-XXXXX-X"),
@@ -57,7 +57,8 @@ export const gwangju = /* @__PURE__ */ defineInstitution({
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "107", category: "ordinary" }),
-        defineSubject({ code: "109", category: "ordinary" }),
+        // PDF p.8: 13d column layout matches the 12d row — 109 is 국고 (treasury).
+        defineSubject({ code: "109", category: "treasury" }),
         defineSubject({ code: "121", category: "savings" }),
         defineSubject({ code: "103", category: "household-current" }),
         defineSubject({ code: "101", category: "current" }),

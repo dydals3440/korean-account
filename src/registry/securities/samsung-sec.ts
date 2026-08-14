@@ -8,7 +8,7 @@ export const samsungSec = /* @__PURE__ */ defineInstitution({
   nameEn: "Samsung Securities",
   category: "securities",
   aliases: ["삼성증권"],
-  priority: 60,
+  userBaseMillions: 12.5,
   patterns: [
     { template: T("XXXXXXXX"), kind: "new" },
     { template: T("XXXXXXXXXX"), kind: "new", effectiveFrom: "2013-05-20" },
