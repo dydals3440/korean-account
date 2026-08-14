@@ -562,7 +562,7 @@ CMS 계좌번호는 기관·자릿수에 따라 **계정과목 코드(과목코�
 ### 6.2 사용 패턴
 
 ```ts
-import { detectBest, institutionById } from "korean-account";
+import { detectBest } from "korean-account";
 
 // 표준은행코드 기반 서버를 쓰는 컨슈머
 const top = detectBest("161-910278-72907");
@@ -575,12 +575,11 @@ const cmsCode = top?.institution.code;
 // → "005" (하나은행 CMS)
 ```
 
-### 6.3 잠재 추가 mismatch — 후속 점검 대상
+### 6.3 mismatch 는 하나은행뿐 — 나머지는 두 namespace 동일
 
-- **농협중앙(012)** — 표준 매핑 별도 확인 (현재 라이브러리 `commonCode` 미지정)
-- **수협 007 ↔ 수협중앙 030 (2025.11 분리)** — 표준의 분리 시점·대표코드 정책 확인
-- **외국계 미참가 (054 HSBC / 055 도이치 / 057 JPMC / 061 BNP파리바)** — 표준 등록 여부 확인. 활성화 시 `commonCode` 패턴으로 흡수.
-- **하나은행 CMS 별칭 `081`** — PDF 표 § 3 의 "005 하나은행: 025, 033, 080, 081, 082" 별칭 set 에 `081` 포함되나, 라이브러리는 `hanaSecuritiesCma (code: "081")` 와 코드 충돌 회피 위해 `hana.aliasCodes` 에서 081 누락. 의도된 trade-off — `institutionByCode("081")` 은 _하나증권 CMA_ 만 반환.
+등록 기관 중 CMS `code` 와 표준은행코드가 갈라지는 곳은 하나은행 (005 ↔ 081) 하나다. 나머지는 두 namespace 의 코드가 동일해 `commonCode` 를 생략하며, `src/registry/common-code.spec.ts` 가 이를 회귀 가드로 고정한다. 농협중앙회(012) ↔ 표준 012 (지역농·축협), 외국계 미참가 4곳 (054/055/057/061) 모두 동일 번호이고, 수협 분리 (2025.11.10) 도 CMS·표준 양쪽에 같은 코드로 시행됐다 — 수협은행 007 (지점 009) / 수협중앙회 030 (지점 069·070). ([KFTC 공지](https://www.cmsedi.or.kr/edi/board/notice/view/1006))
+
+**CMS 코드 `081` 주의** — PDF § 3 은 081 을 하나은행 별칭 set ("005 하나은행: 025, 033, 080, 081, 082") 에도 올려 두지만, CMS namespace 에서 081 의 대표 주인은 별개 기관인 _하나증권 CMA_ 다. 라이브러리는 충돌을 피해 `hana.aliasCodes` 에서 081 을 제외하므로 `getInstitution("081")` 은 하나증권 CMA 를 반환한다. 하나은행의 표준은행코드가 필요하면 `hana.commonCode` (`"081"`) 를 읽는다 (§ 6.2 패턴).
 
 ### 6.4 출처
 
@@ -591,7 +590,7 @@ const cmsCode = top?.institution.code;
 
 # Appendix A. API 레퍼런스
 
-README 는 가장 흔히 쓰는 `detectBest` / `detectAccount` / `defaultDetector` 까지만 다룬다. 이 Appendix 는 자체 detector 를 구성하거나 결과 객체를 깊게 활용할 사람을 위한 전체 레퍼런스.
+README 는 가장 흔히 쓰는 `detectBest` / `detect` / `createDetector` 까지만 다룬다. 이 Appendix 는 자체 detector 를 구성하거나 결과 객체를 깊게 활용할 사람을 위한 전체 레퍼런스.
 
 ## A.1 타입
 
@@ -616,14 +615,14 @@ README 는 가장 흔히 쓰는 `detectBest` / `detectAccount` / `defaultDetecto
 
 | 필드                  | 타입                        | 의미                                                                                                                         |
 | --------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `template`            | `PatternTemplate`           | `createPatternTemplate("XXX-XX-XXXXXX")` 로 만든 브랜드 문자열. `X` = 한 자리, `-` = 시각 그루핑.                            |
+| `template`            | `PatternTemplate`           | `patternTemplate("XXX-XX-XXXXXX")` 로 만든 브랜드 문자열. `X` = 한 자리, `-` = 시각 그루핑.                                  |
 | `kind`                | `AccountKind`               | new / old / virtual / lifetime / incoming-only / merged-legacy.                                                              |
-| `identifierPosition`  | `Position`                  | 0-indexed digit 범위 `{ start, length }`.                                                                                    |
+| `identifierPosition`  | `DigitSpan`                 | 0-indexed digit 범위 `{ start, length }`.                                                                                    |
 | `identifiers`         | `readonly string[]`         | identifierPosition 자리에 일치해야 할 값들.                                                                                  |
 | `identifierRange`     | `{ from, to }`              | identifiers 대신 숫자 range 로 매칭 (수치 비교).                                                                             |
-| `subjectPosition`     | `Position`                  | 과목 코드 위치. identifierPosition 과 같을 수도, 다를 수도.                                                                  |
+| `subjectPosition`     | `DigitSpan`                 | 과목 코드 위치. identifierPosition 과 같을 수도, 다를 수도.                                                                  |
 | `subjects`            | `readonly Subject[]`        | subjectPosition 자리의 값과 매칭.                                                                                            |
-| `checkDigitPosition`  | `Position`                  | 체크디지트 위치. 알고리즘은 PDF 가 비공개이므로 검증 미구현.                                                                 |
+| `checkDigitPosition`  | `DigitSpan`                 | 체크디지트 위치. 알고리즘은 PDF 가 비공개이므로 검증 미구현.                                                                 |
 | `validatesCheckDigit` | `boolean`                   | `false` 면 명시적 미검증 (광주 12d 731, 수협 분리 이후 등). 미지정 시 알고리즘 자체 미구현.                                  |
 | `branchRule`          | `BranchRule`                | 패턴 매칭 후 institution / kind / virtual 을 override 하는 분기 (§ A.4).                                                     |
 | `additionalRules`     | `readonly AdditionalRule[]` | **게이트 + 가산**. 자릿수가 일치하는 입력에서 하나라도 false 면 _패턴 자체가 후보에서 제외_. 모두 통과해야 룰 개수만큼 가산. |
@@ -651,7 +650,7 @@ README 는 가장 흔히 쓰는 `detectBest` / `detectAccount` / `defaultDetecto
 
 | 타입                     | 의미                                                                                                             |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `Position`               | `{ start: number; length: number }` — 0-indexed digit 범위.                                                      |
+| `DigitSpan`              | `{ start: number; length: number }` — 0-indexed digit 범위.                                                      |
 | `Subject`                | `{ code, category, label?, allowsWithdrawal?, virtual?, effectiveFrom?, note? }`. 기본 `allowsWithdrawal: true`. |
 | `BranchRule`             | `{ describe: string; evaluate: (digits) => BranchRuleResult \| null }`.                                          |
 | `BranchRuleResult`       | `{ institutionId?, kindOverride?, virtualOverride? }`.                                                           |
@@ -682,7 +681,7 @@ README 는 가장 흔히 쓰는 `detectBest` / `detectAccount` / `defaultDetecto
 
 ```
 input
-  ↓ normalize        "318-081775-01-014" → "31808177501014"
+  ↓ normalizeAccount "318-081775-01-014" → "31808177501014"
   ↓ scorePattern     length / identifier / subject / additionalRules 가산
   ↓ branchRule       institution / kind / virtual override
   ↓ filter           categories / kinds / include / exclude / minScore
@@ -727,8 +726,9 @@ DetectionResult[]
 ### 가중치 커스터마이징
 
 ```ts
-const aggressive = createDetector({
-  institutions: pickInstitutions(),
+import { createDetector, institutions } from "korean-account";
+
+const aggressive = createDetector(institutions, {
   scoring: { identifierMatch: 6, subjectMatch: 4, kindNewBonus: 1 },
 });
 ```
@@ -837,22 +837,22 @@ IBK 14d new (컨슈머 보강에 가드 `d[3]!=="9"`):
 
 ## B.1 영역별 경계
 
-| 영역              | PDF 코어 (`defaultDetector`)                             | 컨슈머 책임                                                 |
-| ----------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
-| 등록 기관         | ~60곳 — CMS PDF 표 행에 명시된 모든 참가기관             | 사내 정산·B2B 가상계좌 발급사·미참가 외국계 활성화 등       |
-| 과목 코드         | PDF 표에 enumerate 된 값만 (예: 050 = 13/21/22/23 4개)   | 실세계 운영 코드 (050 의 11/14/15/17/18/24~28/33 등)        |
-| Identifier prefix | PDF 명시 길이/값만 (예: K뱅크 13d 첫 자리 미명시)        | tightening (카카오 1→4자리, 토스 3→4자리, K뱅크 100 prefix) |
-| 분기 규칙         | PDF 명시 8건 (수협 4 / KB 1 / K뱅크 2 / 토스 1)          | 사내 prefix → kind override, 도메인 규칙 등                 |
-| 체크디지트        | 값 위치만 명시 — 알고리즘 미구현 (PDF 비공개)            | `checkDigitVerifiers` 옵션으로 verifier 등록                |
-| 외환 14d 식별     | PDF 8개 prefix (117/158/161/162/210/379/600/655)         | 4번째 자리 "9" 광범위 휴리스틱                              |
-| 외국계 미참가     | 메타만 등록 (HSBC 054 / 도이치 055 / JPMC 057 / BNP 061) | 활성화 시 컨슈머가 패턴 추가                                |
+| 영역              | PDF 코어 (전체 레지스트리 `institutions`)                                          | 컨슈머 책임                                           |
+| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 등록 기관         | 57곳 — CMS PDF 표 행에 명시된 모든 참가기관                                        | 사내 정산·B2B 가상계좌 발급사·미참가 외국계 활성화 등 |
+| 과목 코드         | PDF 표에 enumerate 된 값만 (예: 050 = 13/21/22/23 4개)                             | 실세계 운영 코드 (050 의 11/14/15/17/18/24~28/33 등)  |
+| Identifier prefix | PDF 명시 길이/값 + 실세계 확립 신호 (카카오 3333·7979 — 0.2.0 에서 core 로 승격됨) | tightening (토스 3→4자리, K뱅크 100 prefix)           |
+| 분기 규칙         | PDF 명시 8건 (수협 4 / KB 1 / K뱅크 2 / 토스 1)                                    | 사내 prefix → kind override, 도메인 규칙 등           |
+| 체크디지트        | 값 위치만 명시 — 알고리즘 미구현 (PDF 비공개)                                      | `checkDigitVerifiers` 옵션으로 verifier 등록          |
+| 외환 14d 식별     | PDF 8개 prefix (117/158/161/162/210/379/600/655)                                   | 4번째 자리 "9" 광범위 휴리스틱                        |
+| 외국계 미참가     | 메타만 등록 (HSBC 054 / 도이치 055 / JPMC 057 / BNP 061)                           | 활성화 시 컨슈머가 패턴 추가                          |
 
 ## B.2 detector 합성 도식
 
 ```
-        ┌─ defaultDetector (PDF-strict 코어, 라이브러리 본판) ─┐
-        │   ~60 institutions, PDF 표 행만                      │
-        └────────────────────┬──────────────────────────────────┘
+        ┌─ createDetector(institutions) (PDF-strict 코어) ─────┐
+        │   57 institutions, PDF 표 행만                       │
+        └────────────────────┬─────────────────────────────────┘
                              │ .extend({ institutions: [...] })
                              │   ← replace-on-id 시맨틱
                              ▼
@@ -907,13 +907,13 @@ function canRegisterAutoDebit(input: string) {
 
 ```tsx
 import { useDeferredValue, useMemo, useState } from "react";
-import { detectAccount, type DetectionResult } from "korean-account";
+import { detect, type DetectionResult } from "korean-account";
 
 function AccountInput() {
   const [raw, setRaw] = useState("");
   const deferred = useDeferredValue(raw);
   const candidates = useMemo<readonly DetectionResult[]>(
-    () => detectAccount(deferred, { limit: 3 }),
+    () => detect(deferred, { limit: 3 }),
     [deferred],
   );
 
@@ -936,15 +936,18 @@ function AccountInput() {
 
 라이브러리 본판 위에 도메인 보강 patterns 를 얹어 자체 detector 를 만든다. 8건의 실제 보강 사례는 Appendix D.1.
 
+> 아래 카카오 3333·7979 tightening 은 **0.2.0 에서 core 로 승격됨** — 이제 별도 보강 없이 기본 동작이다. 같은 기법을 다른 기관에 적용하는 예시로만 참고할 것.
+
 ```ts
 import {
-  createPatternTemplate as T,
-  defaultDetector,
+  createDetector,
   defineInstitution,
-  institutionById,
+  getInstitution,
+  institutions,
+  patternTemplate as T,
 } from "korean-account";
 
-const kakaoCore = institutionById("kakao");
+const kakaoCore = getInstitution("kakao"); // 등록 literal → non-null
 const kakaoExtended = defineInstitution({
   id: "kakao",
   code: "090",
@@ -952,20 +955,152 @@ const kakaoExtended = defineInstitution({
   category: "bank",
   aliases: ["카카오"],
   userBaseMillions: 5,
-  patterns:
-    kakaoCore?.patterns.map((p) =>
-      p.kind === "new" && !p.identifiers
-        ? { ...p, identifierPosition: { start: 0, length: 4 }, identifiers: ["3333", "7979"] }
-        : p,
-    ) ?? [],
+  patterns: kakaoCore.patterns.map((p) =>
+    p.kind === "new" && !p.identifiers
+      ? { ...p, identifierPosition: { start: 0, length: 4 }, identifiers: ["3333", "7979"] }
+      : p,
+  ),
 });
 
-export const myDetector = defaultDetector.extend({
+export const myDetector = createDetector(institutions).extend({
   institutions: [kakaoExtended],
 });
 ```
 
 ---
+
+## C.5 React Hook Form + zodResolver
+
+`accountSchema` 로 형식을 검증하고, 입력을 지켜보며 감지 결과를 폼 옆에 보여준다.
+
+```tsx
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { accountSchema } from "korean-account/zod";
+import { accountKindLabels, detectBest } from "korean-account";
+
+const transferSchema = z.object({
+  account: accountSchema,
+  amount: z.number().positive(),
+});
+type TransferInput = z.infer<typeof transferSchema>;
+
+export function TransferForm({ onSubmit }: { onSubmit: (v: TransferInput) => void }) {
+  const form = useForm<TransferInput>({ resolver: zodResolver(transferSchema) });
+  const detected = detectBest(form.watch("account") ?? "");
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <input {...form.register("account")} inputMode="numeric" placeholder="계좌번호" />
+      {detected && detected.confidence !== "low" && (
+        <p aria-live="polite">
+          {detected.institution.nameKo} · {accountKindLabels[detected.kind]}
+        </p>
+      )}
+      <p role="alert">{form.formState.errors.account?.message}</p>
+    </form>
+  );
+}
+```
+
+## C.6 TanStack Form
+
+zod 스키마를 validator 로 그대로 물리고, 필드 값으로 감지한다.
+
+```tsx
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import { accountSchema } from "korean-account/zod";
+import { detectBest } from "korean-account";
+
+const form = useForm({
+  defaultValues: { account: "" },
+  validators: { onChange: z.object({ account: accountSchema }) },
+  onSubmit: ({ value }) => transfer(value),
+});
+
+// <form.Field name="account"> 내부에서:
+// const detected = detectBest(field.state.value);
+// detected?.confidence === "high" 이면 은행 배지 렌더링
+```
+
+## C.7 shadcn/ui — 은행 Select 자동 선택
+
+계좌번호를 먼저 받고 은행 Select 를 감지 결과로 채운다. 수동 변경은 항상 감지를 이긴다.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { banks, createDetector } from "korean-account";
+
+const detector = createDetector(banks); // 은행만 취급하는 서비스 — 증권·비은행은 번들에서 제외
+
+export function BankField({ account }: { account: string }) {
+  const [manual, setManual] = useState<string>();
+  const detected = detector.detect(account)[0];
+  const value = manual ?? (detected?.confidence !== "low" ? detected?.institution.code : undefined);
+
+  return (
+    <Select value={value} onValueChange={setManual}>
+      <SelectTrigger>
+        <SelectValue placeholder="은행 선택" />
+      </SelectTrigger>
+      <SelectContent>
+        {banks.map((bank) => (
+          <SelectItem key={bank.id} value={bank.code}>
+            {bank.nameKo}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+```
+
+## C.8 TanStack Query — 유료 실명조회 게이트
+
+핵심 비용 패턴. **confidence 가 high 일 때만** 건당 과금되는 실명조회 API 를 호출한다 — 오타·미완성 입력이 유료 호출로 새지 않는다.
+
+```tsx
+import { useQuery } from "@tanstack/react-query";
+import { detectBest, normalizeAccount } from "korean-account";
+
+export function useAccountHolder(rawAccount: string) {
+  const digits = normalizeAccount(rawAccount);
+  const detected = detectBest(digits);
+  const bankCode = detected?.institution.commonCode ?? detected?.institution.code;
+
+  return useQuery({
+    queryKey: ["account-holder", bankCode, digits],
+    queryFn: () => fetchAccountHolder(bankCode!, digits), // 유료: 오픈뱅킹 계좌실명조회 등
+    enabled: detected?.confidence === "high" && detected.capabilities.allowsWithdrawal,
+    staleTime: Infinity, // 같은 계좌는 재조회하지 않는다
+  });
+}
+```
+
+## C.9 입력 중 실시간 포맷팅
+
+매칭된 패턴의 템플릿으로 하이픈 그루핑을 실시간 적용한다.
+
+```tsx
+import { detectBest, formatAccount, normalizeAccount } from "korean-account";
+
+function formatAsTyped(raw: string): string {
+  const digits = normalizeAccount(raw);
+  const top = detectBest(digits);
+  return top ? formatAccount(digits, top.matchedPattern.template) : digits;
+}
+
+// <input value={value} onChange={(e) => setValue(formatAsTyped(e.target.value))} />
+// "110436387740" 입력 → "110-436-387740" 표시
+```
 
 # Appendix D. 확장 mechanics
 
@@ -1013,12 +1148,12 @@ const savingsBankExtended = defineInstitution({
 - **사이드이펙트**: 가드 없으면 외환 14d 가 동률로 KB 에 흡수.
 
 ```ts
-const kbCore = institutionById("kb");
+const kbCore = getInstitution("kb"); // 등록 literal → non-null
 const kbExtended = defineInstitution({
   id: "kb",
   // ... 메타 ...
   patterns: [
-    ...(kbCore?.patterns ?? []),
+    ...kbCore.patterns,
     {
       template: T("XXXXXX-XX-XXXXXX"),
       kind: "new",
@@ -1039,7 +1174,9 @@ const kbExtended = defineInstitution({
 - **보강 전략**: 코어 패턴 의 identifierPosition 을 `{0,3}` 로 좁히고 `identifiers: ["100"]`.
 - **사이드이펙트**: 없음 (1자리 첫자리 식별이 3자리로 보강돼 신뢰도 boost).
 
-### D.1.4 090 카카오뱅크 — 4자리 prefix tightening
+### D.1.4 090 카카오뱅크 — 4자리 prefix tightening (0.2.0 에서 core 로 승격됨)
+
+> **0.2.0 에서 core 로 승격됨** — 이 보강은 이제 라이브러리 기본 동작이다 (`3333-12-3456789` → 카카오뱅크 `high`). 컨슈머 보강이 필요 없으며, 아래 레시피는 같은 기법의 참고용으로만 남긴다.
 
 - **PDF 상태**: `□-□□□-□□□□□□□□□` 업무구분(1) + 상품구분(3) + 일련(9). 4자리 prefix enumerate 없음.
 - **현실**: 카카오뱅크는 `3333` / `7979` 두 prefix 만 사용.
@@ -1108,13 +1245,13 @@ const hanaExtended = defineInstitution({
 
 § D.1 의 8건을 _어떤 신호 → 어떤 기법_ 으로 추상화하면 5가지로 떨어진다.
 
-| 분류                     | 의도                                           | 기법                                               | 사례                                       |
-| ------------------------ | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
-| **과목코드 확장**        | PDF 가 enumerate 안 한 운영 과목 추가          | `subjects: [...pdf, ...extra]` (같은 patterns 위)  | savings-bank                               |
-| **신규 패턴**            | PDF 에 없는 자릿수/형식의 patterns 자체 추가   | `patterns: [...core, newPattern]`                  | kb 본점 14d, nh-coop 11d                   |
-| **Prefix tightening**    | 1~3자리 → 더 긴 prefix 로 좁힘                 | `identifierPosition.length` ↑ + `identifiers` 좁힘 | kbank 100, kakao 3333/7979, toss 1000/1500 |
-| **휴리스틱 광범위 매칭** | PDF 명시 prefix 외 광범위 신호 (4번째 자리 등) | 1자리 identifier + `additionalRules` 게이트        | hana 외환 d[3]="9"                         |
-| **충돌 가드**            | 다른 기관이 우연 동률로 흡수하는 회귀 차단     | 기존 패턴 `additionalRules` 에 가드 추가           | kb 14d / ibk 14d 의 `d[3]!=="9"`           |
+| 분류                     | 의도                                           | 기법                                               | 사례                                                                     |
+| ------------------------ | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| **과목코드 확장**        | PDF 가 enumerate 안 한 운영 과목 추가          | `subjects: [...pdf, ...extra]` (같은 patterns 위)  | savings-bank                                                             |
+| **신규 패턴**            | PDF 에 없는 자릿수/형식의 patterns 자체 추가   | `patterns: [...core, newPattern]`                  | kb 본점 14d, nh-coop 11d                                                 |
+| **Prefix tightening**    | 1~3자리 → 더 긴 prefix 로 좁힘                 | `identifierPosition.length` ↑ + `identifiers` 좁힘 | kbank 100, toss 1000/1500 (kakao 3333/7979 는 0.2.0 에서 core 로 승격됨) |
+| **휴리스틱 광범위 매칭** | PDF 명시 prefix 외 광범위 신호 (4번째 자리 등) | 1자리 identifier + `additionalRules` 게이트        | hana 외환 d[3]="9"                                                       |
+| **충돌 가드**            | 다른 기관이 우연 동률로 흡수하는 회귀 차단     | 기존 패턴 `additionalRules` 에 가드 추가           | kb 14d / ibk 14d 의 `d[3]!=="9"`                                         |
 
 ### 결정 트리
 
@@ -1137,7 +1274,7 @@ PDF 에 코드/패턴이 있는가?
 ### 새 institution 추가
 
 ```ts
-import { createPatternTemplate, defaultDetector, defineInstitution } from "korean-account";
+import { createDetector, defineInstitution, institutions, patternTemplate } from "korean-account";
 
 const myFintech = defineInstitution({
   id: "my-fintech",
@@ -1147,7 +1284,7 @@ const myFintech = defineInstitution({
   aliases: [],
   patterns: [
     {
-      template: createPatternTemplate("XXX-XXXX-XXXX"),
+      template: patternTemplate("XXX-XXXX-XXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["999"],
@@ -1155,7 +1292,7 @@ const myFintech = defineInstitution({
   ],
 });
 
-const detector = defaultDetector.extend({ institutions: [myFintech] });
+const detector = createDetector(institutions).extend({ institutions: [myFintech] });
 detector.detect("999-1234-5678");
 ```
 
@@ -1164,15 +1301,14 @@ detector.detect("999-1234-5678");
 `extend({ institutions: [override] })` 에서 같은 id 의 institution 이 들어오면 _기존 본을 자동 교체_ 한다. `.remove(id).extend(...)` 체인을 강제하지 않는다.
 
 ```ts
-const base = institutionById("savings-bank");
-if (!base) throw new Error("savings-bank 누락");
+const base = getInstitution("savings-bank"); // 등록 literal → non-null
 
 const extended = defineInstitution({
   ...base,
   patterns: [
     ...base.patterns,
     {
-      template: createPatternTemplate("XXX-XX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XX-XXXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 5, length: 2 },
       subjects: [
@@ -1187,7 +1323,7 @@ const extended = defineInstitution({
   ],
 });
 
-const detector = defaultDetector.extend({ institutions: [extended] });
+const detector = createDetector(institutions).extend({ institutions: [extended] });
 detector.detect("066-43-15-739026-6");
 // → savings-bank, kind: "virtual", subject.code: "15"
 ```
@@ -1209,13 +1345,11 @@ const rule = defineBranchRule({
 ### 카테고리/기관 일부만 사용
 
 ```ts
-import { createDetector, pickInstitutions } from "korean-account";
+import { banks, createDetector, institutions } from "korean-account";
 
-const banksOnly = createDetector({
-  institutions: pickInstitutions({ categories: ["bank"] }),
-});
+const banksOnly = createDetector(banks);
 
-const noForeignBanks = defaultDetector.remove((i) =>
+const noForeignBanks = createDetector(institutions).remove((i) =>
   ["hsbc", "deutsche", "jpmc", "boa", "bnp-paribas"].includes(i.id),
 );
 ```
@@ -1232,8 +1366,7 @@ const verifyShinhan: CheckDigitVerifier = (digits) => {
   return /* boolean */ true;
 };
 
-const detector = createDetector({
-  institutions,
+const detector = createDetector(institutions, {
   checkDigitVerifiers: {
     shinhan: verifyShinhan,
   },
@@ -1247,40 +1380,40 @@ r?.capabilities.validatedCheckDigit; // true / false / null
 
 ## D.4 선택자 & 메타 조회
 
-### `institutionById` / `institutionByCode` (literal narrow)
+### `getInstitution` (literal narrow)
 
-등록된 id / code literal 을 직접 넘기면 반환 institution 의 `id` · `code` · `category` 가 literal 로 좁혀진다.
+id 또는 CMS 코드(별칭 포함) 로 조회한다. 등록된 id / code literal 을 직접 넘기면 반환 타입이 **non-null** 이고 `id` · `code` · `category` 가 literal 로 좁혀진다. 런타임 문자열(비 literal)을 넘기면 `Institution | null` 로 widen 된다.
 
 ```ts
-import { institutionById, institutionByCode, institutions } from "korean-account";
+import { getInstitution } from "korean-account";
 
-const shinhan = institutionById("shinhan");
-shinhan?.id; // "shinhan"
-shinhan?.code; // "088"
-shinhan?.category; // "bank"
+const shinhan = getInstitution("shinhan"); // 등록 literal → non-null
+shinhan.id; // "shinhan"
+shinhan.code; // "088"
+shinhan.category; // "bank"
 
-const ibk = institutionByCode("003");
-ibk?.id; // "ibk"
+const ibk = getInstitution("003"); // CMS 코드 literal 도 동일
+ibk.id; // "ibk"
 ```
 
-### `pickInstitutions` / `pickInstitutionsByIds` (type-safe filter)
+### `searchInstitutions` (type-safe filter)
 
-`pickInstitutions` 는 `categories` / `include` / `exclude` 를 cross-narrow 한다. `categories` 가 지정되면 `include` / `exclude` 가 받을 수 있는 id 도 그 카테고리 안의 id 로 제한된다.
+`searchInstitutions` 는 `categories` / `include` / `exclude` 를 cross-narrow 한다 (`SearchInstitutionsFilter`). `categories` 가 지정되면 `include` / `exclude` 가 받을 수 있는 id 도 그 카테고리 안의 id 로 제한된다.
 
 ```ts
-import { pickInstitutions, pickInstitutionsByIds } from "korean-account";
+import { searchInstitutions } from "korean-account";
 
-const banks = pickInstitutions({ categories: ["bank"] });
+const bankList = searchInstitutions({ categories: ["bank"] });
 
-const major = pickInstitutions({
+const major = searchInstitutions({
   categories: ["bank"],
   include: ["kb", "shinhan", "hana"],
 });
 
 // ❌ 컴파일 에러: "kiwoom" 은 securities 라 bank 카테고리 안에 없음
-// pickInstitutions({ categories: ["bank"], include: ["kiwoom"] });
+// searchInstitutions({ categories: ["bank"], include: ["kiwoom"] });
 
-const big5 = pickInstitutionsByIds({
+const big5 = searchInstitutions({
   include: ["kb", "shinhan", "hana", "woori", "nh"],
 });
 ```
@@ -1312,23 +1445,23 @@ subjectCategoryLabels.savings; // "저축예금"
 
 ```ts
 import {
-  normalize,
+  normalizeAccount,
   formatAccount,
   extractIdentifier,
   extractSubject,
-  createPatternTemplate,
+  patternTemplate,
   scoreToConfidence,
   defineSubject,
   defineBranchRule,
 } from "korean-account";
 
-normalize("110-436-387740"); // "110436387740"
-formatAccount("110436387740", createPatternTemplate("XXX-XXX-XXXXXX")); // "110-436-387740"
+normalizeAccount("110-436-387740"); // "110436387740"
+formatAccount("110436387740", patternTemplate("XXX-XXX-XXXXXX")); // "110-436-387740"
 ```
 
-### zod 스키마 (`korean-account/schema`)
+### zod 스키마 (`korean-account/zod`)
 
-검증이 필요한 경우에만 서브 엔트리에서 가져온다. 메인 진입점은 zod 를 require 하지 않는다.
+검증이 필요한 경우에만 서브 엔트리에서 가져온다. 메인 진입점은 zod 를 require 하지 않으며, zod v3 (≥3.23) 과 v4 를 모두 지원한다.
 
 ```ts
 import {
@@ -1337,57 +1470,73 @@ import {
   detectionSchema,
   accountKindSchema,
   subjectCategorySchema,
-} from "korean-account/schema";
+} from "korean-account/zod";
 
 accountSchema.parse("110-436-387740");
 ```
 
 ---
 
-# Appendix E. 마이그레이션 가이드
+# Appendix E. 마이그레이션 가이드 — 0.1.x → 0.2.0
 
-라이브러리 코어가 갱신될 때 컨슈머 보강 detector 를 어떻게 rebase 하는지의 체크리스트. 새 CMS PDF 가 나오거나 라이브러리 minor 가 올라갈 때 참조.
+0.2.0 은 공개 API 를 전면 재설계했다. 아래 표의 rename 만 따라가면 기계적으로 이행된다 — 스코어링·레지스트리 데이터의 동작은 카카오 3333·7979 core 승격 (Appendix D.1.4) 외에 동일하다.
 
-## E.1 코어 진단
+> 아래 표의 왼쪽 열은 **제거된 0.1.x 이름** 이다. 이 문서의 나머지 부분과 코드에는 더 이상 등장하지 않는다.
 
-`defaultDetector.institutions` 의 변화를 진단. id 가 새로 추가됐거나 삭제됐는지, code 가 바뀌었는지.
+## E.1 함수 rename
+
+| 0.1.x (제거됨)                                                | 0.2.0                                 | 비고                                                                  |
+| ------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------- |
+| `detectAccount(input, opts?)`                                 | `detect(input, opts?)`                | 시그니처 동일                                                         |
+| `normalize(input)`                                            | `normalizeAccount(input)`             |                                                                       |
+| `createPatternTemplate(tpl)`                                  | `patternTemplate(tpl)`                |                                                                       |
+| `institutionById(id)` · `institutionByCode(code)`             | `getInstitution(idOrCode)`            | 하나로 통합. **등록 literal 은 non-null 반환** (`?.` 불필요)          |
+| `pickInstitutions(filter?)` · `pickInstitutionsByIds(filter)` | `searchInstitutions(filter?)`         | 하나로 통합                                                           |
+| `createDetector({ institutions, ...opts })`                   | `createDetector(institutions, opts?)` | institutions 가 첫 위치 인자                                          |
+| `defaultDetector`                                             | **제거**                              | `detect` / `detectBest` 편의 함수 또는 `createDetector(institutions)` |
+
+## E.2 서브패스
+
+| 0.1.x (제거됨)          | 0.2.0                                                           |
+| ----------------------- | --------------------------------------------------------------- |
+| `korean-account/schema` | `korean-account/zod` — 내용 동일. zod v3 (≥3.23) · v4 모두 지원 |
+
+## E.3 타입 rename
+
+| 0.1.x (제거됨)           | 0.2.0                      |
+| ------------------------ | -------------------------- |
+| `Position`               | `DigitSpan`                |
+| `CreateDetectorInput`    | `CreateDetectorOptions`    |
+| `PickInstitutionsFilter` | `SearchInstitutionsFilter` |
+
+## E.4 데이터 모델
+
+| 0.1.x                                    | 0.2.0                                                                                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Institution.priority` (0–100 수동 지정) | `Institution.userBaseMillions` — 순수 함수 `prevalence()` 가 tie-break prior 를 계산 (아래 A.4). `priority` 는 수동 오버라이드로만 유지 |
+
+## E.5 Before / After
 
 ```ts
-import { defaultDetector } from "korean-account";
-const ids = new Set(defaultDetector.institutions.map((i) => i.id));
-console.log([...ids]);
-// 기존 컨슈머 보강 id 들이 모두 있는지 diff
+// 0.1.x
+// import { detectAccount, defaultDetector, institutionById } from "korean-account";
+// detectAccount("110-436-387740");
+// const detector = defaultDetector.extend({ institutions: [myInst] });
+// institutionById("shinhan")?.code;
+
+// 0.2.0
+import { createDetector, detect, getInstitution, institutions } from "korean-account";
+
+detect("110-436-387740");
+const detector = createDetector(institutions).extend({ institutions: [myInst] });
+getInstitution("shinhan").code; // 등록 literal → non-null, "088" 로 narrow
 ```
 
-## E.2 보강 충돌 확인
+## E.6 0.2.0 신규 (마이그레이션 무관, 활용 권장)
 
-컨슈머가 `institutionById(id)?.patterns` 로 spread 했던 모양이 신코어와 호환되는지 검증. `pickPattern(id, { kind, length })` 로 _건드릴 패턴이 살아 있는지_ 확인.
-
-```ts
-import { pickPattern } from "korean-account";
-// IBK 가드는 14d new 패턴에 의존
-pickPattern("ibk", { kind: "new", length: 14 });
-// → null 이면 코어 변경으로 패턴이 사라진 것 — 가드 보강 재설계 필요
-```
-
-## E.3 분기 규칙 변경 흡수
-
-컨슈머가 자체 분기 규칙을 썼다면 신 코어 분기와 충돌이 없는지 확인. 라이브러리 분기 8건과 컨슈머 분기를 함께 정렬해 같은 자릿수·prefix 에 두 규칙이 동시에 발동하지 않도록.
-
-## E.4 휴리스틱 재검증
-
-PDF 가 새 prefix 를 enumerate 했다면 (예: 외환 8개 → 12개) 컨슈머 휴리스틱의 제외 set (예: `HANA_FOREIGN_LEGACY_PREFIXES_FOR_HEURISTIC`) 을 갱신. 그래야 PDF 본 패턴이 잡을 케이스를 휴리스틱이 medium 으로 깎지 않는다.
-
-## E.5 회귀 dry-run
-
-실 데이터 N건을 신코어 + 컨슈머 보강 detector 에 흘려 mismatch 추적. 8차 (2026.05.15) 변경 때 "57건 dry-run → 18→11건 mismatch" 가 표준 패턴.
-
-```ts
-import { detectBest } from "korean-account";
-const cases: ReadonlyArray<{ input: string; expected: string }> = [];
-const mismatches = cases.filter((c) => detectBest(c.input)?.institution.code !== c.expected);
-console.log(mismatches.length, mismatches);
-```
+- **57개 기관 named export** (`kb`, `shinhan`, `toss`, `kbSec`, …) + `banks` / `nonBanks` / `securities` / `institutions` 배열. `createDetector([kb, shinhan])` 은 tree-shake 되어 ≈ 3.6 KB, 전체 레지스트리는 ≈ 10 KB (min+brotli). dist 는 `preserveModules` 로 배포된다.
+- 카카오뱅크 `3333` / `7979` prefix tightening 이 core 로 승격 — 기존 컨슈머 보강 (구 Appendix D.1.4 레시피) 은 제거해도 된다.
+- Node engines `>= 22.12`.
 
 ## A.4 Tie-break prior — `prevalence`
 

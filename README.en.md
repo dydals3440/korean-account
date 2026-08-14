@@ -2,7 +2,7 @@
 
 **English** · [한국어](./README.md)
 
-> A TypeScript library that identifies, classifies, and validates Korean bank account numbers. Its single source of truth is the [KFTC CMS account-number scheme by participating institution (2026.05.08)](https://www.cmsedi.or.kr/cms/board/workdata/view/1026).
+> A TypeScript library that identifies, classifies, and validates Korean financial-institution account numbers. It follows the [KFTC CMS account-number scheme by participating institution](https://www.cmsedi.or.kr/cms/board/workdata/cms) (as of 2026.05.08) as its single source of truth.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dydals3440/korean-account/main/showcase.gif" alt="korean-account demo" width="400" />
@@ -23,7 +23,7 @@ import { detectBest } from "korean-account";
 
 detectBest("110-436-387740");
 // {
-//   institution: { id: "shinhan", code: "088", nameKo: "신한은행", nameEn: "Shinhan Bank", ... },
+//   institution: { id: "shinhan", code: "088", nameKo: "신한은행", ... },
 //   kind: "new",
 //   subject: { code: "110", category: "savings", label: "저축예금" },
 //   formatted: "110-436-387740",
@@ -33,258 +33,227 @@ detectBest("110-436-387740");
 // }
 ```
 
-- **Faithful to the PDF** — a registry of 57 institutions transcribed row-by-row from the KFTC CMS document
+- **PDF-faithful core** — a 57-institution registry cross-checked institution-by-institution against the KFTC CMS PDF (25 banks · 8 non-banks · 24 securities firms)
+- **Only the banks you need** — `createDetector([kb, shinhan, toss])` is 3.6 KB; the full registry is 10 KB (min+brotli)
+- **Zero runtime dependencies** — zod is an optional peerDep only when you use `korean-account/zod` (both v3 and v4 supported)
 - **Strict TypeScript** — `getInstitution("shinhan").code` narrows to the literal `"088"`
-- **Zero runtime dependencies** — `zod` is an optional peer dependency, required only for `korean-account/schema`
-- **Universal** — Node 22.12+ · Bun · Deno · browsers · ESM and CJS
+- **Universal** — Node 22+ · Bun · Deno · browsers · ESM and CJS
 
 Full reference: [DOCS.md](./DOCS.md) · Changelog: [CHANGELOG.md](./CHANGELOG.md) · Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
-## 1. Why korean-account
+## Why this exists
 
-Validating Korean account numbers is harder than it looks. Length varies from 10 to 16 digits by bank; the identifier code sits in different places (first 3 digits, middle 4, last 2); subject codes and branch rules all differ. A regex or two will not cover it, and most of what circulates on wikis, blogs, and Stack Overflow has drifted away from the [KFTC standard](https://www.cmsedi.or.kr/cms/board/workdata/view/1026).
+Most Korean services that identify an institution from an account number use paid server APIs — the [KFTC open-banking account holder inquiry](https://developers.kftc.or.kr/dev/openapi/open-banking/account), or the account-holder lookups offered by PGs such as Toss Payments and PortOne — and all of them **bill per call** (pricing is usually private, negotiated per contract — for reference, comparable identity-verification APIs run at [tens of KRW per call](https://blog.portone.io/authorization-payment-2/)). Adding a server plus a billing contract just for the UX of "type an account number and the bank auto-selects itself" in a form was overkill.
 
-This library takes the KFTC CMS PDF as its single source of truth. Every pattern in `src/data/` corresponds to a row in that document. Contributions that add an institution [must cite the PDF page and table row](./.github/ISSUE_TEMPLATE/new_institution.yml).
+korean-account does that inference **on the client, for free**. It transcribes each institution's account-number scheme from the [KFTC CMS PDF](https://www.cmsedi.or.kr/cms/board/workdata/cms) — digit counts, identifier codes, subject codes, branch rules — into data, and ranks candidates with weighted scoring. This is **scheme-based inference**, not real-name verification, so it can be wrong; that is why every result carries a `confidence` (high/medium/low). If your flow needs certainty, verify with a real-name inquiry API at the final step — and let this library handle the UX in front of it for free.
 
-**What it deliberately does not do:** check digits. The PDF does not publish the algorithms, so the library ships a `CheckDigitVerifier` hook instead of guessing. See [Limitations](#9-limitations).
+If you find an account that disagrees with the scheme, please [file an issue](https://github.com/dydals3440/korean-account/issues/new/choose). Reports that cite the PDF page and table row get fixed fastest.
 
-## 2. Installation
+## Quick start
 
-```bash
-pnpm add korean-account
-```
-
-Requirements:
-
-- **Node 22.12+** (also runs on Bun, Deno, and browsers — the build targets ES2020 and imports no `node:` builtins)
-- TypeScript recommended, but not required
-- `zod@^3.23.0 || ^4.0.0` only if you import `korean-account/schema`
-
-## 3. Quick start
-
-### Single result — when you only need the top candidate
+### Top candidate only — form auto-select, auto-debit guard
 
 ```ts
 import { detectBest } from "korean-account";
 
-const result = detectBest("1002-123-456789");
-result?.institution.nameEn; // "Woori Bank"
-result?.confidence; // "high"
+const top = detectBest("1002-123-456789");
+if (top && top.confidence !== "low") {
+  console.log(top.institution.nameKo, top.kind);
+  // → "우리은행" "new"
+}
 ```
 
 `detectBest` returns `null` when nothing matches.
 
-> **Note** — institutions whose identifier codes are absent from the PDF compete on length
-> alone and tie at `low` confidence. KakaoBank's 13-digit format (`3333-XX-XXXXXXX`) is one:
-> it ties at score 3 with other 13-digit institutions, and Shinhan wins on `priority`. Narrow
-> with `include` when you are targeting a specific institution — see [Limitations](#9-limitations).
-
-### Multiple candidates with filters
+### Multiple candidates + filtering
 
 ```ts
 import { detect } from "korean-account";
 
-detect("110-436-387740", {
-  categories: ["bank"], // banks only
-  exclude: ["hsbc"], // minus HSBC
-  limit: 3,
-  minScore: 5,
-});
+detect("3333-12-3456789", { categories: ["bank"] });
+detect("110-436-387740", { kinds: ["new"] });
+detect("110-436-387740", { include: ["shinhan", "kb"] });
+detect("110-436-387740", { exclude: ["shinhan"], limit: 3, minScore: 4 });
 ```
 
-Results are sorted by score (descending), then by institution `priority`, then by account-kind order. When the top candidate is `high` or `medium` confidence, `low` candidates are dropped as noise.
+### Only the banks you need — tree-shaking
 
-### Choosing a depth
-
-| You want                            | Use                               |
-| ----------------------------------- | --------------------------------- |
-| One answer                          | `detectBest(input)`               |
-| Ranked candidates                   | `detect(input, options)`          |
-| Your own registry / rules / weights | `createDetector({ ... })`         |
-| Add to the default registry         | `defaultDetector.extend({ ... })` |
-| Form validation                     | `korean-account/schema`           |
-
-## 4. Supported institutions
-
-57 institutions: 25 banks, 7 non-banks, 24 securities firms, 1 clearing house. See the [Korean README](./README.md#4-지원-금융기관) for the full table with codes, names, and digit counts, or query it at runtime:
+If your service handles a fixed set of institutions, import the institution constants directly. Only those institutions end up in your bundle.
 
 ```ts
-import { institutions, searchInstitutions } from "korean-account";
+import { createDetector, kb, shinhan, toss } from "korean-account";
 
-institutions.length; // 57
-searchInstitutions({ categories: ["bank"] }); // narrowed to bank institutions
+const detector = createDetector([kb, shinhan, toss]); // ≈ 3.6 KB (min+brotli)
+detector.detect("110-436-387740");
+// 결과의 institution.id 타입도 "kb" | "shinhan" | "toss" 로 좁혀진다
+
+// 전부 쓰려면
+import { createDetector, institutions } from "korean-account";
+const all = createDetector(institutions); // ≈ 10 KB
 ```
 
-If an institution or pattern is not in the PDF, it is not in the core registry. Add it yourself with `defineInstitution` + `extend` — see [Extending](#7-extending).
+`detect` / `detectBest` / `getInstitution` / `searchInstitutions` are convenience functions over the full registry — the moment you import them, all 57 institutions are included in your bundle.
 
-## 5. Core API
+## Scoring and confidence
 
-### 5.1 Detection
+Every candidate earns a score as a sum of signal weights. With the default weights:
 
-```ts
-detect(input: string, options?: DetectOptions): readonly DetectionResult[]
-detectBest(input: string, options?: DetectOptions): DetectionResult | null
-createDetector(input: CreateDetectorOptions): Detector
-defaultDetector: Detector
-```
+| Signal                  | Score   | Notes                                                     |
+| ----------------------- | ------- | --------------------------------------------------------- |
+| Exact digit-count match | +3      | ±1 (while typing) is +1                                   |
+| Identifier code match   | +4      | +1–3 extra for longer codes; partial input scores half    |
+| Subject code match      | +3      | same length-bonus and half-score rules                    |
+| Branch rule hit         | +2      | PDF-specified branches — Suhyup 007↔030, Toss 17/19, etc. |
+| Additional pattern rule | +1 each | failing any rule eliminates the candidate (gate + bonus)  |
 
-```ts
-interface DetectOptions {
-  readonly categories?: readonly InstitutionCategory[];
-  readonly kinds?: readonly AccountKind[];
-  readonly include?: readonly InstitutionId[];
-  readonly exclude?: readonly InstitutionId[];
-  readonly limit?: number; // default 5
-  readonly minScore?: number; // default 1
-}
+score ≥ 7 → `high`, ≥ 4 → `medium`, otherwise `low`. **Only on ties** does the prior `prevalence` (= estimated retail user base × category coefficient) decide the order — it never overturns evidence signals. See [DOCS A.4](./DOCS.md) for the underlying data and formula.
 
-interface DetectionResult {
-  readonly institution: Institution;
-  readonly matchedPattern: AccountPattern;
-  readonly kind: AccountKind;
-  readonly subject?: Subject;
-  readonly formatted: string;
-  readonly score: number;
-  readonly confidence: "high" | "medium" | "low";
-  readonly capabilities: {
-    readonly allowsWithdrawal: boolean;
-    readonly virtual: boolean;
-    readonly validatedCheckDigit: boolean | null;
-  };
-}
-```
+> Signals that the PDF does not enumerate but that are established in the real world — like KakaoBank's `3333`·`7979` prefixes — are built into the core (`3333-12-3456789` → KakaoBank `high`).
 
-### 5.2 Lookup
+### When the result is not what you expect
 
 ```ts
-getInstitution("shinhan"); // narrowed: code is the literal "088"
-getInstitution("088");
-getInstitution("078"); // alias code → widened to Institution | null
-```
+import { createDetector, institutions, getInstitution } from "korean-account";
 
-Note: `institution.code` is the **CMS** code. Some institutions carry a different KFTC common bank code — read `institution.commonCode ?? institution.code` if your backend uses the standard code. (`hana` is `code: "005"` but `commonCode: "081"`.)
+// 1. 특정 기관만 검사 — 후보 자체를 좁힌다
+createDetector([kb, shinhan]).detect(input);
+detect(input, { include: ["kb", "shinhan"] });
 
-### 5.3 Selectors
-
-```ts
-searchInstitutions({ categories: ["bank"], exclude: ["hsbc"] });
-searchInstitutions({ include: ["kb", "shinhan", "hana"] });
-pickPattern("shinhan", { kind: "new" });
-```
-
-### 5.4 Normalize · format · extract
-
-```ts
-normalizeAccount("110-436-387740"); // "110436387740"
-formatAccount("110436387740", patternTemplate("XXX-XXX-XXXXXX"));
-extractIdentifier(digits, pattern);
-extractSubject(digits, pattern);
-scoreToConfidence(9); // "high"
-```
-
-### 5.5 Constants and labels
-
-```ts
-import { ACCOUNT_KINDS, SUBJECT_CATEGORIES, accountKindLabels } from "korean-account";
-
-ACCOUNT_KINDS; // ["new", "old", "virtual", "lifetime", "incoming-only", "merged-legacy"]
-accountKindLabels.virtual; // "가상계좌"
-```
-
-### 5.6 Validation schemas — `korean-account/schema`
-
-Requires `zod` (v3 or v4 — both are tested in CI).
-
-```ts
-import { accountSchema, institutionIdSchema, detectionSchema } from "korean-account/schema";
-
-accountSchema.safeParse("110-436-387740").success; // true
-institutionIdSchema.safeParse("nope").success; // false
-```
-
-This subpath does **not** pull in the institution registry — importing it costs about 1 KB gzipped.
-
-## 6. Exported types
-
-`AccountKind`, `AccountPattern`, `AdditionalRule`, `BranchRule`, `BranchRuleResult`, `CheckDigitVerifier`, `Confidence`, `CreateDetectorOptions`, `DetectOptions`, `DetectionCapabilities`, `DetectionResult`, `Detector`, `GlobalRule`, `Institution`, `InstitutionCategory`, `InstitutionCode`, `InstitutionId`, `InstitutionIdByCategory`, `InstitutionIdInput`, `PatternTemplate`, `PatternToken`, `SearchInstitutionsFilter`, `PickPatternFilter`, `Position`, `RegisteredInstitution`, `ScoringWeights`, `Subject`, `SubjectCategory` — plus `DetectionPayload` from `korean-account/schema`.
-
-## 7. Extending
-
-Detectors are immutable. `extend` and `remove` return new instances.
-
-```ts
-import { patternTemplate, defaultDetector, defineInstitution } from "korean-account";
-
-const myBank = defineInstitution({
-  id: "my-bank",
-  code: "999",
-  nameKo: "커스텀은행",
-  nameEn: "My Bank",
-  category: "bank",
-  aliases: [],
-  patterns: [
-    {
-      template: patternTemplate("XXX-XXXXXXXXXXX"),
-      kind: "new",
-      identifierPosition: { start: 0, length: 3 },
-      identifiers: ["999"],
-    },
-  ],
+// 2. 특정 기관 우선 — 동점 시 순서 오버라이드
+const boosted = createDetector(institutions).extend({
+  institutions: [{ ...getInstitution("busan"), priority: 999 }],
 });
 
-// A verifier receives the normalized digits and returns whether they check out.
-const verifyMyBank = (digits: string): boolean => {
-  const body = digits.slice(0, -1);
-  const expected = Number(digits.at(-1));
-  const sum = [...body].reduce((acc, d, i) => acc + Number(d) * (i + 2), 0);
-  return sum % 10 === expected;
-};
-
-const detector = defaultDetector.extend({
-  institutions: [myBank],
-  checkDigitVerifiers: { "my-bank": verifyMyBank },
-  scoring: { identifierMatch: 6 },
+// 3. 자체 계좌 체계 추가 — 사내 가상계좌 prefix 등
+const extended = createDetector(institutions).extend({
+  institutions: [myInstitution], // defineInstitution() 으로 생성
 });
+
+// 4. 검증번호 알고리즘 주입 — capabilities.validatedCheckDigit 활성화
+createDetector(institutions, { checkDigitVerifiers: { kb: myKbVerifier } });
 ```
 
-| Goal                            | Call                                      |
-| ------------------------------- | ----------------------------------------- |
-| Add or replace an institution   | `extend({ institutions })`                |
-| Remove one                      | `remove("hsbc")` or `remove(predicate)`   |
-| Register a check-digit verifier | `extend({ checkDigitVerifiers })`         |
-| Tune scoring weights            | `extend({ scoring })`                     |
-| Start from scratch              | `createDetector({ institutions: [...] })` |
+## Supported institutions
 
-Give custom institutions an `identifier` where you can. Without one a pattern scores 3 (length only), lands in `low` confidence, and gets filtered out whenever a real bank matches at `high`.
+> **Source**: every code, digit count, identifier position, and subject below is transcribed verbatim from the table rows of the [KFTC CMS account-number scheme by participating institution (2026.05.08)](https://www.cmsedi.or.kr/cms/board/workdata/cms). When a new PDF is published, the library core is updated; consumer extensions remain compatible.
 
-See [DOCS.md → Appendix D](./DOCS.md) for the full extension mechanics.
+### Banks (25)
 
-## 8. Design principles
+| Code | Korean name      | English name             | Digit lengths                      |
+| ---- | ---------------- | ------------------------ | ---------------------------------- |
+| 002  | KDB산업은행      | Korea Development Bank   | 11·14                              |
+| 003  | IBK기업은행      | Industrial Bank of Korea | 10·11·12·14                        |
+| 004  | KB국민은행       | KB Kookmin Bank          | 10·11·12·14                        |
+| 005  | 하나은행         | Hana Bank                | 11·12·14                           |
+| 007  | 수협은행         | Suhyup Bank              | 11·12·14                           |
+| 011  | NH농협은행       | NongHyup Bank            | 11·12·13·14                        |
+| 020  | 우리은행         | Woori Bank               | 11·12·13·14                        |
+| 023  | SC제일은행       | SC First Bank            | 10·14                              |
+| 027  | 한국씨티은행     | Citibank Korea           | 10·11·12·13                        |
+| 031  | iM뱅크           | iM Bank                  | 7·8·9·10·11·12·13·14               |
+| 032  | 부산은행         | Busan Bank               | 12·13                              |
+| 034  | 광주은행         | Gwangju Bank             | 12·13                              |
+| 035  | 제주은행         | Jeju Bank                | 10·12                              |
+| 037  | 전북은행         | Jeonbuk Bank             | 12·13                              |
+| 039  | 경남은행         | Gyeongnam Bank           | 12·13                              |
+| 054  | HSBC은행         | HSBC                     | 12 _(not enrolled in the service)_ |
+| 055  | 도이치은행       | Deutsche Bank            | 10                                 |
+| 057  | JP모간체이스은행 | JPMorgan Chase Bank      | 10                                 |
+| 060  | BOA은행          | Bank of America          | 12·14                              |
+| 061  | 비엔피파리바은행 | BNP Paribas              | 14 _(not enrolled in the service)_ |
+| 081  | 하나증권 CMA     | Hana Securities CMA      | 14                                 |
+| 088  | 신한은행         | Shinhan Bank             | 11·12·13·14                        |
+| 089  | K뱅크            | K Bank                   | 10·12·13·14                        |
+| 090  | 카카오뱅크       | KakaoBank                | 13                                 |
+| 092  | 토스뱅크         | Toss Bank                | 12                                 |
 
-1. **The PDF is the source of truth.** No pattern enters the core registry without a citation.
-2. **Never guess.** Check digits are unimplemented rather than approximated. `validatedCheckDigit: null` means "not checked", not "valid".
-3. **Types carry the domain.** Institution ids, codes, and categories are literal unions, not `string`.
-4. **Pay only for what you import.** The registry lives in its own chunk; `normalize` alone costs 169 bytes gzipped.
-5. **Immutable detectors.** Extension returns new instances; nothing is mutated globally.
+### Non-banks (8)
 
-## 9. Limitations
+| Code | Korean name      | English name                                             | Digit lengths  |
+| ---- | ---------------- | -------------------------------------------------------- | -------------- |
+| 012  | 농협중앙회       | NongHyup Central                                         | 13·14          |
+| 030  | 수협중앙회       | Suhyup Central                                           | 12             |
+| 045  | 새마을금고중앙회 | Korean Federation of Community Credit Cooperatives       | 13             |
+| 048  | 신협중앙회       | Credit Union Central                                     | 10·11·12·13·14 |
+| 050  | 상호저축은행     | Mutual Savings Bank                                      | 14             |
+| 064  | 산림조합중앙회   | Forestry Cooperatives Central                            | 12·13          |
+| 071  | 우체국           | Korea Post                                               | 12·13·14       |
+| 099  | 금융결제원       | Korea Financial Telecommunications & Clearings Institute | —              |
 
-- **No check-digit algorithms.** The KFTC PDF does not publish them. Register your own via `checkDigitVerifiers`.
-- **Detection is probabilistic.** Several institutions share digit counts and prefixes. That is why results are a ranked list with a score, not a single boolean. A `high` confidence result is not proof the account exists.
-- **Deposit-only detection is metadata-driven.** `capabilities.allowsWithdrawal` reflects the account-number scheme and subject code, not the live account state.
-- **Not a bank API.** This library never contacts a network.
+<details>
+<summary><strong>Securities firms (24)</strong> — expand</summary>
 
-## 10. Performance
+| Code | Korean name    | English name                   | Digit lengths      |
+| ---- | -------------- | ------------------------------ | ------------------ |
+| 209  | 유안타증권     | Yuanta Securities              | 11·12              |
+| 218  | KB증권         | KB Securities                  | 9·11               |
+| 238  | 미래에셋증권   | Mirae Asset Securities         | 8·9·10·11·12·13·14 |
+| 240  | 삼성증권       | Samsung Securities             | 8·10·12·14         |
+| 243  | 한국투자증권   | Korea Investment & Securities  | 10·12·14           |
+| 247  | NH투자증권     | NH Investment & Securities     | 11                 |
+| 261  | 교보증권       | Kyobo Securities               | 11                 |
+| 262  | 아이엠증권     | iM Securities                  | 10                 |
+| 263  | 현대차증권     | Hyundai Motor Securities       | 8                  |
+| 264  | 키움증권       | Kiwoom Securities              | 8·10               |
+| 265  | 엘에스투자증권 | LS Securities                  | 9·11               |
+| 266  | SK증권         | SK Securities                  | 9·11               |
+| 267  | 대신증권       | Daishin Securities             | 9·11               |
+| 269  | 한화투자증권   | Hanwha Investment & Securities | 10·11·13·14        |
+| 270  | 하나증권       | Hana Securities                | 8·10·11·14         |
+| 278  | 신한투자증권   | Shinhan Securities             | 11                 |
+| 279  | DB증권         | DB Securities                  | 9·11               |
+| 280  | 유진투자증권   | Eugene Investment & Securities | 11                 |
+| 287  | 메리츠증권     | Meritz Securities              | 10·11              |
+| 288  | 카카오페이증권 | KakaoPay Securities            | 11                 |
+| 290  | 부국증권       | Bookook Securities             | 11                 |
+| 291  | 신영증권       | Shinyoung Securities           | 9·12               |
+| 292  | 케이프투자증권 | Cape Investment & Securities   | 11·14              |
+| 294  | 우리투자증권   | Woori Investment & Securities  | 11                 |
 
-About **12–20 µs** per `detect()` call on an M-series Mac. Internally an index maps input length to candidate institutions, cutting roughly 170 pattern evaluations down to 10–15.
+</details>
 
-## 11. Contributing
+### What about institutions and patterns not in the PDF?
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md). In short: Conventional Commits, a `.spec.ts` for every change, a `pnpm changeset` for anything user-facing, and a PDF citation for any registry change.
+The built-in registry contains only the rows written in the PDF tables above. Cases the PDF does not enumerate — savings-bank virtual-account operating prefixes, in-house settlement accounts, partner-specific prefixes, broad foreign-exchange 14-digit prefixes, and so on — are covered by the extension mechanics in [DOCS.md Appendix D](./DOCS.md).
 
-Bug reports and new-institution requests use [issue forms](./.github/ISSUE_TEMPLATE). Please mask real account numbers (e.g. `110-***-387740`).
+## Validation schemas — `korean-account/zod` (optional)
+
+If your project uses zod, this subpath provides schemas for form/API boundary validation. **Both zod v3 (≥3.23) and v4 are supported**, and CI verifies both majors in a matrix. If you never import this subpath, zod is not needed at all.
+
+```ts
+import { accountSchema, institutionIdSchema, detectionSchema } from "korean-account/zod";
+
+accountSchema.parse("110-436-387740"); // 숫자·하이픈·공백, 정규화 6~20자리
+institutionIdSchema.parse("shinhan"); // 등록된 기관 id 만 허용
+```
+
+## API at a glance
+
+| Function                                                                        | Description                                                                           |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `detect(input, opts?)`                                                          | Rank candidates against the full registry                                             |
+| `detectBest(input, opts?)`                                                      | Top candidate only; `null` when nothing matches                                       |
+| `createDetector(institutions, opts?)`                                           | Detector over just the given institutions (immutable extension via `extend`/`remove`) |
+| `getInstitution(idOrCode)`                                                      | Look up by id or CMS code (aliases included) — registered literals narrow to non-null |
+| `searchInstitutions(filter?)`                                                   | Filtered search by category, kind, id                                                 |
+| `normalizeAccount` / `formatAccount` / `extractIdentifier` / `extractSubject`   | Normalization, grouping, partial extraction                                           |
+| `defineInstitution` / `defineSubject` / `defineBranchRule` / `patternTemplate`  | Authoring API for custom institutions                                                 |
+| 57 institution constants + `banks` / `nonBanks` / `securities` / `institutions` | Tree-shakable data                                                                    |
+
+Full signatures, types, and the scoring walkthrough: [DOCS.md](./DOCS.md).
+
+## Limitations
+
+- **This is not real-name verification** — it is scheme-based inference. Verify with a real-name inquiry API before finalizing transfers or settlements.
+- Schemes without identifier codes (pure serial-number securities firms, etc.) compete on length alone and tie at `low`.
+- Check-digit algorithms are unimplemented — the PDF does not publish them. Inject your own via `checkDigitVerifiers`.
+- PDF revisions (new institutions, new subject codes) are applied by humans. If you spot a mismatch, please open an issue.
+
+## Contributing
+
+[CONTRIBUTING.md](./CONTRIBUTING.md) has the recipe for adding a new institution. Every README example is executed and verified by [readme-examples.spec.ts](./src/readme-examples.spec.ts) — if the docs lie, CI breaks.
 
 ## License
 

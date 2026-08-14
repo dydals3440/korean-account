@@ -25,8 +25,8 @@ body:
       label: 재현 코드
       render: ts
       placeholder: |
-        import { detectAccount } from "korean-account";
-        detectAccount("...");
+        import { detect } from "korean-account";
+        detect("...");
     validations:
       required: true
 
@@ -34,6 +34,6 @@ body:
     id: env
     attributes:
       label: 버전 / 런타임
-      placeholder: "korean-account 0.0.3 · Node 22.5 · macOS 14"
+      placeholder: "korean-account 0.2.0 · Node 22.5 · macOS 14"
     validations:
       required: true
