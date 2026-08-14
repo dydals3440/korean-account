@@ -7,8 +7,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        코어 레지스트리는 [금융결제원 CMS 참가기관별 계좌번호체계 PDF](https://www.cmsedi.or.kr/cms/board/workdata/view/1026) 에 **명시된 행만** 등록합니다.
-        PDF 에 없는 관행 prefix 는 코어가 아닌 `detector.extend()` 컨슈머 보강 영역입니다 — [README § 7. 확장](https://github.com/dydals3440/korean-account#7-확장) 참조.
+        코어 레지스트리는 [금융결제원 CMS 참가기관별 계좌번호체계 PDF](https://www.cmsedi.or.kr/cms/board/workdata/cms) 에 **명시된 행만** 등록합니다.
+        PDF 에 없는 관행 prefix 는 코어가 아닌 `detector.extend()` 컨슈머 보강 영역입니다 — [README § 원하는 결과가 안 나올 때](https://github.com/dydals3440/korean-account#원하는-결과가-안-나올-때) 및 [DOCS Appendix D](https://github.com/dydals3440/korean-account/blob/main/DOCS.md) 참조.
   - type: input
     id: institution
     attributes:

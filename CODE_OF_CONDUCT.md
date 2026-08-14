@@ -38,7 +38,7 @@
 
 학대·괴롭힘 또는 기타 용납되지 않는 행동은 아래 채널로 신고할 수 있습니다.
 
-- 이메일: **dydals3440@gmail.com**
+- 이메일: **matthew@redband.co.kr**
 - 또는 [GitHub Security Advisory](https://github.com/dydals3440/korean-account/security/advisories/new) (비공개)
 
 모든 신고는 신속하고 공정하게 검토·조사됩니다. 커뮤니티 리더는 신고자의 사생활과 신원을 존중할 의무가 있습니다.
