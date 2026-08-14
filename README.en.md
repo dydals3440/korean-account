@@ -36,7 +36,7 @@ detectBest("110-436-387740");
 - **Faithful to the PDF** — a registry of 57 institutions transcribed row-by-row from the KFTC CMS document
 - **Strict TypeScript** — `institutionById("shinhan").code` narrows to the literal `"088"`
 - **Zero runtime dependencies** — `zod` is an optional peer dependency, required only for `korean-account/schema`
-- **Universal** — Node 20.19+ · Bun · Deno · browsers · ESM and CJS
+- **Universal** — Node 22.12+ · Bun · Deno · browsers · ESM and CJS
 
 Full reference: [DOCS.md](./DOCS.md) · Changelog: [CHANGELOG.md](./CHANGELOG.md) · Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
@@ -58,7 +58,7 @@ pnpm add korean-account
 
 Requirements:
 
-- **Node 20.19+** (also runs on Bun, Deno, and browsers — the build targets ES2020 and imports no `node:` builtins)
+- **Node 22.12+** (also runs on Bun, Deno, and browsers — the build targets ES2020 and imports no `node:` builtins)
 - TypeScript recommended, but not required
 - `zod@^3.23.0 || ^4.0.0` only if you import `korean-account/schema`
 
@@ -71,7 +71,7 @@ import { detectBest } from "korean-account";
 
 const result = detectBest("1002-123-456789");
 result?.institution.nameEn; // "Woori Bank"
-result?.confidence;         // "high"
+result?.confidence; // "high"
 ```
 
 `detectBest` returns `null` when nothing matches.
@@ -87,8 +87,8 @@ result?.confidence;         // "high"
 import { detectAccount } from "korean-account";
 
 detectAccount("110-436-387740", {
-  categories: ["bank"],   // banks only
-  exclude: ["hsbc"],      // minus HSBC
+  categories: ["bank"], // banks only
+  exclude: ["hsbc"], // minus HSBC
   limit: 3,
   minScore: 5,
 });
@@ -98,13 +98,13 @@ Results are sorted by score (descending), then by institution `priority`, then b
 
 ### Choosing a depth
 
-| You want | Use |
-| --- | --- |
-| One answer | `detectBest(input)` |
-| Ranked candidates | `detectAccount(input, options)` |
-| Your own registry / rules / weights | `createDetector({ ... })` |
-| Add to the default registry | `defaultDetector.extend({ ... })` |
-| Form validation | `korean-account/schema` |
+| You want                            | Use                               |
+| ----------------------------------- | --------------------------------- |
+| One answer                          | `detectBest(input)`               |
+| Ranked candidates                   | `detectAccount(input, options)`   |
+| Your own registry / rules / weights | `createDetector({ ... })`         |
+| Add to the default registry         | `defaultDetector.extend({ ... })` |
+| Form validation                     | `korean-account/schema`           |
 
 ## 4. Supported institutions
 
@@ -113,7 +113,7 @@ Results are sorted by score (descending), then by institution `priority`, then b
 ```ts
 import { institutions, pickInstitutions } from "korean-account";
 
-institutions.length;                        // 57
+institutions.length; // 57
 pickInstitutions({ categories: ["bank"] }); // narrowed to bank institutions
 ```
 
@@ -136,7 +136,7 @@ interface DetectOptions {
   readonly kinds?: readonly AccountKind[];
   readonly include?: readonly InstitutionId[];
   readonly exclude?: readonly InstitutionId[];
-  readonly limit?: number;    // default 5
+  readonly limit?: number; // default 5
   readonly minScore?: number; // default 1
 }
 
@@ -161,7 +161,7 @@ interface DetectionResult {
 ```ts
 institutionById("shinhan"); // narrowed: code is the literal "088"
 institutionByCode("088");
-institutionByCode("078");   // alias code → widened to Institution | null
+institutionByCode("078"); // alias code → widened to Institution | null
 ```
 
 Note: `institution.code` is the **CMS** code. Some institutions carry a different KFTC common bank code — read `institution.commonCode ?? institution.code` if your backend uses the standard code. (`hana` is `code: "005"` but `commonCode: "081"`.)
@@ -177,11 +177,11 @@ pickPattern("shinhan", { kind: "new" });
 ### 5.4 Normalize · format · extract
 
 ```ts
-normalize("110-436-387740");                                    // "110436387740"
+normalize("110-436-387740"); // "110436387740"
 formatAccount("110436387740", createPatternTemplate("XXX-XXX-XXXXXX"));
 extractIdentifier(digits, pattern);
 extractSubject(digits, pattern);
-scoreToConfidence(9);                                           // "high"
+scoreToConfidence(9); // "high"
 ```
 
 ### 5.5 Constants and labels
@@ -189,8 +189,8 @@ scoreToConfidence(9);                                           // "high"
 ```ts
 import { ACCOUNT_KINDS, SUBJECT_CATEGORIES, accountKindLabels } from "korean-account";
 
-ACCOUNT_KINDS;              // ["new", "old", "virtual", "lifetime", "incoming-only", "merged-legacy"]
-accountKindLabels.virtual;  // "가상계좌"
+ACCOUNT_KINDS; // ["new", "old", "virtual", "lifetime", "incoming-only", "merged-legacy"]
+accountKindLabels.virtual; // "가상계좌"
 ```
 
 ### 5.6 Validation schemas — `korean-account/schema`
@@ -201,7 +201,7 @@ Requires `zod` (v3 or v4 — both are tested in CI).
 import { accountSchema, institutionIdSchema, detectionSchema } from "korean-account/schema";
 
 accountSchema.safeParse("110-436-387740").success; // true
-institutionIdSchema.safeParse("nope").success;     // false
+institutionIdSchema.safeParse("nope").success; // false
 ```
 
 This subpath does **not** pull in the institution registry — importing it costs about 1 KB gzipped.
@@ -249,13 +249,13 @@ const detector = defaultDetector.extend({
 });
 ```
 
-| Goal | Call |
-| --- | --- |
-| Add or replace an institution | `extend({ institutions })` |
-| Remove one | `remove("hsbc")` or `remove(predicate)` |
-| Register a check-digit verifier | `extend({ checkDigitVerifiers })` |
-| Tune scoring weights | `extend({ scoring })` |
-| Start from scratch | `createDetector({ institutions: [...] })` |
+| Goal                            | Call                                      |
+| ------------------------------- | ----------------------------------------- |
+| Add or replace an institution   | `extend({ institutions })`                |
+| Remove one                      | `remove("hsbc")` or `remove(predicate)`   |
+| Register a check-digit verifier | `extend({ checkDigitVerifiers })`         |
+| Tune scoring weights            | `extend({ scoring })`                     |
+| Start from scratch              | `createDetector({ institutions: [...] })` |
 
 Give custom institutions an `identifier` where you can. Without one a pattern scores 3 (length only), lands in `low` confidence, and gets filtered out whenever a real bank matches at `high`.
 

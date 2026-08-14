@@ -71,7 +71,7 @@ describe("pickInstitutions", () => {
       const picked = pickInstitutions(filter);
 
       // Then
-      expect(picked.map((i) => i.id).sort()).toEqual(["kakao", "shinhan"]);
+      expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "shinhan"]);
     });
 
     test("5대 시중은행 동시 포함", () => {
@@ -146,7 +146,7 @@ describe("pickInstitutions", () => {
       const picked = pickInstitutions(filter);
 
       // Then
-      expect(picked.map((i) => i.id).sort()).toEqual(["kakao", "kb", "shinhan"]);
+      expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "kb", "shinhan"]);
     });
 
     test("include + exclude — exclude 가 우선 적용된다", () => {
@@ -160,7 +160,7 @@ describe("pickInstitutions", () => {
       const picked = pickInstitutions(filter);
 
       // Then
-      expect(picked.map((i) => i.id).sort()).toEqual(["hana", "shinhan"]);
+      expect(picked.map((i) => i.id).toSorted()).toEqual(["hana", "shinhan"]);
     });
   });
 

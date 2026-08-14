@@ -1,8 +1,8 @@
-// 배포될 dist 가 `engines.node` 하한에서 실제로 실행되는지 확인한다.
+// Verifies the published dist actually runs on the `engines.node` floor.
 //
-// 빌드 도구(tsdown)는 Node 22.18+ 를 요구하지만, 그건 산출물의 제약이 아니다.
-// 그래서 CI 는 Node 22 에서 빌드한 뒤 이 스크립트를 Node 20 에서 돌린다.
-// `engines` 를 낮추면서 실제로는 검증하지 않는 사고를 막는 것이 목적이다.
+// Build tooling (tsdown) may require a newer Node than the artifact does, so
+// CI builds on .nvmrc and then executes this script on every supported Node
+// (currently 22 and 24). This prevents lowering `engines` without verifying it.
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";

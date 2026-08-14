@@ -1,8 +1,8 @@
 version: 2
 
-# 액션은 모두 커밋 SHA 로 핀되어 있다. Dependabot 이 없으면 아무도 갱신하지 않고,
-# 보안 패치도 오지 않는다. (`changesets/action@v1` 은 태그가 아니라 force-push 가능한
-# 브랜치였다 — SHA 핀 + Dependabot 조합이 필요한 이유.)
+# All actions are pinned to commit SHAs. Without Dependabot nobody bumps them
+# and security patches never arrive. (`changesets/action@v1` was a
+# force-pushable branch, not a tag — hence SHA pin + Dependabot.)
 updates:
   - package-ecosystem: github-actions
     directory: /
@@ -14,7 +14,7 @@ updates:
       - dependencies
       - "area: ci"
     groups:
-      # 액션 범프가 개별 PR 로 쏟아지지 않게 하나로 묶는다 (메이저 포함).
+      # Group action bumps into one PR (majors included).
       github-actions:
         patterns:
           - "*"
@@ -30,8 +30,8 @@ updates:
     labels:
       - dependencies
     groups:
-      # 개별 PR 로 쏟아지지 않게 묶는다. 런타임 의존성이 0 이라 devDeps 가 전부다.
-      # 메이저까지 한 그룹으로 묶는다 (zod 메이저는 아래 ignore 로 제외됨).
+      # Runtime dependencies are zero, so devDeps are everything. One grouped
+      # PR, majors included (zod majors are excluded below).
       dev-dependencies:
         patterns:
           - "*"
@@ -40,21 +40,9 @@ updates:
           - patch
           - major
     ignore:
-      # zod 는 peerDependency 다. 메이저 범위는 CI 의 zod-compat 매트릭스가 검증하므로
-      # devDep 을 자동으로 올리면 하한(^3.23.0) 검증이 사라진다.
+      # zod is a peerDependency (`^3.23.0 || ^4.0.0`). The zod-compat CI matrix
+      # verifies both majors; auto-bumping the devDep past the peer range would
+      # break that contract silently.
       - dependency-name: zod
-        update-types:
-          - version-update:semver-major
-      # typescript 7 · vitest 4 메이저는 보류한다. 산출물(dist)이 바이트 동일이라
-      # 소비자 이득이 0 인데, vitest 4 는 vite 를 새 peerDep 으로 요구하고
-      # coverage-v8 4 는 브랜치 측정이 달라져 커버리지 래칫 재보정을 강제한다.
-      # minor/patch 는 계속 받되 메이저 재제안만 멈춘다. 채택 시 이 블록을 지운다.
-      - dependency-name: typescript
-        update-types:
-          - version-update:semver-major
-      - dependency-name: vitest
-        update-types:
-          - version-update:semver-major
-      - dependency-name: "@vitest/coverage-v8"
         update-types:
           - version-update:semver-major

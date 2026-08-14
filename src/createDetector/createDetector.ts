@@ -66,7 +66,7 @@ const KIND_ORDER: Record<AccountKind, number> = {
 export function createDetector<I extends Institution>(input: CreateDetectorInput<I>): Detector<I> {
   const institutions = input.institutions;
   const globalRules = input.globalRules ?? [];
-  const weights = { ...DEFAULT_WEIGHTS, ...(input.scoring ?? {}) };
+  const weights = { ...DEFAULT_WEIGHTS, ...input.scoring };
   const byId = new Map<string, I>(institutions.map((institution) => [institution.id, institution]));
   const index = buildDetectorIndex(institutions);
   const verifierByInstitutionId = buildVerifierMap(input.checkDigitVerifiers);
