@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { type ContractSchemaName, describeAdapterContract } from "../adapter-contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,
@@ -283,3 +284,13 @@ describe("detectionSchema", () => {
     expect(detectionSchema.safeParse(nullCase).success).toBe(true);
   });
 });
+
+const contractSchemas = {
+  account: accountSchema,
+  institutionId: institutionIdSchema,
+  accountKind: accountKindSchema,
+  subjectCategory: subjectCategorySchema,
+  detection: detectionSchema,
+} as const satisfies Record<ContractSchemaName, unknown>;
+
+describeAdapterContract("zod", (name, value) => contractSchemas[name].safeParse(value).success);
