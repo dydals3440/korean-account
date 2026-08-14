@@ -45,8 +45,8 @@
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "schema": [
-        "./dist/schema.d.ts"
+      "zod": [
+        "./dist/zod.d.ts"
       ]
     }
   },
@@ -60,14 +60,14 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./schema": {
+    "./zod": {
       "types": {
-        "import": "./dist/schema.d.ts",
-        "require": "./dist/schema.d.cts"
+        "import": "./dist/zod.d.ts",
+        "require": "./dist/zod.d.cts"
       },
-      "import": "./dist/schema.js",
-      "require": "./dist/schema.cjs",
-      "default": "./dist/schema.js"
+      "import": "./dist/adapters/zod/index.js",
+      "require": "./dist/adapters/zod/index.cjs",
+      "default": "./dist/adapters/zod/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -77,7 +77,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node scripts/collect-dts.mjs && attw --pack . --profile strict && publint",
     "dev": "tsdown --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
@@ -99,7 +99,7 @@
     "check:runtime": "node scripts/check-runtime.mjs"
   },
   "devDependencies": {
-    "@arethetypeswrong/core": "^0.18.5",
+    "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^2.31.1",
     "@size-limit/preset-small-lib": "^13.0.3",
     "@types/node": "^26.2.0",
