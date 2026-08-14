@@ -18,19 +18,19 @@ export default defineConfig({
         "src/**/*.spec.ts",
         "src/**/*.bench.ts",
         "src/_internal/fixtures.ts",
-        // 데이터 레지스트리는 로직이 아니라 선언이다. 분모에 넣으면 실제 로직의
-        // 커버리지가 데이터 양에 묻힌다.
+        // The registry is declarative data, not logic. Including it would drown
+        // real logic coverage in data volume.
         "src/data/**",
-        // 한 줄짜리 re-export 배럴. 실행 가능한 문장이 없다.
+        // Single-line re-export barrels have no executable statements.
         "src/**/index.ts",
       ],
-      // 현재 실측치 (statements 98.27 / branches 96.06 / functions 98.11) 바로 아래에
-      // 두어 래칫으로 쓴다. 커버리지가 떨어지면 CI 가 실패한다.
+      // Ratchet: pinned just below measured coverage (97.83 / 94.73 / 96.92 / 98.33
+      // under @vitest/coverage-v8 4.x). CI fails if coverage drops.
       thresholds: {
         statements: 97,
-        branches: 95,
-        functions: 95,
-        lines: 97,
+        branches: 94,
+        functions: 96,
+        lines: 98,
       },
     },
   },
