@@ -1516,6 +1516,12 @@ normalizeAccount("110-436-387740"); // "110436387740"
 formatAccount("110436387740", patternTemplate("XXX-XXX-XXXXXX")); // "110-436-387740"
 ```
 
+### 검증 어댑터 5종 — 동일 계약
+
+`korean-account/{zod,valibot,yup,arktype,standard-schema}` 는 전부 같은 5개 스키마를 내보낸다: `accountSchema` · `institutionIdSchema` · `accountKindSchema` · `subjectCategorySchema` · `detectionSchema`. 규칙·한국어 메시지의 단일 출처는 `src/adapters/shared.ts` 이고, `adapter-contract.fixtures.ts` 의 계약 표를 다섯 어댑터가 각자의 parse 로 실행해 동작 동일성을 CI 에서 강제한다. peer 는 전부 optional (standard-schema 는 peer 없음 — 의존성 0). 새 어댑터 추가 절차는 CONTRIBUTING "새 밸리데이터 어댑터 추가" 참고.
+
+알려진 편차: arktype 의 `detectionSchema` 중첩 필드 에러 메시지는 arktype 기본(영어 조합) — 통과/거부 동작은 동일하다.
+
 ### zod 스키마 (`korean-account/zod`)
 
 검증이 필요한 경우에만 서브 엔트리에서 가져온다. 메인 진입점은 zod 를 require 하지 않으며, zod v3 (≥3.23) 과 v4 를 모두 지원한다.

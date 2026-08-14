@@ -218,16 +218,36 @@ createDetector(institutions, { checkDigitVerifiers: { kb: myKbVerifier } });
 
 The built-in registry contains only the rows written in the PDF tables above. Cases the PDF does not enumerate — savings-bank virtual-account operating prefixes, in-house settlement accounts, partner-specific prefixes, broad foreign-exchange 14-digit prefixes, and so on — are covered by the extension mechanics in [DOCS.md Appendix D](./DOCS.md).
 
-## Validation schemas — `korean-account/zod` (optional)
+## Validation adapters (optional)
 
-If your project uses zod, this subpath provides schemas for form/API boundary validation. **Both zod v3 (≥3.23) and v4 are supported**, and CI verifies both majors in a matrix. If you never import this subpath, zod is not needed at all.
+Form/API-boundary schemas ship per validator, as separate subpaths — swap them like @hookform/resolvers plugins. All five adapters export the same five schemas (`accountSchema` · `institutionIdSchema` · `accountKindSchema` · `subjectCategorySchema` · `detectionSchema`), and a single contract test enforces identical behavior. Every peer is optional — you only need the library whose adapter you import.
+
+| Subpath                          | Peer                                     | When                                                                                      |
+| -------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `korean-account/zod`             | zod ^3.23 \|\| ^4 (CI tests both majors) | zod projects                                                                              |
+| `korean-account/valibot`         | valibot ^1                               | bundle-size-sensitive frontends                                                           |
+| `korean-account/yup`             | yup ^1.4                                 | Formik / legacy RHF codebases                                                             |
+| `korean-account/arktype`         | arktype ^2.1                             | arktype projects                                                                          |
+| `korean-account/standard-schema` | **none (zero-dependency)**               | any [Standard Schema](https://standardschema.dev) consumer — TanStack Form, tRPC v11, ... |
 
 ```ts
-import { accountSchema, institutionIdSchema, detectionSchema } from "korean-account/zod";
+import { accountSchema } from "korean-account/zod"; // ← just switch the subpath
 
-accountSchema.parse("110-436-387740"); // 숫자·하이픈·공백, 정규화 6~20자리
-institutionIdSchema.parse("shinhan"); // 등록된 기관 id 만 허용
+accountSchema.parse("110-436-387740"); // digits/hyphens/spaces, 6–20 digits normalized
 ```
+
+```ts
+// react-hook-form — swap the resolver and the adapter together
+useForm({ resolver: zodResolver(z.object({ account: accountSchema })) }); // korean-account/zod
+useForm({ resolver: valibotResolver(v.object({ account: accountSchema })) }); // korean-account/valibot
+useForm({ resolver: yupResolver(yup.object({ account: accountSchema })) }); // korean-account/yup
+
+// TanStack Form — the zero-dependency adapter is a validator as-is
+import { accountSchema } from "korean-account/standard-schema";
+useForm({ validators: { onChange: accountSchema } });
+```
+
+Want an adapter for another validator? See "Adding a validator adapter" in [CONTRIBUTING](./CONTRIBUTING.md) — reuse the shared predicates and pass the contract test.
 
 ## API at a glance
 

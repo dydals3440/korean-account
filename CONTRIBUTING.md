@@ -50,3 +50,11 @@ pnpm build          # tsdown / rolldown
 ## 행동 강령
 
 [Contributor Covenant 2.1](./CODE_OF_CONDUCT.md).
+
+## 새 밸리데이터 어댑터 추가 (3단계)
+
+어댑터는 `src/adapters/<lib>/` 한 세트로 끝난다. 규칙을 새로 쓰지 말 것 — 전부 `src/adapters/shared.ts` 의 술어·메시지를 재사용한다.
+
+1. **구현** — `src/adapters/<lib>/{schema,index}.ts`. 기존 어댑터(zod/valibot/yup/arktype/standard-schema) 중 가장 가까운 것을 미러링. 모든 export 는 그 라이브러리의 **안정 공개 타입으로 명시 어노테이션** (d.ts 에 내부 딥 제네릭이 새지 않게).
+2. **계약 테스트** — `schema.spec.ts` 에서 `describeAdapterContract("<lib>", accepts)` 호출 한 줄. 같은 valid/invalid 표를 통과해야 완료다.
+3. **배선** — package.json exports/typesVersions/optional peer, tsdown 엔트리 2곳, `.size-limit.json` 예산 1건, ci.yml `adapter-compat` 매트릭스 1행.
