@@ -8,7 +8,7 @@ export const daishin = /* @__PURE__ */ defineInstitution({
   nameEn: "Daishin Securities",
   category: "securities",
   aliases: ["대신", "대신증권"],
-  priority: 35,
+  userBaseMillions: 4.6,
   patterns: [
     { template: T("XXX-XXXXXX"), kind: "new" },
     { template: T("XXX-XXXXXX-XX"), kind: "new" },

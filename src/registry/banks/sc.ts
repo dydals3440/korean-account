@@ -9,7 +9,7 @@ export const sc = /* @__PURE__ */ defineInstitution({
   nameEn: "SC First Bank",
   category: "bank",
   aliases: ["SC", "제일은행", "SC제일", "스탠다드차타드"],
-  priority: 25,
+  userBaseMillions: 2,
   patterns: [
     {
       template: T("XXX-XX-XXXXX"),
@@ -41,10 +41,12 @@ export const sc = /* @__PURE__ */ defineInstitution({
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
+        // PDF p.5: withdrawal transfer unavailable (○×○○), like sibling 15.
         defineSubject({
           code: "16",
           category: "ordinary",
           virtual: true,
+          allowsWithdrawal: false,
           effectiveFrom: "2010-12-27",
           note: "비실명 가능",
         }),

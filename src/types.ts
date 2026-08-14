@@ -188,6 +188,18 @@ export interface Institution<
   readonly nameEn?: string;
   readonly category: Category;
   readonly aliases: readonly string[];
+  /**
+   * Estimated retail customer base in millions. Feeds the tie-break prior
+   * (`prevalence = userBaseMillions × category likelihood`); it never adds to
+   * the evidence score. Sourced figures and estimates are tabulated in the
+   * DOCS scoring appendix.
+   */
+  readonly userBaseMillions?: number;
+  /**
+   * Manual tie-break override. When set, it replaces the computed prevalence
+   * entirely. Prefer `userBaseMillions`; use this only when the computed
+   * ordering is demonstrably wrong for your use case.
+   */
   readonly priority?: number;
   readonly patterns: readonly AccountPattern[];
   readonly successorOf?: readonly string[];

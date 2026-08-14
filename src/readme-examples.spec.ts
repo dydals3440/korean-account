@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
   accountKindLabels,
-  detect,
   detectBest,
   getInstitution,
   institutions,
@@ -64,15 +63,13 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(accountKindLabels.virtual).toBe("가상계좌");
   });
 
-  // README 가 새로 명시하는 한계. 이 동작이 바뀌면 README 도 같이 고쳐야 한다.
-  test("한계 — 식별 코드가 없는 기관은 길이만으로 동점 low 가 된다", () => {
-    const results = detect("3333-12-3456789");
-    expect(results[0]?.institution.id, "priority 가 높은 신한이 1순위").toBe("shinhan");
-    expect(results.every((r) => r.confidence === "low")).toBe(true);
-    expect(results.every((r) => r.score === 3)).toBe(true);
-    expect(results.map((r) => r.institution.id)).toContain("kakao");
+  // README 가 명시하는 실세계 보강 — 이 동작이 바뀌면 README 도 같이 고쳐야 한다.
+  test("실세계 보강 — 카카오뱅크 3333/7979 프리픽스가 core 에 반영", () => {
+    const personal = detectBest("3333-12-3456789");
+    expect(personal?.institution.nameKo).toBe("카카오뱅크");
+    expect(personal?.confidence).toBe("high");
 
-    const kakao = detectBest("3333-12-3456789", { include: ["kakao"] });
-    expect(kakao?.institution.nameKo).toBe("카카오뱅크");
+    const group = detectBest("7979-01-2345678");
+    expect(group?.institution.id).toBe("kakao");
   });
 });

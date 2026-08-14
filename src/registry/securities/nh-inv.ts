@@ -9,7 +9,7 @@ export const nhInv = /* @__PURE__ */ defineInstitution({
   nameEn: "NH Investment & Securities",
   category: "securities",
   aliases: ["NH투자", "NH투자증권", "우리투자증권"],
-  priority: 55,
+  userBaseMillions: 10.5,
   successorOf: ["wooriinvest-legacy", "nh-nonghyup-sec"],
   patterns: [{ template: T("XXXXXXXXXXX"), kind: "new", effectiveFrom: "2009-08-04" }],
 });

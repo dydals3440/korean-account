@@ -8,7 +8,7 @@ export const hsbc = /* @__PURE__ */ defineInstitution({
   nameEn: "HSBC",
   category: "bank",
   aliases: ["HSBC"],
-  priority: 5,
+  userBaseMillions: 0.01,
   patterns: [
     {
       template: T("XXX-XXXXX-X-XXX"),

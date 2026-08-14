@@ -8,7 +8,7 @@ export const dbSec = /* @__PURE__ */ defineInstitution({
   nameEn: "DB Securities",
   category: "securities",
   aliases: ["DB증권", "DB금융투자", "동부증권"],
-  priority: 25,
+  userBaseMillions: 2,
   patterns: [
     { template: T("XXX-XX-XXXX"), kind: "new" },
     {

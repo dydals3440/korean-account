@@ -9,7 +9,7 @@ export const yuanta = /* @__PURE__ */ defineInstitution({
   nameEn: "Yuanta Securities",
   category: "securities",
   aliases: ["유안타", "동양증권"],
-  priority: 35,
+  userBaseMillions: 5,
   patterns: [
     {
       template: T("XXX-XX-XXXXXX"),
@@ -24,7 +24,9 @@ export const yuanta = /* @__PURE__ */ defineInstitution({
       ],
     },
     {
-      template: T("XXXX-XXXX-XXX"),
+      // PDF p.14: 고객지정번호(8)-랜덤부여(3)-검증번호(1) = 12 digits; the
+      // printed boxes omit the trailing check-digit.
+      template: T("XXXX-XXXX-XXX-X"),
       kind: "new",
       effectiveFrom: "2011-01-03",
     },

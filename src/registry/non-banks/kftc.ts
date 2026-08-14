@@ -7,7 +7,6 @@ export const kftc = /* @__PURE__ */ defineInstitution({
   nameEn: "Korea Financial Telecommunications & Clearings Institute",
   category: "clearing",
   aliases: ["금융결제원", "KFTC"],
-  priority: 0,
   patterns: [],
   notes: "청산 기관 — customer-facing 계좌 없음",
 });

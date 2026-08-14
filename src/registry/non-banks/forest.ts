@@ -9,7 +9,7 @@ export const forest = /* @__PURE__ */ defineInstitution({
   nameEn: "Forestry Cooperatives Central",
   category: "non-bank",
   aliases: ["산림조합", "산림"],
-  priority: 10,
+  userBaseMillions: 0.6,
   patterns: [
     {
       template: T("XXX-XX-XXXXXX-X"),

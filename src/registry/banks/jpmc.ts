@@ -8,6 +8,6 @@ export const jpmc = /* @__PURE__ */ defineInstitution({
   nameEn: "JPMorgan Chase Bank",
   category: "bank",
   aliases: ["JPM", "JP모간", "JPMorgan", "체이스"],
-  priority: 5,
+  userBaseMillions: 0.01,
   patterns: [{ template: T("XXXXXXXXXX"), kind: "new" }],
 });

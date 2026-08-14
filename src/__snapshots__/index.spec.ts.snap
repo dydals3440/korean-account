@@ -70,6 +70,7 @@ exports[`korean-account 의 공개 export 1`] = `
   "patternTemplate",
   "pickPattern",
   "post",
+  "prevalence",
   "samsungSec",
   "savingsBank",
   "sc",

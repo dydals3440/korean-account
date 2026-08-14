@@ -10,7 +10,7 @@ export const shinhan = /* @__PURE__ */ defineInstitution({
   nameEn: "Shinhan Bank",
   category: "bank",
   aliases: ["신한", "조흥은행"],
-  priority: 95,
+  userBaseMillions: 24,
   successorOf: ["chohung", "shinhan-legacy"],
   patterns: [
     {
@@ -154,8 +154,20 @@ export const shinhan = /* @__PURE__ */ defineInstitution({
       kind: "virtual",
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({ code: "560", category: "ordinary", virtual: true }),
-        defineSubject({ code: "561", category: "ordinary", virtual: true }),
+        // PDF p.12: 560/561 are ○×○× (withdrawal transfer unavailable);
+        // 562 is ○○○○ and keeps withdrawal.
+        defineSubject({
+          code: "560",
+          category: "ordinary",
+          virtual: true,
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "561",
+          category: "ordinary",
+          virtual: true,
+          allowsWithdrawal: false,
+        }),
         defineSubject({ code: "562", category: "ordinary", virtual: true }),
       ],
     },
@@ -182,8 +194,9 @@ export const shinhan = /* @__PURE__ */ defineInstitution({
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
-        defineSubject({ code: "81", category: "ordinary", virtual: true }),
-        defineSubject({ code: "82", category: "ordinary", virtual: true }),
+        // PDF p.12: ○×○× — withdrawal transfer unavailable.
+        defineSubject({ code: "81", category: "ordinary", virtual: true, allowsWithdrawal: false }),
+        defineSubject({ code: "82", category: "ordinary", virtual: true, allowsWithdrawal: false }),
       ],
       note: "(구)조흥(021) 가상계좌",
     },

@@ -9,7 +9,7 @@ export const busan = /* @__PURE__ */ defineInstitution({
   nameEn: "Busan Bank",
   category: "bank",
   aliases: ["부산", "BNK부산"],
-  priority: 40,
+  userBaseMillions: 3.3,
   patterns: [
     {
       template: T("XXX-XX-XXXXXX-X"),

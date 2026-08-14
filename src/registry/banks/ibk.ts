@@ -10,7 +10,7 @@ export const ibk = /* @__PURE__ */ defineInstitution({
   nameEn: "Industrial Bank of Korea",
   category: "bank",
   aliases: ["IBK", "기업은행", "기업"],
-  priority: 60,
+  userBaseMillions: 8,
   patterns: [
     {
       template: T("XXXXXXXX-XX"),

@@ -8,7 +8,7 @@ export const shinyoungSec = /* @__PURE__ */ defineInstitution({
   nameEn: "Shinyoung Securities",
   category: "securities",
   aliases: ["신영증권"],
-  priority: 20,
+  userBaseMillions: 1.5,
   patterns: [
     { template: T("XXXXXXXXX"), kind: "new" },
     { template: T("XXXXXXXXXXXX"), kind: "new" },

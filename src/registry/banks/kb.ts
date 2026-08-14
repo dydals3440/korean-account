@@ -22,7 +22,7 @@ export const kb = /* @__PURE__ */ defineInstitution({
   nameEn: "KB Kookmin Bank",
   category: "bank",
   aliases: ["국민", "국민은행", "KB", "KB국민"],
-  priority: 100,
+  userBaseMillions: 32,
   patterns: [
     {
       template: T("XXX-XXX-XXXX"),

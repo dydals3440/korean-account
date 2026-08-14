@@ -8,7 +8,7 @@ export const bnpParibas = /* @__PURE__ */ defineInstitution({
   nameEn: "BNP Paribas",
   category: "bank",
   aliases: ["BNP", "BNP파리바"],
-  priority: 5,
+  userBaseMillions: 0.01,
   patterns: [
     {
       template: T("XXXXX-XXXXXX-XXX"),

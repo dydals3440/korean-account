@@ -606,7 +606,8 @@ README 는 가장 흔히 쓰는 `detectBest` / `detectAccount` / `defaultDetecto
 | `nameKo` / `nameEn` | `string`                                                   | nameKo ✓ | 표시명.                                                                                                                      |
 | `category`          | `"bank"` \| `"non-bank"` \| `"securities"` \| `"clearing"` | ✓        |                                                                                                                              |
 | `aliases`           | `readonly string[]`                                        | ✓        | 검색 보조 (예: `["국민", "KB"]`).                                                                                            |
-| `priority`          | `number`                                                   |          | 점수 동률 시 tie-break. 시중 은행 80~~100, 인터넷전문 60~~90, 비은행 25~70 권장.                                             |
+| `userBaseMillions`  | `number`                                                   |          | 리테일 고객 규모(백만 명). tie-break prior 의 원천 데이터 — 아래 A.4 표 참고.                                                |
+| `priority`          | `number`                                                   |          | tie-break 수동 오버라이드. 지정 시 `prevalence` 계산식을 완전히 대체. `userBaseMillions` 를 우선 사용할 것.                  |
 | `patterns`          | `readonly AccountPattern[]` (≥1)                           | ✓        | 자릿수별 variant. 아래 § A.1 `AccountPattern` 참조.                                                                          |
 | `successorOf`       | `readonly string[]`                                        |          | 합병 전 기관 id (예: 하나 ← `keb-foreign-exchange`).                                                                         |
 | `notes`             | `string`                                                   |          |                                                                                                                              |
@@ -685,7 +686,7 @@ input
   ↓ scorePattern     length / identifier / subject / additionalRules 가산
   ↓ branchRule       institution / kind / virtual override
   ↓ filter           categories / kinds / include / exclude / minScore
-  ↓ sort             score → priority → kindOrder
+  ↓ sort             score → prevalence(userBaseMillions × 카테고리 계수) → kindOrder
   ↓ narrow           top 이 high/medium 이면 low 후보 제거
   ↓ limit            기본 5건
 DetectionResult[]
@@ -752,7 +753,7 @@ const aggressive = createDetector({
   lengthExact          +3
   identifier "100" (3자리)  +6
   subject "100" (3자리)     +5
-  total                 14    → 동률, priority 결정
+  total                 14    → 동률, prevalence 결정
 
 토스 12d (컨슈머 tightening: identifiers ["1000","1500"]):
   identifier "1001" (4자리) → "1000"·"1500" 모두 불일치 → 매치 안 됨
@@ -950,7 +951,7 @@ const kakaoExtended = defineInstitution({
   nameKo: "카카오뱅크",
   category: "bank",
   aliases: ["카카오"],
-  priority: 90,
+  userBaseMillions: 5,
   patterns:
     kakaoCore?.patterns.map((p) =>
       p.kind === "new" && !p.identifiers
@@ -1387,3 +1388,28 @@ const cases: ReadonlyArray<{ input: string; expected: string }> = [];
 const mismatches = cases.filter((c) => detectBest(c.input)?.institution.code !== c.expected);
 console.log(mismatches.length, mismatches);
 ```
+
+## A.4 Tie-break prior — `prevalence`
+
+점수가 동률일 때만 쓰는 사전확률(prior)이다. 증거 점수(자릿수·식별자·과목·규칙)에 절대 더해지지 않고 비교로만 쓰이므로, 실제 매칭 신호를 뒤집을 수 없다.
+
+```
+prevalence(i) = i.priority                              // 수동 오버라이드가 있으면 그대로
+              ∥ (i.userBaseMillions ?? 0) × 계수(category)
+
+계수: bank 1.0 · non-bank 0.6 · securities 0.25 · clearing 0
+```
+
+`userBaseMillions` 는 "국내 리테일 고객 수(백만 명)" 이다. 실측치는 출처를 명기했고, 나머지는 공개 순위 조사(컨슈머인사이트 주거래/거래율 순위 등)와 통념적 시장 규모를 근거로 한 **추정치**다 — 추정치의 절대값을 신뢰하지 말 것(서수 관계만 유의미). 값이 실제와 다르다고 판단되면 이슈로 제보하거나 `extend` 로 오버라이드하면 된다.
+
+| 기관                                                                                | 값   | 근거                                                                                                                                                                                   |
+| ----------------------------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 카카오뱅크                                                                          | 26.7 | **실측** — 2,670만 명, [카카오뱅크 4Q25 실적발표](https://www.kakaobank.com/view/report/archive/earnings)                                                                              |
+| 케이뱅크                                                                            | 15   | **실측** — 1,500만 명 돌파, [2025.10 보도](https://www.mt.co.kr/finance/2025/10/15/2025101508515560260)                                                                                |
+| 토스뱅크                                                                            | 13.8 | **실측** — 1,375만 명, [2025.10 보도](https://www.businesspost.co.kr/BP?command=article_view&num=416146)                                                                               |
+| KB국민 32 · NH농협 25 · 신한 24 · 우리 19 · 하나 18                                 | —    | 추정 — [컨슈머인사이트 주거래·거래율 순위](https://m.joseilbo.com/news/view.htm?newsid=505454) (KB > NH > 신한 > 우리/하나) 및 거래율 순위(KB > 카카오뱅크 > NH > 신한) 를 보존하는 값 |
+| IBK 8, 지방은행 0.4~3.3, SC 2, 씨티 0.5(2021 소비자금융 철수), KDB 0.5, 외국계 0.01 | —    | 추정 — 영업권 인구·리테일 규모 통념                                                                                                                                                    |
+| 새마을금고 17 · 농협중앙회 18 · 우체국 13 · 신협 12 · 저축은행 6 · 산림조합 0.6     | —    | 추정 — 조합원·거래자 규모 통념 (비은행 계수 0.6 적용)                                                                                                                                  |
+| 증권사 0.7~14 (키움 14 최상)                                                        | —    | 추정 — 리테일 계좌 규모 순위 보존용 (증권 계수 0.25 적용)                                                                                                                              |
+
+증권사·상호금융의 수치는 **순위 보존용 추정**임을 다시 강조한다. 공식 실측(각 사 IR·중앙회 발표)이 확인되는 대로 값을 교체하고 이 표의 근거를 갱신한다.

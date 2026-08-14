@@ -9,10 +9,12 @@ export const gyeongnam = /* @__PURE__ */ defineInstitution({
   nameEn: "Gyeongnam Bank",
   category: "bank",
   aliases: ["경남", "BNK경남"],
-  priority: 30,
+  userBaseMillions: 2,
   patterns: [
+    // PDF p.8: digit-count 12 (branch 3 - subject 2 - serial 6 - check 1);
+    // the printed boxes omit the trailing check-digit box.
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: T("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

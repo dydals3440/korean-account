@@ -10,7 +10,7 @@ export const kyoboSec = /* @__PURE__ */ defineInstitution({
   nameEn: "Kyobo Securities",
   category: "securities",
   aliases: ["교보증권"],
-  priority: 25,
+  userBaseMillions: 3,
   patterns: [
     {
       template: T("XXX-XX-XXXXXX"),
@@ -29,7 +29,9 @@ export const kyoboSec = /* @__PURE__ */ defineInstitution({
       ],
     },
     {
-      template: T("XXXX-XXXX-X-X"),
+      // PDF p.16: 일련번호(4)-일련번호(4)-검증번호(1)-일련번호(2) = 11 digits;
+      // the printed boxes show the last serial run as a single box.
+      template: T("XXXX-XXXX-X-XX"),
       kind: "new",
       effectiveFrom: "2012-01-25",
     },

@@ -8,7 +8,7 @@ export const hanwhaInv = /* @__PURE__ */ defineInstitution({
   nameEn: "Hanwha Investment & Securities",
   category: "securities",
   aliases: ["한화투자증권", "한화투자"],
-  priority: 25,
+  userBaseMillions: 2.4,
   patterns: [
     { template: T("XXXXXXXXXX"), kind: "new", effectiveFrom: "2012-09-03" },
     { template: T("XXXXXXXXXXX"), kind: "new" },

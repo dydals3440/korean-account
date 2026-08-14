@@ -9,7 +9,7 @@ export const shinhanInv = /* @__PURE__ */ defineInstitution({
   nameEn: "Shinhan Securities",
   category: "securities",
   aliases: ["신한투자", "신한투자증권", "신한금융투자"],
-  priority: 50,
+  userBaseMillions: 9,
   successorOf: ["shinhan-fin-invest"],
   patterns: [
     {

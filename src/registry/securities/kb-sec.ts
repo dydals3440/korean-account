@@ -10,7 +10,7 @@ export const kbSec = /* @__PURE__ */ defineInstitution({
   nameEn: "KB Securities",
   category: "securities",
   aliases: ["KB증권", "현대증권"],
-  priority: 60,
+  userBaseMillions: 12,
   successorOf: ["hyundai-sec"],
   patterns: [
     {
@@ -41,7 +41,11 @@ export const kbSec = /* @__PURE__ */ defineInstitution({
         defineSubject({ code: "69", category: "savings" }),
       ],
     },
-    { template: T("XXX-XXX-XX-XX"), kind: "new" },
-    { template: T("XXX-XXX-XX"), kind: "new" },
+    // PDF p.14: 일련번호(8)-검증번호(1)-일련번호(2) = 11 digits; the printed
+    // boxes omit the check-digit between the two serial runs.
+    { template: T("XXX-XXX-XX-X-XX"), kind: "new" },
+    // PDF p.14: 일련번호(8)-검증번호(1) = 9 digits; the printed boxes omit
+    // the trailing check-digit.
+    { template: T("XXX-XXX-XX-X"), kind: "new" },
   ],
 });

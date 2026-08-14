@@ -10,7 +10,7 @@ export const suhyup = /* @__PURE__ */ defineInstitution({
   nameEn: "Suhyup Bank",
   category: "bank",
   aliases: ["수협"],
-  priority: 30,
+  userBaseMillions: 1.5,
   patterns: [
     // branchRule: routes to 030 Suhyup federation when digits 4-5 are a branch code
     {

@@ -8,7 +8,7 @@ export const kis = /* @__PURE__ */ defineInstitution({
   nameEn: "Korea Investment & Securities",
   category: "securities",
   aliases: ["한국투자증권", "한투", "KIS"],
-  priority: 55,
+  userBaseMillions: 11,
   patterns: [
     { template: T("XXXXXXXX-XX"), kind: "new" },
     { template: T("XXXXXXXX-XXXX"), kind: "new" },

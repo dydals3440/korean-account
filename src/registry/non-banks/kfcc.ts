@@ -10,7 +10,7 @@ export const kfcc = /* @__PURE__ */ defineInstitution({
   nameEn: "Korean Federation of Community Credit Cooperatives",
   category: "non-bank",
   aliases: ["새마을금고", "새마을", "MG", "MG새마을금고"],
-  priority: 55,
+  userBaseMillions: 17,
   patterns: [
     {
       template: T("XXXX-XX-XXXXXX-X"),
@@ -26,7 +26,9 @@ export const kfcc = /* @__PURE__ */ defineInstitution({
       template: T("XXXX-XX-XXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 4 },
-      identifiers: ["9001", "9002", "9003", "9004", "9005"],
+      // PDF p.9: "9" + 과목(3) with 002~004, 005, plus virtual account 037 —
+      // no 001 row exists.
+      identifiers: ["9002", "9003", "9004", "9005", "9037"],
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "002", category: "ordinary" }),

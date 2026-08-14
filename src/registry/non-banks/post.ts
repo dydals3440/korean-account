@@ -11,7 +11,7 @@ export const post = /* @__PURE__ */ defineInstitution({
   nameEn: "Korea Post",
   category: "non-bank",
   aliases: ["우체국", "Korea Post", "EPOST", "지식경제부 우체국"],
-  priority: 50,
+  userBaseMillions: 13,
   patterns: [
     {
       template: T("XXX-XXXXXXXX-X"),
@@ -26,12 +26,23 @@ export const post = /* @__PURE__ */ defineInstitution({
         defineSubject({ code: "110", category: "savings" }),
         defineSubject({ code: "120", category: "savings" }),
       ],
+      // PDF p.21 changelog: added 2023.05.03 with the next-gen system.
+      effectiveFrom: "2023-05-03",
+    },
+    // PDF p.11: regular 13d 지점번호(6)-일련번호(6)-검증번호(1). The virtual
+    // 13d below stays distinguishable via its 8/9 leading identifier.
+    {
+      template: T("XXXXXX-XXXXXX-X"),
+      kind: "old",
+      note: "지점번호-일련번호-검증번호",
     },
     {
       template: T("X-XXXXXXXXXXX-X"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["8", "9"],
+      // PDF p.21 changelog: added 2023.05.03 with the next-gen system.
+      effectiveFrom: "2023-05-03",
     },
     {
       template: T("XXXXXX-XX-XXXXX-X"),

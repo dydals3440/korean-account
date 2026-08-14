@@ -10,7 +10,7 @@ export const woori = /* @__PURE__ */ defineInstitution({
   nameEn: "Woori Bank",
   category: "bank",
   aliases: ["우리"],
-  priority: 85,
+  userBaseMillions: 19,
   successorOf: ["sangup", "hanil", "pyunghwa"],
   patterns: [
     {
@@ -28,10 +28,12 @@ export const woori = /* @__PURE__ */ defineInstitution({
         defineSubject({ code: "005", category: "corporate-free" }),
       ],
     },
+    // PDF p.5: 14 digits = branch(3)-customer(5)-check1(1)-subject(2)-serial(2)-check2(1).
+    // The printed box glyphs omit the check1 box; the digit-count column (14) is authoritative.
     {
-      template: T("XXX-XXXXX-XX-XX-X"),
+      template: T("XXX-XXXXX-X-XX-XX-X"),
       kind: "new",
-      subjectPosition: { start: 10, length: 2 },
+      subjectPosition: { start: 9, length: 2 },
       subjects: [
         defineSubject({ code: "18", category: "linked", virtual: true }),
         defineSubject({ code: "92", category: "linked", virtual: true }),

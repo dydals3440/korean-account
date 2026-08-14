@@ -9,10 +9,12 @@ export const jeonbuk = /* @__PURE__ */ defineInstitution({
   nameEn: "Jeonbuk Bank",
   category: "bank",
   aliases: ["전북", "JB전북"],
-  priority: 20,
+  userBaseMillions: 1.2,
   patterns: [
+    // PDF p.8: digit-count 12 (branch 3 - subject 2 - serial 6 - check 1);
+    // the printed boxes omit the trailing check-digit box.
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: T("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

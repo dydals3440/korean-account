@@ -9,7 +9,7 @@ export const bookookSec = /* @__PURE__ */ defineInstitution({
   nameEn: "Bookook Securities",
   category: "securities",
   aliases: ["부국증권"],
-  priority: 15,
+  userBaseMillions: 0.7,
   patterns: [
     {
       template: T("XXX-XX-XXXXXX"),
