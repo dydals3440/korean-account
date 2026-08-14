@@ -1,10 +1,14 @@
 import type { Institution, InstitutionCategory } from "../types";
-import { BANKS } from "./banks";
-import { NON_BANKS } from "./non-banks";
-import { SECURITIES } from "./securities";
+import { banks } from "./banks";
+import { nonBanks } from "./non-banks";
+import { securities } from "./securities";
+
+export * from "./banks";
+export * from "./non-banks";
+export * from "./securities";
 
 /** Every registered institution, in registry order. */
-export const institutions = [...BANKS, ...NON_BANKS, ...SECURITIES] as const;
+export const institutions = [...banks, ...nonBanks, ...securities] as const;
 
 /** Union of all registered institutions. */
 export type RegisteredInstitution = (typeof institutions)[number];

@@ -15,7 +15,9 @@ import { defineConfig } from "tsdown";
 const PURE_HELPER_MODULES =
   /src[\\/](?:core[\\/](?:pattern-template|subjects|confidence|template-length|define-institution)\.ts$|registry[\\/](?:rules|expand-range)\.ts$)/;
 
-const REGISTRY_MODULES = /src[\\/]registry[\\/](banks|non-banks|securities|index)\.ts$/;
+// Matches everything under registry/ except institution-ids.ts (trap 3) and
+// the pure helpers already captured by the group above (groups match in order).
+const REGISTRY_MODULES = /src[\\/]registry[\\/](?!institution-ids)/;
 
 const ENTRY = {
   index: "src/index.ts",

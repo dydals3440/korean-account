@@ -29,14 +29,7 @@ export {
   normalizeSubject,
   subjectCategoryLabels,
 } from "./core/subjects";
-export {
-  getInstitution,
-  type InstitutionCode,
-  type InstitutionId,
-  type InstitutionIdByCategory,
-  institutions,
-  type RegisteredInstitution,
-} from "./registry";
+export * from "./registry";
 export {
   ACCOUNT_KINDS,
   CONFIDENCE_LEVELS,
