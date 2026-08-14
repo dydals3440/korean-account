@@ -3,16 +3,17 @@ import type { PatternTemplate } from "../types";
 const ALLOWED_CHARS = new Set<string>(["X", "-"]);
 
 /**
- * 패턴 템플릿 문자열을 검증한 뒤 브랜드 타입으로 반환한다.
+ * Validates a pattern template string and returns it as the branded type.
  *
- * v2부터 템플릿은 자릿수(`X`)와 시각 그루핑(`-`)만 표현한다.
- * 식별·과목·검증 자리는 `AccountPattern` 객체의 `*Position` 필드로 명시.
+ * A template expresses digit count (`X`) and visual grouping (`-`) only.
+ * Identifier, subject, and check-digit positions are declared on the
+ * `AccountPattern` object via the `*Position` fields.
  *
  * @example
- * createPatternTemplate("XXX-XX-XXXXXX");   // 11자리, 3-2-6 그루핑
- * createPatternTemplate("XXXX-XX-XXXXXX");  // 12자리, 4-2-6 그루핑
+ * patternTemplate("XXX-XX-XXXXXX");  // 11 digits, 3-2-6 grouping
+ * patternTemplate("XXXX-XX-XXXXXX"); // 12 digits, 4-2-6 grouping
  */
-export function createPatternTemplate(template: string): PatternTemplate {
+export function patternTemplate(template: string): PatternTemplate {
   if (template.length === 0) {
     throw new Error("Pattern template must be non-empty.");
   }

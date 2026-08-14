@@ -29,9 +29,7 @@ const [reqMajor, reqMinor] = pkg.engines.node
   .split(".")
   .map(Number);
 if (major < reqMajor || (major === reqMajor && minor < (reqMinor ?? 0))) {
-  console.error(
-    `이 Node (${process.versions.node}) 는 engines (${pkg.engines.node}) 보다 낮습니다.`,
-  );
+  console.error(`This Node (${process.versions.node}) is below engines (${pkg.engines.node}).`);
   process.exit(1);
 }
 
@@ -50,35 +48,37 @@ check("CJS detectBest", () => {
   if (result?.institution.id !== "shinhan") throw new Error(`got ${result?.institution.id}`);
 });
 
-check("ESM/CJS 결과 동치", () => {
-  const a = JSON.stringify(esm.detectAccount("3333-12-3456789"));
-  const b = JSON.stringify(cjs.detectAccount("3333-12-3456789"));
-  if (a !== b) throw new Error("ESM 과 CJS 결과가 다릅니다");
+check("ESM/CJS results are equivalent", () => {
+  const a = JSON.stringify(esm.detect("3333-12-3456789"));
+  const b = JSON.stringify(cjs.detect("3333-12-3456789"));
+  if (a !== b) throw new Error("ESM and CJS results differ");
 });
 
-check("순수 헬퍼 (별도 청크에서 로드)", () => {
-  if (esm.normalize("110-436-387740") !== "110436387740") throw new Error("normalize");
-  if (esm.institutionByCode("088")?.nameKo !== "신한은행") throw new Error("institutionByCode");
+check("pure helpers load (from the non-registry chunk)", () => {
+  if (esm.normalizeAccount("110-436-387740") !== "110436387740") {
+    throw new Error("normalizeAccount");
+  }
+  if (esm.getInstitution("088")?.nameKo !== "신한은행") throw new Error("getInstitution");
 });
 
-check("extend() 로 만든 detector", () => {
-  const extended = esm.defaultDetector.extend({ scoring: { identifierMatch: 6 } });
-  if (extended.detect("110-436-387740").length === 0) throw new Error("빈 결과");
+check("createDetector with custom scoring", () => {
+  const detector = esm.createDetector(esm.institutions, { scoring: { identifierMatch: 6 } });
+  if (detector.detect("110-436-387740").length === 0) throw new Error("empty result");
 });
 
-check("registry 청크 초기화 순서 (TDZ 회귀 가드)", () => {
+check("registry chunk init order (TDZ regression guard)", () => {
   if (esm.institutions.length !== 57) throw new Error(`${esm.institutions.length} !== 57`);
 });
 
-// zod 없이도 메인 엔트리는 로드돼야 한다. `/schema` 는 optional peerDep 이다.
-check("메인 엔트리는 zod 를 요구하지 않는다", () => {
+// The main entry must load without zod. `/schema` is an optional peerDep.
+check("main entry does not require zod", () => {
   const source = readFileSync(`${root}dist/index.js`, "utf8");
-  if (/from\s*["']zod["']/.test(source)) throw new Error("dist/index.js 가 zod 를 import 합니다");
+  if (/from\s*["']zod["']/.test(source)) throw new Error("dist/index.js imports zod");
 });
 
 if (failures.length > 0) {
-  console.error(`\n${failures.length}건 실패:`);
+  console.error(`\n${failures.length} failure(s):`);
   for (const failure of failures) console.error(`  - ${failure}`);
   process.exit(1);
 }
-console.log("\n런타임 호환 정상.");
+console.log("\nRuntime compatibility OK.");

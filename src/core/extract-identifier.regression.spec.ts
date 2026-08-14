@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "vitest";
-import { institutionById } from "../registry";
-import { normalize } from "./normalize";
+import { getInstitution } from "../registry";
+import { normalizeAccount } from "./normalize-account";
 import type { AccountPattern } from "../types";
 import { extractIdentifier } from "./extract-identifier";
 
@@ -12,7 +12,7 @@ describe("extractIdentifier 는 identifiers 없이 identifierPosition 만으로�
   let suhyup12: AccountPattern;
 
   beforeAll(() => {
-    const suhyup = institutionById("suhyup");
+    const suhyup = getInstitution("suhyup");
     expect(suhyup, "suhyup 기관이 레지스트리에 있어야 한다").not.toBeNull();
 
     const pattern = suhyup?.patterns.find((p) => p.kind === "new" && p.branchRule !== undefined);
@@ -34,6 +34,6 @@ describe("extractIdentifier 는 identifiers 없이 identifierPosition 만으로�
     ["927659375731", "927"],
     ["769978387352", "769"],
   ])("extractIdentifier(%s) === %s", (input, expected) => {
-    expect(extractIdentifier(normalize(input), suhyup12)).toBe(expected);
+    expect(extractIdentifier(normalizeAccount(input), suhyup12)).toBe(expected);
   });
 });

@@ -34,7 +34,7 @@ detectBest("110-436-387740");
 ```
 
 - **PDF 충실 코어** — KFTC CMS PDF 표 행을 그대로 옮긴 57곳 기관 레지스트리
-- **strict TypeScript** — `institutionById("shinhan").code` 가 `"088"` literal 로 narrow
+- **strict TypeScript** — `getInstitution("shinhan").code` 가 `"088"` literal 로 narrow
 - **런타임 의존성 0** — zod 는 `korean-account/schema` 를 쓸 때만 optional peerDep 로 요구
 - **Universal** — Node 22.12+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
 
@@ -99,24 +99,24 @@ if (top) {
 ### 여러 후보 + 필터링
 
 ```ts
-import { detectAccount } from "korean-account";
+import { detect } from "korean-account";
 
 // 카테고리 / 종류 / 화이트리스트·블랙리스트 / 결과 개수·최소 점수 조절
-detectAccount("3333-12-3456789", { categories: ["bank"] });
-detectAccount("110-436-387740", { kinds: ["new"] });
-detectAccount("110-436-387740", { include: ["shinhan", "kb"] });
-detectAccount("110-436-387740", { exclude: ["shinhan"], limit: 3, minScore: 4 });
+detect("3333-12-3456789", { categories: ["bank"] });
+detect("110-436-387740", { kinds: ["new"] });
+detect("110-436-387740", { include: ["shinhan", "kb"] });
+detect("110-436-387740", { exclude: ["shinhan"], limit: 3, minScore: 4 });
 ```
 
 ### 어느 깊이로 쓸지 결정 매트릭스
 
-| 상황                            | 진입점                             | 예상 코드량 |
-| ------------------------------- | ---------------------------------- | ----------- |
-| 폼에서 1순위만 알면 됨          | `detectBest`                       | 3줄         |
-| 자동완성 후보 N개               | `detectAccount(input, { limit })`  | 5줄         |
-| 은행/증권 카테고리만 필터       | `pickInstitutions({ categories })` | 8줄         |
-| 사내·B2B·파트너 도메인 보강     | `defaultDetector.extend({...})`    | 20~30줄     |
-| 점수 가중치 / 체크디지트 커스텀 | `createDetector({...})`            | 50줄+       |
+| 상황                            | 진입점                               | 예상 코드량 |
+| ------------------------------- | ------------------------------------ | ----------- |
+| 폼에서 1순위만 알면 됨          | `detectBest`                         | 3줄         |
+| 자동완성 후보 N개               | `detect(input, { limit })`           | 5줄         |
+| 은행/증권 카테고리만 필터       | `searchInstitutions({ categories })` | 8줄         |
+| 사내·B2B·파트너 도메인 보강     | `defaultDetector.extend({...})`      | 20~30줄     |
+| 점수 가중치 / 체크디지트 커스텀 | `createDetector({...})`              | 50줄+       |
 
 ## 4. 지원 금융기관
 
@@ -215,9 +215,9 @@ detectAccount("110-436-387740", { exclude: ["shinhan"], limit: 3, minScore: 4 })
 ### 5.1 계좌 식별 (Detection)
 
 ```ts
-import { detectAccount, detectBest, defaultDetector, createDetector } from "korean-account";
+import { detect, detectBest, defaultDetector, createDetector } from "korean-account";
 
-detectAccount(input, options?) // → readonly DetectionResult[] (정렬됨, 기본 limit 5)
+detect(input, options?) // → readonly DetectionResult[] (정렬됨, 기본 limit 5)
 detectBest(input, options?)    // → DetectionResult | null  (1순위, minScore 미달이면 null)
 defaultDetector                // → Detector — PDF-strict immutable 인스턴스
 createDetector({ institutions, globalRules?, scoring?, checkDigitVerifiers? }) // 커스텀 detector
@@ -253,13 +253,13 @@ interface DetectionResult {
 ### 5.2 기관 메타 조회 (Lookup)
 
 ```ts
-import { institutionById, institutionByCode, institutions } from "korean-account";
+import { getInstitution, getInstitution, institutions } from "korean-account";
 
-const shinhan = institutionById("shinhan");
+const shinhan = getInstitution("shinhan");
 shinhan?.code; // "088" (literal)
 shinhan?.category; // "bank" (literal)
 
-const ibk = institutionByCode("003");
+const ibk = getInstitution("003");
 ibk?.id; // "ibk"
 
 institutions; // readonly RegisteredInstitution[] — 등록 전체 (57곳)
@@ -270,10 +270,10 @@ institutions; // readonly RegisteredInstitution[] — 등록 전체 (57곳)
 대량 institution 을 카테고리·종류·과목 유무 등으로 필터링.
 
 ```ts
-import { pickInstitutions, pickInstitutionsByIds, pickPattern } from "korean-account";
+import { searchInstitutions, searchInstitutions, pickPattern } from "korean-account";
 
-pickInstitutions({ categories: ["bank"], hasSubject: true });
-pickInstitutionsByIds({ include: ["kb", "shinhan"], exclude: ["sc"] });
+searchInstitutions({ categories: ["bank"], hasSubject: true });
+searchInstitutions({ include: ["kb", "shinhan"], exclude: ["sc"] });
 pickPattern("kb", { kind: "new", length: 14 }); // 특정 institution 의 특정 패턴 변형
 ```
 
@@ -281,14 +281,14 @@ pickPattern("kb", { kind: "new", length: 14 }); // 특정 institution 의 특정
 
 ```ts
 import {
-  normalize,
+  normalizeAccount,
   formatAccount,
-  createPatternTemplate as T,
+  patternTemplate as T,
   extractIdentifier,
   extractSubject,
 } from "korean-account";
 
-normalize(" 110-436-387740 "); // "110436387740"
+normalizeAccount(" 110-436-387740 "); // "110436387740"
 formatAccount("110436387740", T("XXX-XXX-XXXXXX")); // "110-436-387740"
 
 const pattern = pickPattern("shinhan", { kind: "new" })!;
@@ -367,8 +367,8 @@ import type {
   // 확장·필터용 보조 타입
   RegisteredInstitution, // 기본 레지스트리에 등록된 institution 의 union
   InstitutionIdInput, // 등록 id autocomplete + 외부 확장 id widening
-  CreateDetectorInput, // createDetector() 입력
-  PickInstitutionsFilter,
+  CreateDetectorOptions, // createDetector() 입력
+  SearchInstitutionsFilter,
   PickPatternFilter, // 선택자 필터
   PatternToken, // PatternTemplate 의 토큰 단위
   AdditionalRule, // 패턴별 커스텀 가드 (digits) => boolean
@@ -392,15 +392,15 @@ import type {
 
 ```ts
 import {
-  createPatternTemplate as T,
+  patternTemplate as T,
   defaultDetector,
   defineInstitution,
   defineSubject,
-  institutionById,
+  getInstitution,
 } from "korean-account";
 
 // 저축은행 가상계좌 — PDF 비명시 패턴 추가
-const base = institutionById("savings-bank");
+const base = getInstitution("savings-bank");
 if (!base) throw new Error("savings-bank 누락");
 
 const savingsBankExtended = defineInstitution({
@@ -448,7 +448,7 @@ myDetector.detect("066-43-15-739026-6");
 
 ## 10. 성능
 
-`detectAccount()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 57곳 × ~~3 패턴 ≈ 170 평가를 평균 10~~15회로 단축한다.
+`detect()` 호출당 평균 **~12-20µs** (M-series Mac). 내부적으로 입력 길이에 맞는 institution 만 평가하는 인덱스 (`byLengthNear`) 를 사용해 57곳 × ~~3 패턴 ≈ 170 평가를 평균 10~~15회로 단축한다.
 
 UI 입력 디바운스에는 `useMemo` / `useDeferredValue` 같은 일반 React 패턴으로 충분히 대응 가능.
 

@@ -10,17 +10,16 @@ export {
   toss12First1719,
 } from "./registry/rules";
 export { scoreToConfidence } from "./core/confidence";
-export type { CreateDetectorInput } from "./core/detector";
+export type { CreateDetectorOptions } from "./core/detector";
 export { createDetector } from "./core/detector";
-export { createPatternTemplate } from "./core/pattern-template";
-export { defaultDetector, detectAccount } from "./core/detect-account";
-export { detectBest } from "./core/detect-best";
+export { patternTemplate } from "./core/pattern-template";
+export { detect, detectBest } from "./core/detect";
 export { extractIdentifier } from "./core/extract-identifier";
 export { extractSubject } from "./core/extract-subject";
 export { formatAccount } from "./core/format-account";
-export { normalize } from "./core/normalize";
-export type { PickInstitutionsFilter } from "./core/pick-institutions";
-export { pickInstitutions, pickInstitutionsByIds } from "./core/pick-institutions";
+export { normalizeAccount } from "./core/normalize-account";
+export type { SearchInstitutionsFilter } from "./core/search-institutions";
+export { searchInstitutions } from "./core/search-institutions";
 export type { PickPatternFilter } from "./core/pick-pattern";
 export { pickPattern } from "./core/pick-pattern";
 export { defineInstitution } from "./core/define-institution";
@@ -31,11 +30,10 @@ export {
   subjectCategoryLabels,
 } from "./core/subjects";
 export {
+  getInstitution,
   type InstitutionCode,
   type InstitutionId,
   type InstitutionIdByCategory,
-  institutionByCode,
-  institutionById,
   institutions,
   type RegisteredInstitution,
 } from "./registry";
@@ -58,13 +56,13 @@ export type {
   DetectionResult,
   DetectOptions,
   Detector,
+  DigitSpan,
   GlobalRule,
   Institution,
   InstitutionCategory,
   InstitutionIdInput,
   PatternTemplate,
   PatternToken,
-  Position,
   ScoringWeights,
   Subject,
   SubjectCategory,

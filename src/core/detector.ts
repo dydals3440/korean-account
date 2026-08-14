@@ -1,7 +1,7 @@
 import { buildDetectorIndex } from "./detector-index";
-import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
 import { scoreToConfidence } from "./confidence";
-import { normalize } from "./normalize";
+import { normalizeAccount } from "./normalize-account";
+import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
 import { normalizeSubject } from "./subjects";
 import type {
   AccountKind,
@@ -17,17 +17,19 @@ import type {
   Subject,
 } from "../types";
 
-export interface CreateDetectorInput<I extends Institution = Institution> {
-  readonly institutions: readonly I[];
+/** Optional knobs for {@link createDetector}. */
+export interface CreateDetectorOptions<I extends Institution = Institution> {
   readonly globalRules?: readonly GlobalRule[];
-  /** 점수 가중치 override. 누락된 키는 기본값. */
+  /** Partial override of the scoring weights. Missing keys keep their defaults. */
   readonly scoring?: ScoringWeights;
   /**
-   * institution id 별 체크디지트 verifier. 매칭된 institution 의 verifier 가
-   * 등록되어 있고 패턴이 `validatesCheckDigit: false` 가 아니면, detect 결과의
-   * `capabilities.validatedCheckDigit` 가 boolean 으로 채워진다.
+   * Check-digit verifiers keyed by institution id. When the matched
+   * institution has a verifier and the pattern does not opt out with
+   * `validatesCheckDigit: false`, the result's
+   * `capabilities.validatedCheckDigit` becomes a boolean.
    *
-   * 알고리즘 자체는 외부 자료에서 가져와 사용자가 정의한다.
+   * The algorithms themselves are user-supplied — they are not published by
+   * KFTC and are out of scope for this library.
    */
   readonly checkDigitVerifiers?: Readonly<Partial<Record<I["id"], CheckDigitVerifier>>>;
 }
@@ -35,7 +37,7 @@ export interface CreateDetectorInput<I extends Institution = Institution> {
 const DEFAULT_LIMIT = 5;
 const DEFAULT_MIN_SCORE = 1;
 
-/** kind 우선순위 (랭킹 tie-break). */
+/** Ranking tie-break order between account kinds. */
 const KIND_ORDER: Record<AccountKind, number> = {
   new: 6,
   old: 5,
@@ -46,47 +48,57 @@ const KIND_ORDER: Record<AccountKind, number> = {
 };
 
 /**
- * institution 집합과 globalRule 을 받아 detector 를 만든다.
+ * Builds a detector over the given institutions.
  *
- * 입력 `institutions` 의 element 타입이 generic `I` 로 전파되어 `detect()`
- * 반환의 `DetectionResult<I>` 까지 좁혀진다. 예를 들어 기본 레지스트리를 그대로
- * 넘기면 `defaultDetector` 의 결과는 `institution.id` 가 `InstitutionId`
- * literal union 으로 추론된다.
+ * The element type of `institutions` propagates as the generic `I`, so
+ * `detect()` results narrow to exactly the ids you passed in — e.g.
+ * `createDetector([kb, shinhan])` yields results whose `institution.id` is
+ * `"kb" | "shinhan"`.
  *
- * `extend` / `remove` 는 새 detector 를 반환한다.
- * `scoring` 으로 점수 가중치를 부분 override 할 수 있다.
+ * `extend` / `remove` return new detectors; a detector is never mutated.
  *
- * @example
- * const detector = createDetector({ institutions });
+ * @example Only the banks you ship with — everything else tree-shakes away
+ * import { createDetector, kb, shinhan, toss } from "korean-account";
+ * const detector = createDetector([kb, shinhan, toss]);
  * detector.detect("110-436-387740");
  *
- * @example 확장 — 저축은행 가상계좌 prefix 보강
- * const extended = defaultDetector.extend({ institutions: [myCustomInstitution] });
+ * @example The full registry
+ * import { createDetector, institutions } from "korean-account";
+ * const detector = createDetector(institutions);
+ *
+ * @example Custom scoring and extension
+ * const strict = createDetector(institutions, { scoring: { identifierMatch: 6 } });
+ * const extended = strict.extend({ institutions: [myCustomInstitution] });
  */
-export function createDetector<I extends Institution>(input: CreateDetectorInput<I>): Detector<I> {
-  const institutions = input.institutions;
-  const globalRules = input.globalRules ?? [];
-  const weights = { ...DEFAULT_WEIGHTS, ...input.scoring };
+export function createDetector<I extends Institution>(
+  institutions: readonly I[],
+  options: CreateDetectorOptions<I> = {},
+): Detector<I> {
+  const globalRules = options.globalRules ?? [];
+  const weights = { ...DEFAULT_WEIGHTS, ...options.scoring };
   const byId = new Map<string, I>(institutions.map((institution) => [institution.id, institution]));
   const index = buildDetectorIndex(institutions);
-  const verifierByInstitutionId = buildVerifierMap(input.checkDigitVerifiers);
+  const verifierByInstitutionId = buildVerifierMap(options.checkDigitVerifiers);
 
-  const detect = (raw: string, options: DetectOptions = {}): readonly DetectionResult<I>[] => {
-    const digits = normalize(raw);
+  const detect = (
+    raw: string,
+    detectOptions: DetectOptions = {},
+  ): readonly DetectionResult<I>[] => {
+    const digits = normalizeAccount(raw);
     if (digits.length === 0) {
       return [];
     }
 
-    const limit = options.limit ?? DEFAULT_LIMIT;
-    const minScore = options.minScore ?? DEFAULT_MIN_SCORE;
-    const includeSet = options.include ? new Set<string>(options.include) : null;
-    const excludeSet = options.exclude ? new Set<string>(options.exclude) : null;
+    const limit = detectOptions.limit ?? DEFAULT_LIMIT;
+    const minScore = detectOptions.minScore ?? DEFAULT_MIN_SCORE;
+    const includeSet = detectOptions.include ? new Set<string>(detectOptions.include) : null;
+    const excludeSet = detectOptions.exclude ? new Set<string>(detectOptions.exclude) : null;
 
     const candidateInstitutions = index.byLengthNear(digits.length);
     const results: DetectionResult<I>[] = [];
 
     for (const institution of candidateInstitutions) {
-      if (!passesOptionFilters(institution, options, includeSet, excludeSet)) {
+      if (!passesOptionFilters(institution, detectOptions, includeSet, excludeSet)) {
         continue;
       }
 
@@ -100,9 +112,10 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
         continue;
       }
 
-      // branchRule 보너스를 minScore 컷오프 *앞* 에서 적용한다. 분기 규칙은 PDF 가
-      // 명시한 강한 식별 신호이므로, 그 덕에 minScore 를 넘겼어야 할 후보가 먼저
-      // 탈락해서는 안 된다.
+      // The branch-rule bonus applies *before* the minScore cutoff. Branch
+      // rules are strong identification signals spelled out by the KFTC PDF,
+      // so a candidate that clears minScore thanks to one must not be culled
+      // early.
       const branchOutcome = evaluateBranch(
         matchedPattern,
         digits,
@@ -115,7 +128,7 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
         continue;
       }
 
-      if (options.kinds && !options.kinds.includes(branchOutcome.kind)) {
+      if (detectOptions.kinds && !detectOptions.kinds.includes(branchOutcome.kind)) {
         continue;
       }
 
@@ -155,23 +168,22 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
     readonly scoring?: ScoringWeights;
     readonly checkDigitVerifiers?: Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
   }): Detector<I | E> => {
-    // 같은 id 가 들어오면 기존을 새 institution 으로 교체 (silent duplicate 방지).
+    // An incoming id replaces the existing institution (prevents silent duplicates).
     const incomingIds = new Set((extra.institutions ?? []).map((institution) => institution.id));
     const merged: readonly (I | E)[] = [
       ...institutions.filter((institution) => !incomingIds.has(institution.id)),
       ...(extra.institutions ?? []),
     ];
-    // 두 맵의 키는 모두 `(I | E)["id"]` 의 부분집합이지만, TS 는 generic key 를 가진
-    // mapped type 의 spread 결과를 그 타입으로 좁히지 못한다.
+    // Both maps' keys are subsets of `(I | E)["id"]`, but TS cannot narrow the
+    // spread of a mapped type with a generic key back to that type.
     const checkDigitVerifiers = {
-      ...input.checkDigitVerifiers,
+      ...options.checkDigitVerifiers,
       ...extra.checkDigitVerifiers,
     } as Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
 
-    return createDetector<I | E>({
-      institutions: merged,
+    return createDetector<I | E>(merged, {
       globalRules: [...globalRules, ...(extra.globalRules ?? [])],
-      scoring: { ...input.scoring, ...extra.scoring },
+      scoring: { ...options.scoring, ...extra.scoring },
       checkDigitVerifiers,
     });
   };
@@ -181,12 +193,14 @@ export function createDetector<I extends Institution>(input: CreateDetectorInput
       typeof target === "function"
         ? target
         : (institution: Institution) => institution.id === target;
-    return createDetector<I>({
-      institutions: institutions.filter((institution) => !matchesRemoval(institution)),
-      globalRules,
-      scoring: input.scoring,
-      checkDigitVerifiers: input.checkDigitVerifiers,
-    });
+    return createDetector<I>(
+      institutions.filter((institution) => !matchesRemoval(institution)),
+      {
+        globalRules,
+        scoring: options.scoring,
+        checkDigitVerifiers: options.checkDigitVerifiers,
+      },
+    );
   };
 
   return { institutions, detect, extend, remove };
@@ -218,9 +232,9 @@ interface BranchOutcome<I extends Institution> {
 }
 
 /**
- * 매칭된 패턴의 `branchRule` 을 평가해 kind / institution / virtual / score 를
- * 보정한다. PDF 가 명시한 분기 규칙은 *추가적인 강한 식별 신호* 이므로 통과 시
- * score 에 `branchRuleMatch` 만큼 가산.
+ * Evaluates the matched pattern's `branchRule` to adjust kind / institution /
+ * virtual flag / score. A passing branch rule is an *additional* strong
+ * identification signal from the KFTC PDF, so it adds `branchRuleMatch`.
  */
 function evaluateBranch<I extends Institution>(
   matchedPattern: AccountPattern,
@@ -273,7 +287,7 @@ function computeCapabilities(
   return { allowsWithdrawal, virtual, validatedCheckDigit };
 }
 
-/** institution id 별 체크디지트 verifier 호출. 패턴이 명시적으로 미검증이면 null. */
+/** Runs the institution's check-digit verifier; null when the pattern opts out. */
 function resolveCheckDigit(
   matchedPattern: AccountPattern,
   institutionId: string,
@@ -290,7 +304,7 @@ function resolveCheckDigit(
   return verifier(digits);
 }
 
-/** score (desc) → priority (desc) → kindOrder (desc) 로 정렬. */
+/** Sort by score (desc), then institution priority (desc), then kind order (desc). */
 function compareDetections(a: DetectionResult, b: DetectionResult): number {
   if (b.score !== a.score) {
     return b.score - a.score;
@@ -303,7 +317,7 @@ function compareDetections(a: DetectionResult, b: DetectionResult): number {
   return KIND_ORDER[b.kind] - KIND_ORDER[a.kind];
 }
 
-/** 1순위가 high / medium 이면 low 후보를 제거 — noise filtering. */
+/** Drops low-confidence candidates when the top result is high/medium. */
 function narrowLowConfidence<I extends Institution>(
   results: readonly DetectionResult<I>[],
 ): readonly DetectionResult<I>[] {
@@ -315,7 +329,7 @@ function narrowLowConfidence<I extends Institution>(
 }
 
 function buildVerifierMap<I extends Institution>(
-  verifiers: CreateDetectorInput<I>["checkDigitVerifiers"],
+  verifiers: CreateDetectorOptions<I>["checkDigitVerifiers"],
 ): Map<string, CheckDigitVerifier> {
   const entries = Object.entries(verifiers ?? {}).filter(
     (entry): entry is [string, CheckDigitVerifier] => entry[1] !== undefined,

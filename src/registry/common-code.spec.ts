@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { institutionById } from ".";
+import { getInstitution } from ".";
 
 /**
  * `Institution.commonCode` (KFTC 표준은행코드) 회귀 가드.
@@ -12,7 +12,7 @@ import { institutionById } from ".";
 describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
   test("하나은행 (외환·하나 통합) — CMS code 005 ≠ 표준 081", () => {
     // Given / When
-    const hana = institutionById("hana");
+    const hana = getInstitution("hana");
 
     // Then
     expect(hana?.code).toBe("005");
@@ -39,7 +39,7 @@ describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
     ["toss", "092"],
   ] as const)("%s — CMS code 와 표준은행코드 일치 (commonCode 생략)", (id, code) => {
     // Given / When
-    const inst = institutionById(id);
+    const inst = getInstitution(id);
 
     // Then
     expect(inst?.code).toBe(code);
@@ -48,7 +48,7 @@ describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
 
   test("hana-securities-cma — CMS 081 (증권사 CMA, 표준은행코드 대상 아님)", () => {
     // Given / When
-    const cma = institutionById("hana-securities-cma");
+    const cma = getInstitution("hana-securities-cma");
 
     // Then
     expect(cma?.code).toBe("081");

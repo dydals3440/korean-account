@@ -1,4 +1,4 @@
-import { createPatternTemplate as T } from "../core/pattern-template";
+import { patternTemplate as T } from "../core/pattern-template";
 import {
   kb11FirstDigit,
   kbank10First9,

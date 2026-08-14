@@ -1,25 +1,25 @@
 import { templateLength } from "./template-length";
-import { institutionById } from "../registry";
+import { getInstitution } from "../registry";
 import type { AccountKind, AccountPattern } from "../types";
 
 export interface PickPatternFilter {
   readonly kind?: AccountKind;
-  /** 템플릿 길이 (digits 자릿수). */
+  /** Template length in digits (hyphens excluded). */
   readonly length?: number;
 }
 
 /**
- * 특정 institution에서 조건에 맞는 패턴 하나를 조회한다.
+ * Looks up a single matching pattern on a registered institution.
  *
  * @example
  * pickPattern("kb", { kind: "new", length: 14 });
- * // → KB국민 신계좌 14자리 패턴
+ * // → the KB Kookmin 14-digit new-format pattern
  */
 export function pickPattern(
   institutionId: string,
   filter: PickPatternFilter = {},
 ): AccountPattern | null {
-  const inst = institutionById(institutionId);
+  const inst = getInstitution(institutionId);
   if (!inst) {
     return null;
   }

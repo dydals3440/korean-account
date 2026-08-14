@@ -1,4 +1,4 @@
-import { createPatternTemplate as T } from "../core/pattern-template";
+import { patternTemplate as T } from "../core/pattern-template";
 import { defineSubject } from "../core/subjects";
 import { defineInstitution } from "../core/define-institution";
 import { expandTwoDigitRange } from "./expand-range";

@@ -1,36 +1,38 @@
 /**
- * 패턴 템플릿 토큰. 자릿수는 `X`, 시각 그루핑은 `-` 만 사용한다.
+ * Pattern template token. Digit slots use `X`; visual grouping uses `-`.
  *
  * @example
- * "XXX-XX-XXXXXX"   // 11자리, 3-2-6 그루핑
+ * "XXX-XX-XXXXXX" // 11 digits, 3-2-6 grouping
  */
 export type PatternToken = "X";
 
-/** 패턴 템플릿 브랜드. 반드시 `createPatternTemplate`으로 생성. */
+/** Branded template string. Always construct via `patternTemplate`. */
 export type PatternTemplate = string & { readonly __brand: "PatternTemplate" };
 
-/** 0-indexed digit 범위. */
-export interface Position {
+/** A 0-indexed span of digits inside a normalized account number. */
+export interface DigitSpan {
   readonly start: number;
-  /** 자릿수 (1 이상). */
+  /** Number of digits (≥ 1). */
   readonly length: number;
 }
 
-/** 금융기관 카테고리. */
+/** Financial institution category. */
 export type InstitutionCategory = "bank" | "non-bank" | "securities" | "clearing";
 
-/** 점수 → 신뢰도 매핑. */
+/** Confidence band derived from the raw score. */
 export type Confidence = "high" | "medium" | "low";
 
 /**
- * 계좌의 종류.
+ * Account number generation / purpose.
  *
- * - `new` — 차세대(신) 계좌
- * - `old` — 구 계좌
- * - `virtual` — 가상계좌 (입금 전용인 경우가 많음)
- * - `lifetime` — 평생계좌 / 고객지정 / 핸드폰번호 연결
- * - `incoming-only` — 입금 전용 (적금·신탁·연계 등 자동이체 출금 불가)
- * - `merged-legacy` — 합병 전 구 시스템 계좌 (외환·조흥·한일·평화 등)
+ * - `new` — current (next-generation) format
+ * - `old` — legacy format
+ * - `virtual` — virtual account (usually deposit-only)
+ * - `lifetime` — lifetime / customer-chosen / phone-number-linked account
+ * - `incoming-only` — deposit-only (installment savings, trusts, linked
+ *   products; direct-debit withdrawal unavailable)
+ * - `merged-legacy` — pre-merger legacy system account (KEB, Chohung, Hanil,
+ *   Peace Bank, ...)
  */
 export type AccountKind =
   | "new"
@@ -41,10 +43,12 @@ export type AccountKind =
   | "merged-legacy";
 
 /**
- * 계정과목 카테고리.
+ * Ledger subject (계정과목) category.
  *
- * CMS PDF 표준 10종 (보통/국고/저축/자유저축/가계당좌/당좌/기업자유/YES/연계/기타)
- * + 입금전용 상품 분류용 확장 (`installment`/`trust`/`isa`).
+ * The ten standard categories from the KFTC CMS PDF (ordinary / treasury /
+ * savings / free-savings / household-current / current / corporate-free /
+ * YES / linked / other) plus extensions for deposit-only products
+ * (`installment` / `trust` / `isa`).
  */
 export type SubjectCategory =
   | "ordinary"
@@ -61,19 +65,20 @@ export type SubjectCategory =
   | "isa"
   | "other";
 
-/** 계정과목 코드 정의. */
+/** A ledger subject code declaration. */
 export interface Subject {
-  /** 자릿수에 맞춰 zero-padded 코드 ("01", "611", "301" 등). */
+  /** Zero-padded code matching the subject span width ("01", "611", "301", ...). */
   readonly code: string;
   readonly category: SubjectCategory;
-  /** 표시명 ("정기적금" 등). 없으면 카테고리 라벨 사용. */
+  /** Display label ("정기적금" etc.). Falls back to the category label. */
   readonly label?: string;
   /**
-   * 자동이체 출금 가능 여부. 미지정 시 kind 로부터 유도된다 — `virtual: true` 이거나
-   * kind 가 `virtual` / `incoming-only` / `lifetime` 이면 false, 그 외에는 true.
+   * Whether direct-debit withdrawal is possible. When unspecified it is
+   * derived from the kind — false for `virtual: true` subjects and for
+   * `virtual` / `incoming-only` / `lifetime` kinds, true otherwise.
    */
   readonly allowsWithdrawal?: boolean;
-  /** 가상계좌 (입금 전용으로 동작). */
+  /** Virtual account (behaves deposit-only). */
   readonly virtual?: boolean;
   readonly effectiveFrom?: string;
   readonly note?: string;
@@ -81,30 +86,31 @@ export interface Subject {
 
 export type AdditionalRule = (digits: string) => boolean;
 
-/** Detector 레벨 전역 룰. 패턴이 적중한 institution에 대해서만 평가. */
+/** Detector-level global rule, evaluated only for institutions whose pattern matched. */
 export type GlobalRule = (digits: string, institution: Institution) => boolean;
 
 /**
- * 체크디지트 검증 함수. 정규화된 digits 를 받아 통과 여부를 반환.
+ * Check-digit verifier: receives normalized digits, returns pass/fail.
  *
- * PDF 는 알고리즘을 비공개하므로 라이브러리 기본은 미구현이다. 컨슈머가
- * 은행 공개 자료 / 시중 자료로 알고리즘을 확보해 `createDetector` 의
- * `checkDigitVerifiers` 옵션에 institution id 별로 등록할 수 있다.
+ * The KFTC PDF does not publish the algorithms, so the library implements
+ * none. Consumers who obtain an algorithm can register it per institution id
+ * via `createDetector`'s `checkDigitVerifiers` option.
  *
- * 결과 `capabilities.validatedCheckDigit` 는:
- * - verifier 등록 + 통과 → `true`
- * - verifier 등록 + 실패 → `false`
- * - verifier 미등록 또는 패턴이 `validatesCheckDigit: false` → `null`
+ * The resulting `capabilities.validatedCheckDigit` is:
+ * - verifier registered and passed → `true`
+ * - verifier registered and failed → `false`
+ * - no verifier, or the pattern sets `validatesCheckDigit: false` → `null`
  */
 export type CheckDigitVerifier = (digits: string) => boolean;
 
 /**
- * 분기 규칙 — digits를 받아 결과를 보정한다.
+ * Branch rule — inspects digits and adjusts the result.
  *
- * - `institutionId` 가 반환되면 결과 institution이 그 id로 교체된다 (수협 분기 등).
- * - `kindOverride` 가 반환되면 결과 kind가 교체된다 (K뱅크 / 토스 prefix 등).
- * - `virtualOverride` 가 반환되면 capabilities.virtual 이 교체된다.
- * - `null` 반환 시 변경 없음.
+ * - Returning `institutionId` reroutes the result to that institution
+ *   (e.g. the Suhyup bank/coop split).
+ * - Returning `kindOverride` replaces the kind (e.g. K bank / Toss prefixes).
+ * - Returning `virtualOverride` replaces `capabilities.virtual`.
+ * - Returning `null` leaves the result unchanged.
  */
 export interface BranchRule {
   readonly describe: string;
@@ -116,29 +122,31 @@ export interface BranchRuleResult {
   readonly virtualOverride?: boolean;
 }
 
-/** 단일 institution의 계좌번호 패턴 한 variant. */
+/** One account-number format variant of an institution. */
 export interface AccountPattern {
   readonly template: PatternTemplate;
   readonly kind: AccountKind;
-  readonly identifierPosition?: Position;
+  readonly identifierPosition?: DigitSpan;
   readonly identifiers?: readonly string[];
   readonly identifierRange?: { readonly from: number; readonly to: number };
-  readonly subjectPosition?: Position;
+  readonly subjectPosition?: DigitSpan;
   readonly subjects?: readonly Subject[];
   /**
-   * @deprecated 어떤 코드 경로도 이 필드를 읽지 않으며, 기본 레지스트리의 152개
-   * 패턴 중 하나도 채우지 않는다. 체크디지트 위치는 `checkDigitVerifiers` 에
-   * 등록하는 함수가 직접 안다. 다음 major 에서 제거 예정.
+   * @deprecated No code path reads this field and none of the 152 built-in
+   * patterns set it. A check-digit verifier registered via
+   * `checkDigitVerifiers` knows its own digit positions. Removed in the next
+   * major.
    */
-  readonly checkDigitPosition?: Position;
-  /** `false` 면 명시적 미검증. 기본 `undefined` = 알고리즘 미구현. */
+  readonly checkDigitPosition?: DigitSpan;
+  /** `false` opts out explicitly. Default `undefined` = no algorithm available. */
   readonly validatesCheckDigit?: boolean;
   readonly branchRule?: BranchRule;
   /**
-   * 패턴 매칭의 *통과 검증 + 점수 가산* 룰. 자릿수가 일치하는 입력에서 하나라도
-   * false 면 패턴이 매칭되지 않으며, 모두 통과해야 룰 개수만큼 가산된다. PDF·실
-   * 세계 도메인 제약 (예: `d[3]==="9"` 외환 14d 신호, prefix 충돌 회피) 을 패턴
-   * 매칭 조건과 함께 표현할 때 사용.
+   * Gate-and-score rules for the pattern. On a length-matching input, all
+   * rules must pass or the pattern is rejected; when all pass, each rule adds
+   * to the score. Use for domain constraints the template cannot express
+   * (e.g. `d[3] === "9"` as the KEB 14-digit signal, or prefix-collision
+   * avoidance).
    */
   readonly additionalRules?: readonly AdditionalRule[];
   readonly effectiveFrom?: string;
@@ -146,14 +154,14 @@ export interface AccountPattern {
 }
 
 /**
- * 금융기관.
+ * A financial institution.
  *
- * Generic 파라미터는 literal narrow 보존용:
- * - `Id` — `"kdb"` 같은 institution id literal
- * - `Code` — `"002"` 같은 CMS 표준 코드 literal
- * - `Category` — `"bank"` 같은 카테고리 literal
+ * The generic parameters preserve literals for narrowing:
+ * - `Id` — institution id literal such as `"kdb"`
+ * - `Code` — CMS representative code literal such as `"002"`
+ * - `Category` — category literal such as `"bank"`
  *
- * `defineInstitution` 헬퍼를 거치면 세 generic 이 자동 추론된다.
+ * The `defineInstitution` helper infers all three automatically.
  */
 export interface Institution<
   Id extends string = string,
@@ -163,15 +171,16 @@ export interface Institution<
   readonly id: Id;
   readonly code: Code;
   /**
-   * 금융공동망 표준은행코드 (KFTC 공동코드). CMS namespace `code` 와 다른 경우만
-   * 지정. 같은 KFTC 가 운영하는 별개 namespace 라 한쪽으로 통일 불가 — 합병·분리
-   * 이력에 따라 두 체계의 대표코드가 달라지는 경우가 있음.
+   * KFTC interbank standard bank code, set only when it differs from the CMS
+   * namespace `code`. Both namespaces are operated by KFTC but diverge for
+   * institutions with merger/split history.
    *
-   * 예시: `hana` 는 `code: "005"` (CMS — 외환·하나 통합 후 외환 대표코드 승계),
-   * `commonCode: "081"` (표준 — 하나은행 대표코드 유지). 컨슈머가 표준은행코드
-   * 기반 서버를 쓴다면 `institution.commonCode ?? institution.code` 로 접근.
+   * Example: `hana` has `code: "005"` (CMS — inherited the KEB representative
+   * code after the merger) and `commonCode: "081"` (standard — kept the Hana
+   * representative code). If your backend speaks standard bank codes, read
+   * `institution.commonCode ?? institution.code`.
    *
-   * 미지정 시 `code` 와 동일하다고 간주.
+   * When unset, assume it equals `code`.
    */
   readonly commonCode?: string;
   readonly aliasCodes?: readonly string[];
@@ -185,22 +194,22 @@ export interface Institution<
   readonly notes?: string;
 }
 
-/** detect 결과 케이퍼빌리티 메타. */
+/** Capability metadata attached to each detection result. */
 export interface DetectionCapabilities {
-  /** 자동이체 출금이 가능한지 (입금전용/평생계좌/가상계좌 등은 false). */
+  /** Whether direct-debit withdrawal is possible (false for deposit-only / lifetime / virtual). */
   readonly allowsWithdrawal: boolean;
-  /** 가상계좌 여부. */
+  /** Whether the account is a virtual account. */
   readonly virtual: boolean;
   /**
-   * 체크디지트 검증 결과.
-   * - `true` — 검증 완료 & 통과
-   * - `false` — 검증 완료 & 실패
-   * - `null` — 검증 미수행 (알고리즘 미구현 또는 pattern.validatesCheckDigit=false)
+   * Check-digit verification outcome.
+   * - `true` — verified and passed
+   * - `false` — verified and failed
+   * - `null` — not verified (no algorithm, or `validatesCheckDigit: false`)
    */
   readonly validatedCheckDigit: boolean | null;
 }
 
-/** detect 결과 단일 항목. */
+/** A single detection candidate. */
 export interface DetectionResult<I extends Institution = Institution> {
   readonly institution: I;
   readonly matchedPattern: AccountPattern;
@@ -213,8 +222,8 @@ export interface DetectionResult<I extends Institution = Institution> {
 }
 
 /**
- * autocomplete-with-widening 패턴 — `Id` 가 literal union 으로 들어오면 IDE 가
- * 후보를 띄워주되, 임의 string 도 그대로 받아준다 (외부 institution 확장 대응).
+ * Autocomplete-with-widening: registered `Id` literals surface in the IDE
+ * while arbitrary strings stay accepted (for user-extended registries).
  */
 export type InstitutionIdInput<Id extends string = string> = Id | (string & Record<never, never>);
 
@@ -228,60 +237,62 @@ export interface DetectOptions<Id extends string = string> {
 }
 
 /**
- * Detector 가 패턴 매칭 시 부여하는 점수 가중치. 미지정 키는 `DEFAULT_WEIGHTS`
- * (lengthExact:3 / lengthNear:1 / identifierMatch:4 / subjectMatch:3 /
- * additionalRule:1 / globalRule:1 / branchRuleMatch:2 / kindNewBonus:0) 가 적용된다.
+ * Scoring weights applied when a pattern matches. Missing keys use
+ * `DEFAULT_WEIGHTS` (lengthExact:3 / lengthNear:1 / identifierMatch:4 /
+ * subjectMatch:3 / additionalRule:1 / globalRule:1 / branchRuleMatch:2 /
+ * kindNewBonus:0).
  *
- * 일반 은행 앱과 동일한 추천 흐름을 따르려면 기본값을 그대로 쓰면 된다 —
- * "자릿수가 맞고(+3) prefix 가 맞으면(+4) 카테고리도 맞으면(+3) high(10)" 과
- * 같은 직관적 가중치다.
+ * The defaults read intuitively: right length (+3), matching prefix (+4),
+ * matching subject (+3) → score 10 → high confidence.
  */
 export interface ScoringWeights {
-  /** 자릿수가 패턴 template 과 정확히 일치할 때 가산점 (기본 +3). */
+  /** Bonus when the digit count matches the template exactly (default +3). */
   readonly lengthExact?: number;
-  /** 자릿수가 template ±1 일 때 (사용자가 입력 중) 가산점 (기본 +1). */
+  /** Bonus when the digit count is within ±1 — user still typing (default +1). */
   readonly lengthNear?: number;
-  /** identifier 가 정확히 매칭될 때 가산점 (기본 +4). 부분 입력은 절반 적용. */
+  /** Bonus for an exact identifier match (default +4). Partial input scores half. */
   readonly identifierMatch?: number;
-  /** subject (계정과목) 가 매칭될 때 가산점 (기본 +3). 부분 입력은 절반 적용. */
+  /** Bonus for a subject (ledger code) match (default +3). Partial input scores half. */
   readonly subjectMatch?: number;
   /**
-   * 패턴의 `additionalRules` 가 통과될 때 통과 1건당 가산점 (기본 +1).
+   * Bonus per passing `additionalRules` entry (default +1).
    *
-   * `additionalRules` 는 *통과 검증 + 점수 가산* 두 역할을 한다. 자릿수가
-   * 일치하는 입력 (lengthExact / lengthNear) 에서 하나라도 false 면 패턴은
-   * 후보에서 제외되며, 모두 통과해야 룰 개수만큼 가산된다.
+   * `additionalRules` both gate and score: on a length-matching input, one
+   * failing rule rejects the pattern; when all pass, each adds this bonus.
    */
   readonly additionalRule?: number;
-  /** detector 의 `globalRules` 가 통과될 때 통과 1건당 가산점 (기본 +1). */
+  /** Bonus per passing detector-level `globalRules` entry (default +1). */
   readonly globalRule?: number;
   /**
-   * 패턴의 `branchRule` 이 결과를 돌려준 경우 (kind/institution/virtual override
-   * 발생) 가산점 (기본 +2). PDF 가 명시한 분기 규칙은 *추가적인 강한 식별 신호* —
-   * 동일 prefix 가 여러 기관에 enumerate 된 모호한 경우 (예: 토스 12d 가상 17/19
-   * vs 신협 12d 적금 170~178), 분기 규칙이 매칭하면 그 institution 이 우선되게.
+   * Bonus when the pattern's `branchRule` produced a result — a kind /
+   * institution / virtual override (default +2). Branch rules are the PDF's
+   * strong disambiguation signals: when the same prefix is enumerated by
+   * multiple institutions (e.g. Toss 12-digit virtual 17/19 vs Shinhyup
+   * 12-digit installment 170–178), the institution whose branch rule fires
+   * wins.
    */
   readonly branchRuleMatch?: number;
-  /** 매칭된 패턴 kind 가 "new" 일 때 부여하는 보너스 (기본 0, 옵트인). */
+  /** Bonus when the matched pattern's kind is `"new"` (default 0, opt-in). */
   readonly kindNewBonus?: number;
 }
 
 /**
- * Detector 인스턴스 — immutable, `.extend` / `.remove` 로 새 인스턴스를 만든다.
+ * A detector instance — immutable; `.extend` / `.remove` return new
+ * instances.
  *
- * generic `I` 는 등록된 institution union. `defaultDetector` 는
- * `Detector<RegisteredInstitution>` 으로 추론되어 `detect()` 결과의
- * `institution.id` 가 literal union 으로 좁혀진다.
+ * The generic `I` is the union of registered institutions, so `detect()`
+ * results narrow `institution.id` to the ids the detector was built with.
  */
 export interface Detector<I extends Institution = Institution> {
   readonly institutions: readonly I[];
   detect(input: string, options?: DetectOptions<I["id"]>): readonly DetectionResult<I>[];
   /**
-   * institution / 룰 / 가중치 / 체크디지트 verifier 를 얹은 새 detector 를 반환.
+   * Returns a new detector with added institutions / rules / weights /
+   * check-digit verifiers.
    *
-   * `scoring` 은 기존 가중치 위에 얕게 병합되고, `checkDigitVerifiers` 는 기존
-   * 맵과 합쳐진다 (같은 id 는 새 verifier 로 교체). 새로 추가한 institution 의
-   * verifier 를 여기서 바로 등록할 수 있다.
+   * `scoring` merges shallowly over the current weights;
+   * `checkDigitVerifiers` merges over the current map (same id → replaced).
+   * An incoming institution id replaces the existing institution.
    */
   extend<E extends Institution>(extra: {
     readonly institutions?: readonly E[];
@@ -289,6 +300,6 @@ export interface Detector<I extends Institution = Institution> {
     readonly scoring?: ScoringWeights;
     readonly checkDigitVerifiers?: Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
   }): Detector<I | E>;
-  /** id 또는 술어로 institution 을 제거한 새 detector 를 반환. */
+  /** Returns a new detector with institutions removed by id or predicate. */
   remove(target: string | ((i: Institution) => boolean)): Detector<I>;
 }

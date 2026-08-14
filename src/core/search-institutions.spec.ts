@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { institutions } from "../registry";
-import { pickInstitutions } from "./pick-institutions";
+import { searchInstitutions } from "./search-institutions";
 
-describe("pickInstitutions", () => {
+describe("searchInstitutions", () => {
   describe("필터 없는 호출", () => {
     test("필터 없이 호출하면 전체 institution 을 반환한다", () => {
       // Given / When
-      const result = pickInstitutions();
+      const result = searchInstitutions();
 
       // Then
       expect(result).toEqual(institutions);
@@ -19,7 +19,7 @@ describe("pickInstitutions", () => {
       const filter = { categories: ["bank"] } as const;
 
       // When
-      const banks = pickInstitutions(filter);
+      const banks = searchInstitutions(filter);
 
       // Then
       expect(banks.every((i) => i.category === "bank")).toBe(true);
@@ -31,7 +31,7 @@ describe("pickInstitutions", () => {
       const filter = { categories: ["securities"] } as const;
 
       // When
-      const sec = pickInstitutions(filter);
+      const sec = searchInstitutions(filter);
 
       // Then
       expect(sec.every((i) => i.category === "securities")).toBe(true);
@@ -42,7 +42,7 @@ describe("pickInstitutions", () => {
       const filter = { categories: ["non-bank"] } as const;
 
       // When
-      const nb = pickInstitutions(filter);
+      const nb = searchInstitutions(filter);
 
       // Then
       expect(nb.every((i) => i.category === "non-bank")).toBe(true);
@@ -53,7 +53,7 @@ describe("pickInstitutions", () => {
       const filter = { categories: ["bank", "non-bank"] } as const;
 
       // When
-      const both = pickInstitutions(filter);
+      const both = searchInstitutions(filter);
 
       // Then
       const categories: readonly string[] = both.map((i) => i.category);
@@ -68,7 +68,7 @@ describe("pickInstitutions", () => {
       const filter = { include: ["shinhan", "kakao"] } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then
       expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "shinhan"]);
@@ -81,7 +81,7 @@ describe("pickInstitutions", () => {
       } as const;
 
       // When
-      const big5 = pickInstitutions(filter);
+      const big5 = searchInstitutions(filter);
 
       // Then
       expect(big5.length).toBe(5);
@@ -94,7 +94,7 @@ describe("pickInstitutions", () => {
       const filter = { exclude: ["shinhan"] } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then — id 를 string 으로 펼쳐 런타임 검증 (타입은 이미 narrow)
       const ids: readonly string[] = picked.map((i) => i.id);
@@ -106,7 +106,7 @@ describe("pickInstitutions", () => {
       const filter = { exclude: ["kakao", "toss", "kbank"] } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then
       const ids: readonly string[] = picked.map((i) => i.id);
@@ -125,7 +125,7 @@ describe("pickInstitutions", () => {
       } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then
       expect(picked.every((i) => i.category === "bank")).toBe(true);
@@ -143,7 +143,7 @@ describe("pickInstitutions", () => {
       } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then
       expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "kb", "shinhan"]);
@@ -157,7 +157,7 @@ describe("pickInstitutions", () => {
       } as const;
 
       // When
-      const picked = pickInstitutions(filter);
+      const picked = searchInstitutions(filter);
 
       // Then
       expect(picked.map((i) => i.id).toSorted()).toEqual(["hana", "shinhan"]);
@@ -170,8 +170,8 @@ describe("pickInstitutions", () => {
       const filter = { categories: ["bank"] } as const;
 
       // When
-      const a = pickInstitutions(filter);
-      const b = pickInstitutions(filter);
+      const a = searchInstitutions(filter);
+      const b = searchInstitutions(filter);
 
       // Then
       expect(a).toEqual(b);

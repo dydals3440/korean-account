@@ -1,12 +1,12 @@
 import type { AccountPattern, Subject } from "../types";
 
 /**
- * 정규화된 digits에서 패턴의 `subjectPosition` 자리의 값을 추출해 일치하는
- * `Subject`를 반환한다.
+ * Reads the subject code at the pattern's `subjectPosition` and returns the
+ * matching `Subject`.
  *
- * - 패턴에 `subjectPosition` / `subjects`가 없으면 `null`.
- * - digits가 subject 위치 끝에 도달하지 못하면 `null` (입력 중).
- * - 추출 값이 `subjects[].code`에 일치하지 않으면 `null`.
+ * Returns `null` when the pattern declares no `subjectPosition` / `subjects`,
+ * when digits end before the subject range (mid-input), or when the extracted
+ * code matches none of `subjects[].code`.
  *
  * @example
  * const pattern = pickPattern("shinhan", { kind: "new" })!;

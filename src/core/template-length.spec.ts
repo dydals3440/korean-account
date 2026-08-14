@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPatternTemplate } from "./pattern-template";
+import { patternTemplate } from "./pattern-template";
 import { templateLength } from "./template-length";
 
 describe("templateLength", () => {
@@ -14,7 +14,7 @@ describe("templateLength", () => {
       { template: "X", expected: 1 },
     ])("$template 의 토큰 수는 $expected", ({ template, expected }) => {
       // Given
-      const tpl = createPatternTemplate(template);
+      const tpl = patternTemplate(template);
 
       // When
       const result = templateLength(tpl);
@@ -27,8 +27,8 @@ describe("templateLength", () => {
   describe("토큰 수만 계산한다", () => {
     test("하이픈 개수와 무관하게 X 토큰 수만 센다", () => {
       // Given
-      const sparse = createPatternTemplate("X-X-X-X-X");
-      const dense = createPatternTemplate("XXXXX");
+      const sparse = patternTemplate("X-X-X-X-X");
+      const dense = patternTemplate("XXXXX");
 
       // When
       const sparseLen = templateLength(sparse);
@@ -41,8 +41,8 @@ describe("templateLength", () => {
 
     test("선행/후행 하이픈도 토큰 수에 영향을 주지 않는다", () => {
       // Given
-      const leadingDash = createPatternTemplate("-XXXX");
-      const trailingDash = createPatternTemplate("XXXX-");
+      const leadingDash = patternTemplate("-XXXX");
+      const trailingDash = patternTemplate("XXXX-");
 
       // When
       const leading = templateLength(leadingDash);
@@ -57,7 +57,7 @@ describe("templateLength", () => {
   describe("매우 긴 입력", () => {
     test("길이 1000 의 템플릿도 정확히 센다", () => {
       // Given
-      const longTemplate = createPatternTemplate("X".repeat(1000));
+      const longTemplate = patternTemplate("X".repeat(1000));
 
       // When
       const result = templateLength(longTemplate);

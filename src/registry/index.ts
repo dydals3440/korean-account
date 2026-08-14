@@ -3,33 +3,32 @@ import { BANKS } from "./banks";
 import { NON_BANKS } from "./non-banks";
 import { SECURITIES } from "./securities";
 
-/** 등록된 모든 institution. */
+/** Every registered institution, in registry order. */
 export const institutions = [...BANKS, ...NON_BANKS, ...SECURITIES] as const;
 
-/** 등록된 institution 의 union. */
+/** Union of all registered institutions. */
 export type RegisteredInstitution = (typeof institutions)[number];
 
-/** 등록된 institution id 의 union. */
+/** Union of registered institution ids. */
 export type InstitutionId = RegisteredInstitution["id"];
 
-/** 등록된 institution 대표 code 의 union. */
+/** Union of registered representative CMS codes. */
 export type InstitutionCode = RegisteredInstitution["code"];
 
 /**
- * 특정 카테고리에 속한 institution id 들의 union.
+ * Union of institution ids within the given category.
  *
  * @example
  * type BankId = InstitutionIdByCategory<"bank">;        // "kdb" | "ibk" | ...
- * type SecId  = InstitutionIdByCategory<"securities">;  // "yuanta" | "kb-sec" | ...
- * type Both   = InstitutionIdByCategory<"bank" | "securities">;
+ * type SecId  = InstitutionIdByCategory<"securities">;  // "yuanta" | "kbSec" | ...
  */
 export type InstitutionIdByCategory<C extends InstitutionCategory> = Extract<
   RegisteredInstitution,
   { category: C }
 >["id"];
 
-// pure 어노테이션이 없으면 번들러가 이 최상위 초기화를 side effect 로 보고
-// `institutions` 를 통째로 유지한다.
+// Without the pure annotations, bundlers treat these top-level initializers
+// as side effects and retain the whole `institutions` array.
 const BY_ID = /* @__PURE__ */ new Map<string, RegisteredInstitution>(
   institutions.map((i) => [i.id, i]),
 );
@@ -44,39 +43,29 @@ const BY_CODE = /* @__PURE__ */ (() => {
 })();
 
 /**
- * id 로 institution 조회. 없으면 null.
+ * Looks up an institution by id or CMS code (representative and alias codes
+ * both match).
  *
- * 등록된 id literal (`InstitutionId`) 을 직접 넘기면 반환 타입이 그 id 의
- * institution 으로 좁혀진다.
+ * Passing a registered literal narrows the return type to that institution
+ * and removes `null` — the registry is static, so the lookup cannot miss.
+ * Arbitrary strings return `Institution | null`.
  *
- * @example
- * const shinhan = institutionById("shinhan");
- * shinhan?.id; // "shinhan" (literal)
- */
-export function institutionById<Id extends InstitutionId>(
-  id: Id,
-): Extract<RegisteredInstitution, { id: Id }> | null;
-export function institutionById(id: string): Institution | null;
-export function institutionById(id: string): Institution | null {
-  return BY_ID.get(id) ?? null;
-}
-
-/**
- * 3자리 CMS 표준 코드로 institution 조회 — 대표 / alias 모두 매칭.
- *
- * 등록된 대표 code (`InstitutionCode`) 를 넘기면 반환 타입이 좁혀진다. alias
- * 코드는 string 으로 넘어가 일반 `Institution | null` 로 반환.
+ * Importing this pulls the entire registry into your bundle. For a fixed
+ * subset, import the institution constants directly.
  *
  * @example
- * institutionByCode("088"); // 신한 (대표 code, literal narrow)
- * institutionByCode("078"); // KB국민 (alias — wide Institution | null)
+ * getInstitution("shinhan"); // Institution<"shinhan", "088", "bank">
+ * getInstitution("088");     // same institution, by representative code
+ * getInstitution("078");     // alias code — Institution | null
+ * getInstitution("no-such"); // null
  */
-export function institutionByCode<Code extends InstitutionCode>(
-  code: Code,
-): Extract<RegisteredInstitution, { code: Code }> | null;
-export function institutionByCode(code: string): Institution | null;
-export function institutionByCode(code: string): Institution | null {
-  return BY_CODE.get(code) ?? null;
+export function getInstitution<Id extends InstitutionId>(
+  idOrCode: Id,
+): Extract<RegisteredInstitution, { id: Id }>;
+export function getInstitution<Code extends InstitutionCode>(
+  idOrCode: Code,
+): Extract<RegisteredInstitution, { code: Code }>;
+export function getInstitution(idOrCode: string): Institution | null;
+export function getInstitution(idOrCode: string): Institution | null {
+  return BY_ID.get(idOrCode) ?? BY_CODE.get(idOrCode) ?? null;
 }
-
-export { defineInstitution } from "../core/define-institution";

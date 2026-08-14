@@ -7,7 +7,7 @@ import { createDetector } from "./detector";
 describe("branchRule 보너스는 minScore 컷오프보다 먼저 적용된다", () => {
   // 예전에는 baseScore 로 먼저 자르고 나서 보너스를 얹었다. 그 결과 "분기 규칙 덕에
   // minScore 를 넘겼어야 할 후보" 가 보너스를 받아보지도 못하고 탈락했다.
-  const detector = createDetector({ institutions });
+  const detector = createDetector(institutions);
 
   test("branchRule 이 적중한 후보가 minScore 때문에 조기 탈락하지 않는다", () => {
     // Given — K뱅크 10d 는 첫 자리 9 에 branchRule (kbank10First9) 이 걸려 있다.
@@ -66,7 +66,7 @@ describe("normalizeSubject 의 출금 판정은 computeCapabilities 와 같은 �
 
   test("subject.allowsWithdrawal 과 capabilities.allowsWithdrawal 이 어긋나지 않는다", () => {
     // Given — 기본 레지스트리 전체를 훑어, 두 값이 모순되는 결과가 없는지 확인.
-    const detector = createDetector({ institutions });
+    const detector = createDetector(institutions);
     const inputs = ["110-436-387740", "3333-12-3456789", "1002-123-456789", "79094537213886"];
 
     // When / Then

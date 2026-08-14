@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import type { Position } from "../types";
+import type { DigitSpan } from "../types";
 import { extractIdentifier } from "./extract-identifier";
 
-const pos = (start: number, length: number): Position => ({ start, length });
+const pos = (start: number, length: number): DigitSpan => ({ start, length });
 
 describe("extractIdentifier", () => {
   describe("prefix 식별 (신계좌)", () => {

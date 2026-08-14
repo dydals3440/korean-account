@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type { RegisteredInstitution } from "../registry";
 import type { DetectionResult } from "../types";
-import { detectBest } from "./detect-best";
+import { detectBest } from "./detect";
 
 describe("detectBest", () => {
   describe("성공 케이스", () => {

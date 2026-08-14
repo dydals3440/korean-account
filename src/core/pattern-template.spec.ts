@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { createPatternTemplate } from "./pattern-template";
+import { patternTemplate } from "./pattern-template";
 
-describe("createPatternTemplate", () => {
+describe("patternTemplate", () => {
   describe("유효한 템플릿은 그대로 반환한다", () => {
     test.each([
       "XXX-XX-XXXXXX",
@@ -16,7 +16,7 @@ describe("createPatternTemplate", () => {
       const input = template;
 
       // When
-      const result = createPatternTemplate(input);
+      const result = patternTemplate(input);
 
       // Then
       expect(result).toBe(input);
@@ -29,7 +29,7 @@ describe("createPatternTemplate", () => {
       const input = "";
 
       // When / Then
-      expect(() => createPatternTemplate(input)).toThrow(/non-empty/);
+      expect(() => patternTemplate(input)).toThrow(/non-empty/);
     });
   });
 
@@ -52,7 +52,7 @@ describe("createPatternTemplate", () => {
       const input = template;
 
       // When / Then
-      expect(() => createPatternTemplate(input)).toThrow(/Invalid/);
+      expect(() => patternTemplate(input)).toThrow(/Invalid/);
     });
   });
 
@@ -62,7 +62,7 @@ describe("createPatternTemplate", () => {
       const input = "XXX-XXX-XXXXXX";
 
       // When
-      const tpl = createPatternTemplate(input);
+      const tpl = patternTemplate(input);
 
       // Then
       expect(typeof tpl).toBe("string");

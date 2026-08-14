@@ -1,15 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { FIXTURES, type Fixture } from "./detect-account.fixtures";
-import { detectAccount } from "./detect-account";
+import { FIXTURES, type Fixture } from "./detect.fixtures";
+import { detect } from "./detect";
 
-describe("detectAccount", () => {
+describe("detect", () => {
   describe("fixture 자동 매칭", () => {
     test.each(FIXTURES as readonly Fixture[])("$input → $id ($kind)", (fixture) => {
       // Given
       const input = fixture.input;
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       expect(results[0]?.institution.id).toBe(fixture.id);
@@ -25,15 +25,15 @@ describe("detectAccount", () => {
   describe("엣지 케이스", () => {
     test("빈 / 공백 / 하이픈만 입력은 빈 결과를 반환한다", () => {
       // Given / When / Then
-      expect(detectAccount("")).toEqual([]);
-      expect(detectAccount("    ")).toEqual([]);
-      expect(detectAccount("---")).toEqual([]);
+      expect(detect("")).toEqual([]);
+      expect(detect("    ")).toEqual([]);
+      expect(detect("---")).toEqual([]);
     });
 
     test("비숫자만 입력은 빈 결과를 반환한다", () => {
       // Given / When / Then
-      expect(detectAccount("abcd")).toEqual([]);
-      expect(detectAccount("한글입력")).toEqual([]);
+      expect(detect("abcd")).toEqual([]);
+      expect(detect("한글입력")).toEqual([]);
     });
 
     test("한 자리만 입력은 빈 결과를 반환한다 (식별자 미달성)", () => {
@@ -41,7 +41,7 @@ describe("detectAccount", () => {
       const input = "1";
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       expect(results).toEqual([]);
@@ -54,7 +54,7 @@ describe("detectAccount", () => {
       const input = "110-436-387740";
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       for (let i = 1; i < results.length; i += 1) {
@@ -67,7 +67,7 @@ describe("detectAccount", () => {
       const input = "110436387740";
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       expect(results[0]?.formatted).toBe("110-436-387740");
@@ -78,7 +78,7 @@ describe("detectAccount", () => {
       const input = "110-436-387740";
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       expect(results[0]?.matchedPattern).not.toBeNull();
@@ -89,7 +89,7 @@ describe("detectAccount", () => {
       const input = "110-436-387740";
 
       // When
-      const [r] = detectAccount(input);
+      const [r] = detect(input);
 
       // Then
       expect(r?.capabilities).toBeDefined();
@@ -106,7 +106,7 @@ describe("detectAccount", () => {
         const input = `351-1234-5678-${tail}`;
 
         // When
-        const [r] = detectAccount(input);
+        const [r] = detect(input);
 
         // Then
         expect(r?.institution.id).toBe("nh-coop");
@@ -121,7 +121,7 @@ describe("detectAccount", () => {
       const input = "1712-3456-7890";
 
       // When
-      const [r] = detectAccount(input);
+      const [r] = detect(input);
 
       // Then
       expect(r?.institution.id).toBe("toss");
@@ -134,7 +134,7 @@ describe("detectAccount", () => {
       const input = "1912-3456-7890";
 
       // When
-      const [r] = detectAccount(input);
+      const [r] = detect(input);
 
       // Then
       expect(r?.institution.id).toBe("toss");
@@ -151,7 +151,7 @@ describe("detectAccount", () => {
       const input = "161-910278-72907";
 
       // When
-      const results = detectAccount(input);
+      const results = detect(input);
 
       // Then
       expect(results[0]?.institution.id).toBe("hana");
@@ -165,7 +165,7 @@ describe("detectAccount", () => {
       const input = "3333-12-3456789";
 
       // When
-      const results = detectAccount(input, { categories: ["bank"] });
+      const results = detect(input, { categories: ["bank"] });
 
       // Then
       expect(results.every((r) => r.institution.category === "bank")).toBe(true);

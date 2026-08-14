@@ -1,16 +1,17 @@
 import type { PatternTemplate } from "../types";
 
 /**
- * 정규화된 digits를 템플릿(`XXX-YY-ZZZZ` 등) 형태로 그루핑한다.
+ * Groups normalized digits into the template shape (`XXX-XX-XXXXXX` etc.).
  *
- * - digits가 짧으면 남는 토큰은 잘리고 끝의 하이픈도 떼낸다.
- * - digits가 길어 템플릿을 다 소진하면 남은 digits를 끝에 그대로 붙인다.
+ * - When digits run short, remaining tokens are dropped along with a trailing
+ *   hyphen (useful while the user is still typing).
+ * - When digits outlast the template, the excess is appended verbatim.
  *
  * @example
- * import { createPatternTemplate } from "korean-account";
- * const tpl = createPatternTemplate("XXX-XXX-XXXXXX");
+ * import { patternTemplate } from "korean-account";
+ * const tpl = patternTemplate("XXX-XXX-XXXXXX");
  * formatAccount("110436387740", tpl); // "110-436-387740"
- * formatAccount("110436", tpl); // "110-436"
+ * formatAccount("110436", tpl);       // "110-436"
  */
 export function formatAccount(digits: string, template: PatternTemplate): string {
   if (digits.length === 0) {

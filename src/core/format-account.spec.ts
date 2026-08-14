@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPatternTemplate } from "./pattern-template";
+import { patternTemplate } from "./pattern-template";
 import { formatAccount } from "./format-account";
 
 describe("formatAccount", () => {
@@ -7,7 +7,7 @@ describe("formatAccount", () => {
     test("digits 를 템플릿 하이픈 위치에 맞춰 그루핑한다", () => {
       // Given
       const digits = "110436387740";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -19,7 +19,7 @@ describe("formatAccount", () => {
     test("XXX-XXX-XXXXXX 신한 신계좌 그루핑", () => {
       // Given
       const digits = "110436387740";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -31,7 +31,7 @@ describe("formatAccount", () => {
     test("XXXX-XX-XXXXXXX 카카오뱅크 그루핑", () => {
       // Given
       const digits = "3333123456789";
-      const template = createPatternTemplate("XXXX-XX-XXXXXXX");
+      const template = patternTemplate("XXXX-XX-XXXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -43,7 +43,7 @@ describe("formatAccount", () => {
     test("XXXXXX-XX-XXXXXX KB 14자리 그루핑", () => {
       // Given
       const digits = "12345604789012";
-      const template = createPatternTemplate("XXXXXX-XX-XXXXXX");
+      const template = patternTemplate("XXXXXX-XX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -57,7 +57,7 @@ describe("formatAccount", () => {
     test("그룹 중간에서 끊긴다", () => {
       // Given
       const digits = "11043";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -69,7 +69,7 @@ describe("formatAccount", () => {
     test("그룹 경계 직전이면 후행 하이픈이 없다", () => {
       // Given
       const digits = "110";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -81,7 +81,7 @@ describe("formatAccount", () => {
     test("그룹 경계에 정확히 맞으면 다음 그룹 안으로 들어가지 않는다", () => {
       // Given
       const digits = "110436";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -93,7 +93,7 @@ describe("formatAccount", () => {
     test("한 자리만 입력하면 한 자리 그대로 반환한다", () => {
       // Given
       const digits = "1";
-      const template = createPatternTemplate("XXX-XXX");
+      const template = patternTemplate("XXX-XXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -107,7 +107,7 @@ describe("formatAccount", () => {
     test("템플릿을 다 소진한 뒤 남은 digits 를 그대로 붙인다", () => {
       // Given
       const digits = "12345678";
-      const template = createPatternTemplate("XXX-XXX");
+      const template = patternTemplate("XXX-XXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -119,7 +119,7 @@ describe("formatAccount", () => {
     test("크게 초과해도 동작한다", () => {
       // Given
       const digits = "12345678901234";
-      const template = createPatternTemplate("XXX");
+      const template = patternTemplate("XXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -131,7 +131,7 @@ describe("formatAccount", () => {
     test("매우 긴 입력도 그대로 잘 처리한다", () => {
       // Given
       const digits = "1".repeat(60);
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -146,7 +146,7 @@ describe("formatAccount", () => {
     test("빈 digits 는 빈 문자열을 반환한다", () => {
       // Given
       const digits = "";
-      const template = createPatternTemplate("XXX-XXX");
+      const template = patternTemplate("XXX-XXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -158,8 +158,8 @@ describe("formatAccount", () => {
     test("같은 길이라도 다른 그루핑이면 결과가 다르다", () => {
       // Given
       const digits = "123456";
-      const tA = createPatternTemplate("XX-XX-XX");
-      const tB = createPatternTemplate("XXX-XXX");
+      const tA = patternTemplate("XX-XX-XX");
+      const tB = patternTemplate("XXX-XXX");
 
       // When
       const a = formatAccount(digits, tA);
@@ -173,7 +173,7 @@ describe("formatAccount", () => {
     test("하이픈 없는 템플릿이면 그루핑도 없다", () => {
       // Given
       const digits = "1234567890";
-      const template = createPatternTemplate("XXXXXXXXXX");
+      const template = patternTemplate("XXXXXXXXXX");
 
       // When
       const result = formatAccount(digits, template);
@@ -187,7 +187,7 @@ describe("formatAccount", () => {
     test("같은 입력에 항상 같은 결과를 반환한다", () => {
       // Given
       const digits = "110436387740";
-      const template = createPatternTemplate("XXX-XXX-XXXXXX");
+      const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
       const a = formatAccount(digits, template);
