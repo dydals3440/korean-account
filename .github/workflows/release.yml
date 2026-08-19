@@ -46,7 +46,7 @@ jobs:
       # pnpm 내장 명령에 가려져 package.json 의 스크립트가 실행되지 않는다 (88fd0b8).
       - name: Create Release Pull Request or Publish
         id: changesets
-        uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
+        uses: changesets/action@198f833dd7d863100ea6e28967bc9a9fdefadb0a # v2.1.0
         with:
           publish-script: pnpm changeset publish
           version-script: pnpm changeset version
