@@ -150,21 +150,21 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.0",
-    "@size-limit/preset-small-lib": "^13.0.3",
+    "@size-limit/preset-small-lib": "^13.1.1",
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^5.0.0",
     "arktype": "^2.2.3",
-    "oxfmt": "^0.66.0",
-    "oxlint": "^1.78.0",
+    "oxfmt": "^0.67.0",
+    "oxlint": "^1.82.0",
     "publint": "^0.3.23",
-    "size-limit": "^13.0.3",
+    "size-limit": "^13.1.1",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
-    "valibot": "^1.4.2",
-    "vite": "^8.2.1",
+    "valibot": "^1.5.0",
+    "vite": "^8.3.0",
     "vitest": "^5.0.0",
     "yup": "^1.7.1",
-    "zod": "^4.4.3"
+    "zod": "^4.6.4"
   },
   "peerDependencies": {
     "arktype": "^2.1.0",
