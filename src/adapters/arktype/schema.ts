@@ -1,4 +1,4 @@
-import { type Type, type } from "arktype";
+import { type } from "arktype";
 import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../shared/constants";
 import type { InstitutionId } from "../../registry";
 import { INSTITUTION_IDS } from "../../registry/institution-ids";
@@ -12,6 +12,11 @@ import {
   digitCount,
   MESSAGES,
 } from "../shared";
+
+// ArkType is ESM-only. CJS declarations must resolve its types as imports,
+// including consumers using TypeScript's frozen Node16 module model.
+// The inline query preserves resolution-mode in tsdown's TS7 declarations.
+type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type<T>;
 
 export type { DetectionPayload } from "../shared";
 

@@ -37,7 +37,7 @@ detectBest("110-436-387740");
 - **필요한 은행만** — `createDetector([kb, shinhan, toss])` 로 3.6 KB, 전체 레지스트리도 10 KB (min+brotli)
 - **밸리데이터 프리** — zod·valibot·yup·arktype 어댑터(전부 optional peer) + 의존성 0 의 Standard Schema 어댑터
 - **strict TypeScript** — `getInstitution("shinhan").code` 가 `"088"` literal 로 narrow
-- **Universal** — Node 22+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
+- **Universal** — Node 22.12+ · Bun · Deno · 브라우저 · ESM·CJS 동시 지원
 
 상세 레퍼런스: [DOCS.md](./DOCS.md) · 변경 이력: [CHANGELOG.md](./CHANGELOG.md) · 기여: [CONTRIBUTING.md](./CONTRIBUTING.md)
 

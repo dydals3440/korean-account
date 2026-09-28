@@ -37,7 +37,7 @@ detectBest("110-436-387740");
 - **Only the banks you need** — `createDetector([kb, shinhan, toss])` is 3.6 KB; the full registry is 10 KB (min+brotli)
 - **Zero runtime dependencies** — zod is an optional peerDep only when you use `korean-account/zod` (both v3 and v4 supported)
 - **Strict TypeScript** — `getInstitution("shinhan").code` narrows to the literal `"088"`
-- **Universal** — Node 22+ · Bun · Deno · browsers · ESM and CJS
+- **Universal** — Node 22.12+ · Bun · Deno · browsers · ESM and CJS
 
 Full reference: [DOCS.md](./DOCS.md) · Changelog: [CHANGELOG.md](./CHANGELOG.md) · Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
