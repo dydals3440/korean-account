@@ -155,6 +155,7 @@
     "@types/node": "^26.6.3",
     "@vitest/coverage-v8": "^5.0.2",
     "arktype": "^2.2.5",
+    "cross-spawn": "^7.0.6",
     "oxfmt": "^0.70.0",
     "oxlint": "^1.85.0",
     "publint": "^0.3.24",

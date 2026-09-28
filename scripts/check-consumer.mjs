@@ -1,7 +1,7 @@
 // Test the shipped artifact, not a rebuild against each consumer's peers.
 // An npm alias provides the last public release for API/type/behavior comparison.
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import spawn from "cross-spawn";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -12,31 +12,33 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const typescript = process.env.CONSUMER_TYPESCRIPT ?? pkg.devDependencies.typescript;
 assert.match(typescript, /^\^?\d+\.\d+\.\d+$/);
 const runtimeOnly = process.env.CONSUMER_RUNTIME_ONLY === "true";
+const legacyEsm = typescript === "5.1.6";
 const selected = process.argv.slice(2);
 const cases = selected.length
   ? selected
-  : [
-      "none",
-      "zod@3.23.0",
-      "zod@^3",
-      "zod@4.0.0",
-      "zod@^4",
-      "valibot@1.0.0",
-      "valibot@^1",
-      "yup@1.4.0",
-      "yup@^1",
-      "arktype@2.1.0",
-      "arktype@^2",
-    ];
+  : legacyEsm
+    ? ["arktype@2.1.0", "arktype@^2"]
+    : [
+        "none",
+        "zod@3.23.0",
+        "zod@^3",
+        "zod@4.0.0",
+        "zod@^4",
+        "valibot@1.0.0",
+        "valibot@^1",
+        "yup@1.4.0",
+        "yup@^1",
+        "arktype@2.1.0",
+        "arktype@^2",
+      ];
 for (const peer of cases) {
   assert.match(peer, /^(none|(?:zod|valibot|yup|arktype)@\^?\d+(?:\.\d+){0,2})$/);
 }
 
 function run(command, args, cwd) {
-  const result = spawnSync(command, args, {
+  const result = spawn.sync(command, args, {
     cwd,
     encoding: "utf8",
-    shell: process.platform === "win32" && command !== process.execPath,
     maxBuffer: 10 * 1024 * 1024,
     env: { ...process.env, npm_config_update_notifier: "false" },
   });
@@ -48,7 +50,8 @@ function run(command, args, cwd) {
   return result.stdout;
 }
 
-const temp = mkdtempSync(join(tmpdir(), "korean-account-consumer-"));
+// Deliberately include a space to exercise Windows .cmd argument escaping.
+const temp = mkdtempSync(join(tmpdir(), "korean-account consumer-"));
 try {
   const tarball = join(temp, "package.tgz");
   run("pnpm", ["pack", "--out", tarball], root);
@@ -180,7 +183,7 @@ try {
     for (const [module, resolution] of [
       ["Node16", "Node16"],
       ["NodeNext", "NodeNext"],
-      ["Preserve", "Bundler"],
+      [legacyEsm ? "ESNext" : "Preserve", "Bundler"],
     ]) {
       writeFileSync(
         join(cwd, "tsconfig.json"),
@@ -188,7 +191,10 @@ try {
           compilerOptions: {
             strict: true,
             noEmit: true,
-            skipLibCheck: false,
+            // ArkType recommends skipLibCheck; its own declarations produce
+            // errors on TS 5.1. Preserve that existing ESM consumer setup.
+            // All modern compiler cases still check dependencies strictly.
+            skipLibCheck: legacyEsm,
             target: "ES2022",
             lib: ["ES2023", "DOM"],
             types: adapter === "arktype" ? ["node"] : [],
@@ -198,8 +204,9 @@ try {
           // 0.3.0's ArkType CJS declaration fails in the frozen Node16 model.
           // Strictly check the fixed artifact here; compare with 0.3.0 in
           // NodeNext and Bundler, where its declarations already work.
-          include:
-            adapter === "arktype" && resolution === "Node16"
+          include: legacyEsm
+            ? ["consumer.mts"]
+            : adapter === "arktype" && resolution === "Node16"
               ? ["current.mts", "current.cts"]
               : ["consumer.mts", "consumer.cts"],
         }),
@@ -207,7 +214,7 @@ try {
       run("npm", ["exec", "--", "tsc", "--project", "tsconfig.json"], cwd);
     }
     console.log(
-      `✓ packed consumer: ${peer} (ESM, CJS, Node16, NodeNext, Bundler; 0.3.0 compatible)`,
+      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.0 compatible)`,
     );
   }
 } finally {

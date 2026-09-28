@@ -65,6 +65,10 @@ jobs:
       - name: Size limit
         run: pnpm size
 
+      - name: Check packed consumer on Windows
+        if: runner.os == 'Windows'
+        run: pnpm check:consumer none
+
   # Verifies `engines.node` actually holds by executing dist on the floor version.
   runtime:
     name: Runtime Node ${{ matrix.node }}
@@ -203,7 +207,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        typescript: ["5.9.3", "6.0.3"]
+        typescript: ["5.1.6", "5.9.3", "6.0.3"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

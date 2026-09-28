@@ -11,7 +11,8 @@
   공개 API·런타임 동작은 그대로 유지됩니다.
 - ArkType 어댑터의 타입 import에 ESM resolution mode를 명시합니다. CommonJS 소비자가
   TypeScript의 `Node16` 모드에서 `korean-account/arktype`을 사용할 때 발생하던
-  ESM 타입 해석 오류를 수정합니다.
+  ESM 타입 해석 오류를 수정합니다. ESM 선언은 TypeScript 5.1에서도 읽을 수 있도록
+  불필요한 import attribute를 제거합니다.
 - 배포물의 ESM/CJS·타입 해석을 실제 tarball로 검사합니다. 정확한 peer 최소 버전과
   최신 지원 버전, peer 없는 코어·Standard Schema 사용, npm 0.3.0과의 호환성을 검증합니다.
 
