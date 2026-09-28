@@ -145,6 +145,7 @@
     "release": "changeset publish",
     "size": "size-limit",
     "check:runtime": "node scripts/check-runtime.mjs",
+    "check:consumer": "node scripts/check-consumer.mjs",
     "test:adapters": "vitest run src/adapters"
   },
   "devDependencies": {

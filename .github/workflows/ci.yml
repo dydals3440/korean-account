@@ -24,12 +24,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 24]
+        node: [22, 24, 26]
         os: [ubuntu-latest]
         include:
-          - node: 22
+          - node: 24
             os: macos-latest
-          - node: 22
+          - node: 24
             os: windows-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,7 +72,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["22.12.0", 24]
+        node: ["22.12.0", 22, 24, 26]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -101,9 +101,9 @@ jobs:
       - name: Run dist on Node ${{ matrix.node }}
         run: node scripts/check-runtime.mjs
 
-  # Every validator peer we advertise gets a matrix row proving the adapter
-  # works with it; the standard-schema row additionally proves the packed
-  # tarball works with NO peers installed at all.
+  # Test the published tarball and source contracts with exact peer floors and
+  # latest supported majors. The none case proves core and standard-schema
+  # import/require/types work without installing any validator peers.
   adapter-compat:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
@@ -111,8 +111,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: "zod v3 (peer floor)", install: "zod@^3.23.0", dir: zod, forbid: "ZodEffects" }
+          - { name: "zod v3 (peer floor)", install: "zod@3.23.0", dir: zod, forbid: "ZodEffects" }
+          - { name: "zod v3 latest", install: "zod@^3", dir: zod, forbid: "ZodEffects" }
+          - { name: "zod v4 (peer floor)", install: "zod@4.0.0", dir: zod, forbid: "ZodEffects" }
           - { name: "zod v4", install: "zod@^4", dir: zod, forbid: "ZodEffects" }
+          - {
+              name: "valibot v1 (peer floor)",
+              install: "valibot@1.0.0",
+              dir: valibot,
+              forbid: "SchemaWithPipe|PicklistSchema|CustomSchema",
+            }
           - {
               name: "valibot v1",
               install: "valibot@^1",
@@ -131,6 +139,7 @@ jobs:
               dir: yup,
               forbid: "StringSchema|MixedSchema|BooleanSchema|NumberSchema|ObjectSchema",
             }
+          - { name: "arktype v2 (peer floor)", install: "arktype@2.1.0", dir: arktype, forbid: "" }
           - { name: "arktype v2", install: "arktype@^2.1", dir: arktype, forbid: "" }
           - {
               name: "standard-schema (zero-dep)",
@@ -154,6 +163,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Build exactly the artifact we release, before changing consumer peers.
+      - name: Build
+        run: pnpm build
+
+      - name: Check packed consumer
+        run: pnpm check:consumer "${{ matrix.install || 'none' }}"
+
       - name: Install ${{ matrix.install }}
         if: matrix.install != ''
         run: pnpm add -D ${{ matrix.install }}
@@ -163,9 +179,6 @@ jobs:
 
       - name: Test adapter
         run: pnpm vitest run src/adapters/${{ matrix.dir }}
-
-      - name: Build
-        run: pnpm build
 
       # Generated d.ts must not pin the adapter to a validator release —
       # public annotations (ZodType<T>, v.GenericSchema<T>, Schema<T>, ...)
@@ -178,20 +191,27 @@ jobs:
             exit 1
           fi
 
-      # The zero-dependency claim, proven against the real artifact: install
-      # the packed tarball into a bare project with peers omitted and run it.
-      - name: Prove zero-dependency install
-        if: matrix.dir == 'standard-schema'
-        run: |
-          pnpm pack
-          mkdir /tmp/std-check && cd /tmp/std-check && npm init -y >/dev/null
-          npm i --omit=peer "$GITHUB_WORKSPACE"/korean-account-*.tgz
-          node -e '
-            import("korean-account/standard-schema").then(({ accountSchema }) => {
-              const ok = accountSchema["~standard"].validate("110-436-387740");
-              const bad = accountSchema["~standard"].validate("12345");
-              if (ok.issues || !bad.issues) process.exit(1);
-            });'
+  consumer-types:
+    name: Consumer TypeScript ${{ matrix.typescript }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: ["5.9.3", "6.0.3"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm check:consumer
+        env:
+          CONSUMER_TYPESCRIPT: ${{ matrix.typescript }}
 
   coverage:
     name: Coverage
