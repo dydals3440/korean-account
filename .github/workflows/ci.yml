@@ -101,6 +101,12 @@ jobs:
       - name: Run dist on Node ${{ matrix.node }}
         run: node scripts/check-runtime.mjs
 
+      - name: Run packed adapters on minimum Node
+        if: matrix.node == '22.12.0'
+        run: node scripts/check-consumer.mjs
+        env:
+          CONSUMER_RUNTIME_ONLY: "true"
+
   # Test the published tarball and source contracts with exact peer floors and
   # latest supported majors. The none case proves core and standard-schema
   # import/require/types work without installing any validator peers.

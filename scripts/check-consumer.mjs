@@ -11,6 +11,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const typescript = process.env.CONSUMER_TYPESCRIPT ?? pkg.devDependencies.typescript;
 assert.match(typescript, /^\^?\d+\.\d+\.\d+$/);
+const runtimeOnly = process.env.CONSUMER_RUNTIME_ONLY === "true";
 const selected = process.argv.slice(2);
 const cases = selected.length
   ? selected
@@ -65,10 +66,10 @@ try {
         "--package-lock=false",
         tarball,
         "korean-account-baseline@npm:korean-account@0.3.0",
-        `typescript@${typescript}`,
+        ...(runtimeOnly ? [] : [`typescript@${typescript}`]),
         ...(peer === "none" ? [] : [peer]),
         // ArkType's own declarations refer to NodeJS and buffer types.
-        ...(peer.startsWith("arktype@") ? ["@types/node@^22"] : []),
+        ...(!runtimeOnly && peer.startsWith("arktype@") ? ["@types/node@^22"] : []),
       ],
       cwd,
     );
@@ -134,6 +135,11 @@ try {
     `;
     writeFileSync(join(cwd, "runtime.mjs"), checks);
     run(process.execPath, ["runtime.mjs"], cwd);
+
+    if (runtimeOnly) {
+      console.log(`✓ packed consumer: ${peer} (ESM, CJS; Node ${process.versions.node})`);
+      continue;
+    }
 
     const types =
       entries
