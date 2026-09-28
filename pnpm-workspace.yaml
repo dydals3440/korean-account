@@ -1,2 +1,8 @@
-onlyBuiltDependencies:
-  - esbuild
+allowBuilds:
+  esbuild: true
+# Reviewed stable size-limit release; exact-version exceptions only.
+minimumReleaseAgeExclude:
+  - "@size-limit/file@14.1.0"
+  - "@size-limit/preset-small-lib@14.1.0"
+  - "@size-limit/rolldown@14.1.0"
+  - size-limit@14.1.0
