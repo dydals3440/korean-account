@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 사용법 질문 — 문서 먼저 확인
+  - name: 사용법·API 문서
     url: https://github.com/dydals3440/korean-account/blob/main/DOCS.md
-    about: DOCS.md (API·확장·Recipes 레퍼런스) 에 대부분의 답이 있습니다. 해결되지 않으면 기능 제안 템플릿으로 질문을 열어 주세요.
-  - name: 보안 취약점
+    about: API·확장·통합 예제를 확인하세요. 문서로 해결되지 않는 사용성 문제는 기능 제안으로 설명해 주세요.
+  - name: 보안 취약점 비공개 신고
     url: https://github.com/dydals3440/korean-account/security/advisories/new
-    about: 비공개 Security Advisory.
+    about: 계좌번호·토큰·보안 취약점은 공개 이슈에 올리지 마세요.

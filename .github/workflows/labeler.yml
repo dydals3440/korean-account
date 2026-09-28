@@ -1,25 +1,89 @@
-name: Labeler
+name: Metadata
 
-# pull_request_target 은 base 리포의 권한으로 돈다. checkout 을 하지 않으므로
-# 포크의 코드가 실행되지 않는다 — 이 조합이어야 안전하다.
+# Base 리포의 워크플로만 실행합니다. PR 코드를 checkout하거나 실행하지 않습니다.
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened]
+  issues:
+    types: [opened, edited, reopened]
 
-# 연속 push 시 라벨 동기화가 경합하지 않도록.
 concurrency:
-  group: labeler-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: metadata-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
-  labeler:
-    name: Auto Label
+  metadata:
+    name: Metadata labels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
+      - name: Label changed areas
+        if: github.event_name == 'pull_request_target'
+        uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
         with:
           sync-labels: true
+
+      - name: Classify purpose and compatibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          AUTHOR: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
+          IS_PR: ${{ github.event_name == 'pull_request_target' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Retrieve current metadata so an older queued event cannot restore stale labels.
+          item=$(gh api "repos/$GITHUB_REPOSITORY/issues/$NUMBER")
+          TITLE=$(jq -r '.title' <<< "$item")
+          purpose=''
+          case "$TITLE" in
+            feat:*|feat\(*) purpose='feature' ;;
+            fix:*|fix\(*) purpose='bug' ;;
+            docs:*|docs\(*) purpose='docs' ;;
+            refactor:*|refactor\(*) purpose='refactor' ;;
+            test:*|test\(*) purpose='test' ;;
+            chore\(release\):*|chore\(release\)!:*) purpose='release' ;;
+            build:*|build\(*|ci:*|ci\(*|chore:*|chore\(*|style:*|style\(*|perf:*|perf\(*|revert:*|revert\(*) purpose='maintenance' ;;
+          esac
+          # Unscoped breaking titles, e.g. feat!: ..., use the same type mapping.
+          if [[ -z "$purpose" && "$TITLE" =~ ^(feat|fix|docs|refactor|test|build|ci|chore|style|perf|revert)!: ]]; then
+            case "${BASH_REMATCH[1]}" in
+              feat) purpose='feature' ;; fix) purpose='bug' ;; docs) purpose='docs' ;;
+              refactor) purpose='refactor' ;; test) purpose='test' ;; *) purpose='maintenance' ;;
+            esac
+          fi
+          if [[ "$HEAD_REF" == changeset-release/* ]]; then purpose='release'; fi
+          if [[ -z "$purpose" ]]; then
+            echo '제목에 분류 가능한 type이 없습니다. 메인테이너가 분류합니다.'
+            exit 0
+          fi
+          wanted="type: $purpose"
+          while IFS= read -r label; do
+            if [[ "$label" == type:* && "$label" != "$wanted" ]]; then
+              encoded=$(jq -rn --arg value "$label" '$value|@uri')
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/$NUMBER/labels/$encoded" --silent
+            fi
+          done < <(jq -r '.labels[].name' <<< "$item")
+          labels=$(jq -cn --arg label "$wanted" '[$label]')
+          if [[ "$TITLE" =~ ^[a-z]+(\([^\)]+\))?!: ]]; then
+            labels=$(jq -c '. + ["flag: breaking-change"]' <<< "$labels")
+          elif jq -e '.labels | any(.name == "flag: breaking-change")' <<< "$item" >/dev/null; then
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/$NUMBER/labels/flag%3A%20breaking-change" --silent
+          fi
+          if [[ "$AUTHOR" == 'dependabot[bot]' || "$TITLE" =~ ^[a-z]+\(deps\): ]]; then
+            labels=$(jq -c '. + ["flag: dependencies"]' <<< "$labels")
+          elif [[ "$IS_PR" == 'true' ]]; then
+            files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[].filename')
+            if grep -Fxq 'pnpm-lock.yaml' <<< "$files"; then
+              labels=$(jq -c '. + ["flag: dependencies"]' <<< "$labels")
+            fi
+          fi
+          # Other manually assigned flags and areas are preserved.
+          jq -cn --argjson labels "$labels" '{labels:$labels}' > "$RUNNER_TEMP/metadata-labels.json"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$NUMBER/labels" --input "$RUNNER_TEMP/metadata-labels.json" --silent

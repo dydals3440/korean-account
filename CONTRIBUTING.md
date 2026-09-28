@@ -22,7 +22,19 @@ pnpm check:dist     # 번들 크기·ESM/CJS 런타임
 pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.0 호환성
 ```
 
-브랜치: `feat/...`, `fix/...`, `docs/...`. 커밋은 [Conventional Commits](https://www.conventionalcommits.org/ko/v1.0.0/).
+## 이슈·PR 작성
+
+한국어를 기본으로 하며 영어 기여도 환영합니다. 기술 이름과 API는 원문을 유지합니다.
+제목은 이슈·PR·커밋 모두 `type(scope): 구체적인 변경` 형식의 [Conventional Commits](https://www.conventionalcommits.org/ko/v1.0.0/)를 사용합니다.
+예: `fix(adapters): ArkType CommonJS 타입 해석 오류 수정`.
+
+본문은 **요약 → 변경 및 영향 → 검증 → 관련 항목** 순서로 작성합니다.
+이슈에는 재현 방법·완료 조건, PR에는 실제 실행한 검사 결과를 적습니다.
+`Closes #번호`는 이슈를 완료할 때, `Refs #번호`는 부분 작업에 사용합니다.
+문서·운영 설정만 수정하면 관련 포맷·링크·설정 검사로 충분합니다.
+
+브랜치는 `feat/...`, `fix/...`, `docs/...`, `chore/...`를 사용합니다.
+라벨·담당자·Projects·릴리스 기준은 [저장소 운영 가이드](.github/MAINTAINING.md)를 따릅니다.
 
 사용자에게 보이는 변경은 **`pnpm changeset` 으로 변경 항목 기록 필수**. 내부 리팩터/CI 만이면 생략.
 
@@ -48,7 +60,7 @@ pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.0 호환�
 
 ## 릴리스
 
-메인테이너만. main 머지 → Changesets 가 `Version Packages` PR 자동 생성 → 머지 시 npm 배포 + provenance 발급.
+메인테이너만. main 머지 → Changesets가 `chore(release): 패키지 버전 갱신` PR 자동 생성 → 머지 시 npm 배포 + provenance 발급.
 
 배포는 npm Trusted Publishing(OIDC)을 사용한다. npm의 `korean-account` 설정에
 GitHub `dydals3440/korean-account`, workflow `release.yml`, 직접 게시 권한이 연결되어 있다.

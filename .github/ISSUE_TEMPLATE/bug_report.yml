@@ -1,39 +1,45 @@
-name: 버그 리포트
-description: 식별·과목 매칭 오류 또는 라이브러리 동작 이상.
-title: "[Bug] "
-labels: ["bug", "needs triage"]
-assignees: ["dydals3440"]
+name: 버그 신고
+description: 계좌 식별·타입·패키지·배포 오류를 신고합니다. English reports are welcome.
+title: "fix: "
+labels: ["type: bug"]
 body:
   - type: markdown
     attributes:
-      value: 민감한 계좌번호는 마스킹해 주세요. 자릿수와 식별자 영역의 앞 1~3자리는 분석에 필요합니다.
-
+      value: |
+        제목은 `fix(scope): 발생 조건과 오류` 형식입니다. scope는 생략할 수 있습니다.
+        실제 계좌번호·인증 정보 대신 합성 입력을 사용하고, 재현에 필요한 자릿수·식별 위치를 남겨 주세요.
+        보안 취약점은 공개 이슈 대신 [비공개 신고](https://github.com/dydals3440/korean-account/security/advisories/new)를 이용해 주세요.
   - type: textarea
-    id: input
+    id: summary
     attributes:
-      label: 입력 / 기대 / 실제
-      placeholder: |
-        입력: "1000-19**-****"
-        기대: institution.id === "toss", kind === "virtual"
-        실제: institution.id === "kakao-bank"
+      label: 요약
+      description: 어떤 입력·조건에서 무엇이 잘못되는지 설명해 주세요.
     validations:
       required: true
-
   - type: textarea
-    id: repro
+    id: impact
     attributes:
-      label: 재현 코드
-      render: ts
+      label: 변경 및 영향
+      description: 기대 동작, 실제 동작, 영향을 받는 사용 방식을 적어 주세요.
       placeholder: |
+        기대: …
+        실제: …
+        영향: ESM/CJS, 타입 검사, 특정 금융기관 등
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: 검증
+      description: 최소 재현 코드·명령·오류 메시지와 패키지·Node·TypeScript·peer 버전을 적어 주세요.
+      placeholder: |
+        korean-account: 0.3.1 / Node: 22.12.0 / TypeScript: 5.9.3 / zod: 3.23.0
         import { detect } from "korean-account";
-        detect("...");
+        detect("합성 입력");
     validations:
       required: true
-
-  - type: input
-    id: env
+  - type: textarea
+    id: related
     attributes:
-      label: 버전 / 런타임
-      placeholder: "korean-account 0.2.0 · Node 22.5 · macOS 14"
-    validations:
-      required: true
+      label: 관련 항목
+      description: 관련 이슈·PR·문서가 있으면 연결해 주세요.

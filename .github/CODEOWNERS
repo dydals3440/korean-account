@@ -1,6 +1,8 @@
-# 모든 PR 에 메인테이너가 리뷰어로 자동 지정된다.
+# 실제 코드 검토 책임자. 작성자(author)·담당자(assignee)와 다른 역할입니다.
+# 본인 PR에는 자동 self-review 요청이 생성되지 않습니다.
 * @dydals3440
 
-# 도메인 데이터 (기관·패턴 레지스트리) 는 PDF 근거 검증이 필요하므로 명시 소유.
-/src/data/ @dydals3440
-/.github/workflows/ @dydals3440
+/src/core/ @dydals3440
+/src/registry/ @dydals3440
+/src/adapters/ @dydals3440
+/.github/ @dydals3440

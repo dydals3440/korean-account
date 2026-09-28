@@ -9,9 +9,10 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: "chore(ci)"
+      prefix: "ci(deps)"
     labels:
-      - dependencies
+      - "flag: dependencies"
+      - "type: maintenance"
       - "area: ci"
     groups:
       # Group action bumps into one PR (majors included).
@@ -25,10 +26,11 @@ updates:
       interval: weekly
     versioning-strategy: increase-if-necessary
     commit-message:
-      prefix: chore
-      prefix-development: chore
+      prefix: "build(deps)"
+      prefix-development: "build(deps)"
     labels:
-      - dependencies
+      - "flag: dependencies"
+      - "type: maintenance"
     groups:
       # Runtime dependencies are zero, so devDeps are everything. One grouped
       # PR, majors included (zod majors are excluded below).

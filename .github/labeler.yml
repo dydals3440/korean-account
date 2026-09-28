@@ -1,60 +1,55 @@
-# actions/labeler v5 — path/branch based auto-labeling for PRs.
-
+# actions/labeler v7: 파일 경로로 area/의존성 라벨만 동기화합니다.
+# 목적(type)과 비호환 표시는 workflow의 제목 분류 단계가 관리합니다.
 "area: registry":
   - changed-files:
-      - any-glob-to-any-file:
-          - "src/registry/**"
-
+      - any-glob-to-any-file: ["src/registry/**"]
 "area: core":
   - changed-files:
-      - any-glob-to-any-file:
-          - "src/core/**"
-
+      - any-glob-to-any-file: ["src/core/**"]
 "area: adapters":
   - changed-files:
-      - any-glob-to-any-file:
-          - "src/adapters/**"
-
+      - any-glob-to-any-file: ["src/adapters/**"]
 "area: types":
   - changed-files:
-      - any-glob-to-any-file:
-          - "src/types.ts"
-          - "src/shared/**"
-
+      - any-glob-to-any-file: ["src/types.ts", "src/shared/**", "src/**/*.types.spec.ts"]
 "area: build":
   - changed-files:
       - any-glob-to-any-file:
-          - "tsdown.config.ts"
-          - "scripts/**"
-
+          [
+            "tsdown.config.ts",
+            "scripts/**",
+            "package.json",
+            "pnpm-lock.yaml",
+            "pnpm-workspace.yaml",
+            ".nvmrc",
+            "tsconfig.json",
+            "vitest.config.ts",
+            ".size-limit.json",
+          ]
 "area: ci":
   - changed-files:
-      - any-glob-to-any-file:
-          - ".github/**"
-
-documentation:
+      - any-glob-to-any-file: [".github/workflows/**", ".github/dependabot.yml"]
+"area: repository":
   - changed-files:
       - any-glob-to-any-file:
-          - "README.md"
-          - "README.en.md"
-          - "DOCS.md"
-          - "CONTRIBUTING.md"
-          - "CHANGELOG.md"
-          - "SECURITY.md"
-          - "CODE_OF_CONDUCT.md"
-
-test:
+          [
+            ".github/ISSUE_TEMPLATE/**",
+            ".github/PULL_REQUEST_TEMPLATE.md",
+            ".github/CODEOWNERS",
+            ".github/labeler.yml",
+            ".github/labels.json",
+            ".github/MAINTAINING.md",
+            ".github/release.yml",
+          ]
+"area: docs":
   - changed-files:
       - any-glob-to-any-file:
-          - "src/**/*.spec.ts"
-          - "src/**/*.fixtures.ts"
-          - "vitest.config.ts"
-
-dependencies:
-  - changed-files:
-      - any-glob-to-any-file:
-          - "pnpm-lock.yaml"
-
-release:
-  - head-branch:
-      - "^changeset-release/"
+          [
+            "README.md",
+            "README.en.md",
+            "DOCS.md",
+            "CONTRIBUTING.md",
+            "SECURITY.md",
+            "CODE_OF_CONDUCT.md",
+            ".github/MAINTAINING.md",
+          ]
