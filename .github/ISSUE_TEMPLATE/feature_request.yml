@@ -1,29 +1,37 @@
 name: 기능 제안
-description: 새 API·개선 등 라이브러리 확장 제안. (기관·패턴 추가는 전용 템플릿 사용)
-title: "[Feature] "
-labels: ["enhancement", "needs triage"]
-assignees: ["dydals3440"]
+description: 새 API 또는 사용성 개선을 제안합니다. 기관·패턴 추가는 전용 양식을 사용해 주세요.
+title: "feat: "
+labels: ["type: feature"]
 body:
   - type: markdown
     attributes:
-      value: PDF 미명시 영역은 코어가 아닌 컨슈머 `defaultDetector.extend(...)` 영역입니다 — [README § 7. 확장](https://github.com/dydals3440/korean-account#7-확장).
-
+      value: |
+        제목은 `feat(scope): 기대하는 기능` 형식입니다. 한국어 기본, English welcome.
+        개별 서비스의 계좌 체계는 `createDetector(...).extend(...)`로 보강할 수 있습니다.
+        [확장 가이드](https://github.com/dydals3440/korean-account/blob/main/DOCS.md)를 함께 확인해 주세요.
   - type: textarea
-    id: problem
+    id: summary
     attributes:
-      label: 해결하려는 문제
+      label: 요약
+      description: 현재의 불편과 해결하려는 사용자 문제를 적어 주세요.
     validations:
       required: true
-
   - type: textarea
-    id: proposal
+    id: impact
     attributes:
-      label: 제안
+      label: 변경 및 영향
+      description: 제안 API·사용 예제·대안과 기존 사용자에게 미치는 영향을 적어 주세요.
     validations:
       required: true
-
   - type: textarea
-    id: source
+    id: verification
     attributes:
-      label: 근거
-      description: 새 기관/패턴 추가는 CMS PDF 페이지·표 행 인용 필수.
+      label: 검증
+      description: 구현 후 완료를 판단할 수 있는 예제나 수용 조건을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: 관련 항목
+      description: 관련 이슈·PR·근거 자료를 연결해 주세요.

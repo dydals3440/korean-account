@@ -1,0 +1,87 @@
+[
+  {
+    "name": "type: bug",
+    "description": "기존 동작·배포·타입 계약의 오류 수정",
+    "color": "d73a4a"
+  },
+  {
+    "name": "type: feature",
+    "description": "새 기능·API·기관·패턴 추가",
+    "color": "0e8a16"
+  },
+  {
+    "name": "type: docs",
+    "description": "사용자·기여자 문서 개선",
+    "color": "0075ca"
+  },
+  {
+    "name": "type: maintenance",
+    "description": "개발 도구·설정·저장소 운영 유지보수",
+    "color": "6f42c1"
+  },
+  {
+    "name": "type: refactor",
+    "description": "동작을 유지하는 내부 구조 개선",
+    "color": "c5def5"
+  },
+  {
+    "name": "type: test",
+    "description": "테스트·검증 기준·회귀 방지 개선",
+    "color": "d4c5f9"
+  },
+  {
+    "name": "type: release",
+    "description": "버전·changeset·릴리스 준비 및 게시 기록",
+    "color": "5319e7"
+  },
+  {
+    "name": "area: core",
+    "description": "src/core: 식별·스코어링·분기 규칙",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: registry",
+    "description": "src/registry: 금융기관·계좌 패턴 데이터",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: adapters",
+    "description": "src/adapters: Zod·Valibot·Yup·ArkType·Standard Schema",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: types",
+    "description": "공개 타입·제네릭·타입 선언 호환성",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: build",
+    "description": "빌드·패키지 구성·배포물 검증·개발 도구",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: ci",
+    "description": "GitHub Actions·Dependabot·배포 자동화",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: docs",
+    "description": "README·DOCS·기여 및 운영 가이드",
+    "color": "1d76db"
+  },
+  {
+    "name": "area: repository",
+    "description": "이슈·PR 템플릿·라벨·CODEOWNERS·저장소 운영",
+    "color": "1d76db"
+  },
+  {
+    "name": "flag: breaking-change",
+    "description": "공개 API·지원 환경·관측 결과의 비호환 변경; 마이그레이션 필요",
+    "color": "b60205"
+  },
+  {
+    "name": "flag: dependencies",
+    "description": "npm 개발 의존성 또는 GitHub Actions 버전 변경",
+    "color": "fbca04"
+  }
+]

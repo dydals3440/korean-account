@@ -1,17 +1,18 @@
 ## 요약
 
-<!-- 무엇을 왜. 한두 문장. -->
+<!-- 해결하는 문제와 변경 후 동작을 1~2문장으로 설명합니다. 한국어 기본, English welcome. -->
+
+## 변경 및 영향
+
+<!-- 핵심 변경만 적습니다. 공개 API·Node 하한·optional peer·ESM/CJS·타입에 영향이 있으면 설명합니다. -->
+<!-- 사용자 노출 변경: changeset 종류와 이유. 비호환 변경: 이전/이후 예제 및 마이그레이션. 해당 없으면 그 이유를 한 줄로 적습니다. -->
 
 ## 검증
 
-<!-- 실행한 명령과 결과. 예: pnpm check && pnpm build && pnpm size 모두 통과 -->
+<!-- 실행한 명령과 실제 결과를 적습니다. 실행하지 않은 검사는 이유를 적고 통과로 표시하지 않습니다. -->
+<!-- 기본: pnpm check. 패키지/타입/도구 변경: pnpm build && pnpm check:dist, 필요 시 pnpm check:consumer. -->
+<!-- 문서·운영 설정만 바꾸면 관련 링크·YAML·포맷·워크플로 검사 결과로 충분합니다. -->
 
-## 체크
+## 관련 항목
 
-- [ ] `pnpm check` (typecheck·lint·test) 통과
-- [ ] `.spec.ts` 추가/갱신
-- [ ] 사용자 노출 변경이면 `pnpm changeset`
-- [ ] 코어 데이터 변경이면 [DOCS.md](../DOCS.md) 갱신
-- [ ] 공개 API 를 깨뜨리지 않음 — breaking 이면 major changeset + `breaking change` 라벨
-
-<!-- Closes #123 -->
+<!-- 완료하는 이슈: Closes #123. 일부 작업: Refs #123. 대체 PR: Supersedes #123. 없으면 '없음'. -->

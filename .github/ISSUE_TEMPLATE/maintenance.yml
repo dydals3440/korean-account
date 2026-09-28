@@ -1,0 +1,34 @@
+name: 유지보수 제안
+description: 문서·개발 도구·CI·저장소 운영 개선을 제안합니다.
+title: "chore: "
+labels: ["type: maintenance"]
+body:
+  - type: markdown
+    attributes:
+      value: 제목은 목적에 맞게 `docs:`, `test:`, `refactor:`, `chore:` 중 하나를 사용해 주세요. 메인테이너가 분류를 확인합니다.
+  - type: textarea
+    id: summary
+    attributes:
+      label: 요약
+      description: 현재 문제와 개선 목적을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 변경 및 영향
+      description: 작업 범위와 사용자·기여자에게 미치는 영향을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: 검증
+      description: 완료 조건과 필요한 검사 방법을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: 관련 항목
+      description: 관련 이슈·PR·문서가 있으면 연결해 주세요.

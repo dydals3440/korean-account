@@ -73,5 +73,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: pnpm changeset publish
           version-script: pnpm changeset version
-          commit-message: "chore: version packages"
-          pr-title: "chore: version packages"
+          commit-message: "chore(release): 패키지 버전 갱신"
+          pr-title: "chore(release): 패키지 버전 갱신"

@@ -1,0 +1,16 @@
+# GitHub의 Generate release notes를 사용할 때 적용합니다.
+# 정규 npm 릴리스 본문은 Changesets의 한국어 changeset이 기준입니다.
+changelog:
+  categories:
+    - title: 호환성 변경
+      labels: ["flag: breaking-change"]
+    - title: 기능 추가
+      labels: ["type: feature"]
+    - title: 오류 수정
+      labels: ["type: bug"]
+    - title: 문서 개선
+      labels: ["type: docs"]
+    - title: 개발·운영 개선
+      labels: ["type: maintenance", "type: refactor", "type: test", "type: release"]
+    - title: 기타 변경
+      labels: ["*"]
