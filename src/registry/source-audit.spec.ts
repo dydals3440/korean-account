@@ -47,3 +47,16 @@ test("SC 11자리 과목 15는 하나와 충돌하며 기존 동점 순서를 �
     ["sc", 7],
   ]);
 });
+
+describe("제주 — PDF p.8의 열거 식별자", () => {
+  const listed = new Set([
+    700, 701, 702, 703, 704, 705, 706, 707, 708, 709, 711, 712, 713, 714, 769, 770, 771, 772, 773,
+    774, 775, 776, 777, 778, 779,
+  ]);
+  test.each(Array.from({ length: 80 }, (_, i) => 700 + i))("접두어 %i", (prefix) => {
+    const digits = String(prefix) + "111111111";
+    const result = scoped("jeju", digits);
+    expect(result?.score).toBe(listed.has(prefix) ? 14 : 3);
+    expect(result?.subject !== undefined).toBe(listed.has(prefix));
+  });
+});
