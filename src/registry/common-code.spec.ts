@@ -11,7 +11,7 @@ import { getInstitution } from ".";
  * and break the form submit boundary.
  */
 describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
-  test("하나은행 (외환·하나 통합) — CMS code 005 ≠ 표준 081", () => {
+  test("하나은행 (외환·하나 통합) — 기존 라이브러리 code 005·commonCode 081 유지", () => {
     // Given / When
     const hana = getInstitution("hana");
 

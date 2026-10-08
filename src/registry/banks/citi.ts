@@ -89,7 +89,7 @@ const formerCitiSubjects: readonly Subject[] = [
   }),
 ];
 
-export const citi = /* @__PURE__ */ defineInstitution({
+export const citi = defineInstitution({
   id: "citi",
   code: "027",
   aliasCodes: ["036", "053"],

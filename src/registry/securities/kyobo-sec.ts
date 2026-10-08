@@ -3,7 +3,7 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 import { expandTwoDigitRange } from "../expand-range";
 
-export const kyoboSec = /* @__PURE__ */ defineInstitution({
+export const kyoboSec = defineInstitution({
   id: "kyobo-sec",
   code: "261",
   nameKo: "교보증권",
@@ -15,6 +15,7 @@ export const kyoboSec = /* @__PURE__ */ defineInstitution({
     {
       template: T("XXX-XX-XXXXXX"),
       kind: "old",
+      additionalRules: [(digits) => digits[0] === "0"],
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -33,6 +34,7 @@ export const kyoboSec = /* @__PURE__ */ defineInstitution({
       // the printed boxes show the last serial run as a single box.
       template: T("XXXX-XXXX-X-XX"),
       kind: "new",
+      additionalRules: [(digits) => digits[0] !== "0"],
       effectiveFrom: "2012-01-25",
     },
   ],

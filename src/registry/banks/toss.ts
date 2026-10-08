@@ -3,7 +3,7 @@ import { toss12First1719 } from "../rules";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const toss = /* @__PURE__ */ defineInstitution({
+export const toss = defineInstitution({
   id: "toss",
   code: "092",
   nameKo: "토스뱅크",

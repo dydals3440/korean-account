@@ -1,20 +1,8 @@
 import { defineConfig } from "tsdown";
 
-// JS is published unbundled (`unbundle: true` = rolldown preserveModules):
-// dist mirrors src at module granularity. Combined with `sideEffects: false`
-// and per-call PURE annotations, consumer bundlers drop every institution
-// module they don't import — the whole point of the one-file-per-institution
-// registry. The exports map (not the file layout) is the public API boundary.
-//
-// d.ts stays a separate *bundled* build. It writes to its own outDir
-// (dist-dts) because under TypeScript 7 the plugin's `emitDtsOnly` fails to
-// suppress the CJS JS pass — sharing dist made two builds race on index.cjs
-// and intermittently corrupt it. scripts/collect-dts.mjs moves the
-// declarations into dist and drops the stray JS; attw (strict) + publint then
-// run as explicit build steps (see package.json "build") because they must
-// validate the FINAL layout, not the pre-collection one.
-//
-// Regression guards: byte budgets in .size-limit.json + scripts/check-runtime.mjs.
+// Preserve module boundaries so consumer bundlers can drop unused institutions.
+// Declarations use a separate directory to avoid the TS7 CJS emission race;
+// collect-dts moves only declarations before attw and publint validate dist.
 export default defineConfig([
   {
     entry: [

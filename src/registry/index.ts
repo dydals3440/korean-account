@@ -24,7 +24,7 @@ export type InstitutionCode = RegisteredInstitution["code"];
  *
  * @example
  * type BankId = InstitutionIdByCategory<"bank">;        // "kdb" | "ibk" | ...
- * type SecId  = InstitutionIdByCategory<"securities">;  // "yuanta" | "kbSec" | ...
+ * type SecId  = InstitutionIdByCategory<"securities">;  // "yuanta" | "kb-sec" | ...
  */
 export type InstitutionIdByCategory<C extends InstitutionCategory> = Extract<
   RegisteredInstitution,
@@ -33,11 +33,9 @@ export type InstitutionIdByCategory<C extends InstitutionCategory> = Extract<
 
 // Without the pure annotations, bundlers treat these top-level initializers
 // as side effects and retain the whole `institutions` array.
-const BY_ID = /* @__PURE__ */ new Map<string, RegisteredInstitution>(
-  institutions.map((i) => [i.id, i]),
-);
+const BY_ID = new Map<string, RegisteredInstitution>(institutions.map((i) => [i.id, i]));
 
-const BY_CODE = /* @__PURE__ */ (() => {
+const BY_CODE = (() => {
   const map = new Map<string, RegisteredInstitution>();
   for (const i of institutions) {
     map.set(i.code, i);

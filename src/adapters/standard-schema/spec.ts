@@ -1,9 +1,5 @@
-// Vendored from @standard-schema/spec@1.1.0 (MIT) — types only, zero runtime.
-// The spec encourages copying instead of depending; this keeps the adapter
-// truly dependency-free. Interop is structural, so code typed against the
-// real @standard-schema/spec accepts these schemas verbatim.
+// @standard-schema/spec@1.1.0 (MIT). See THIRD_PARTY_NOTICES.md.
 // Source: https://unpkg.com/@standard-schema/spec@1.1.0/dist/index.d.ts
-// (StandardJSONSchemaV1 is intentionally not vendored — not implemented here.)
 
 /** The Standard Typed interface. Base type extended by other specs. */
 export interface StandardTypedV1<Input = unknown, Output = Input> {

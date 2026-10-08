@@ -8,6 +8,7 @@ import {
   ACCOUNT_MIN_DIGITS,
   type DetectionPayload,
   digitCount,
+  isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
 } from "../shared";
@@ -77,9 +78,9 @@ export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = picklist
   MESSAGES.subjectCategory,
 );
 
-const CONFIDENCE_SET = /* @__PURE__ */ new Set<string>(CONFIDENCE_LEVELS);
-const KIND_SET = /* @__PURE__ */ new Set<string>(ACCOUNT_KINDS);
-const CATEGORY_SET = /* @__PURE__ */ new Set<string>(SUBJECT_CATEGORIES);
+const CONFIDENCE_SET = new Set<string>(CONFIDENCE_LEVELS);
+const KIND_SET = new Set<string>(ACCOUNT_KINDS);
+const CATEGORY_SET = new Set<string>(SUBJECT_CATEGORIES);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -97,7 +98,7 @@ export const detectionSchema: StandardSchemaV1<DetectionPayload> = createStandar
   if (typeof value.kind !== "string" || !KIND_SET.has(value.kind)) {
     push(MESSAGES.accountKind, "kind");
   }
-  if (typeof value.score !== "number" || value.score < 0) {
+  if (!isFiniteNumber(value.score) || value.score < 0) {
     push("score 는 0 이상의 숫자여야 합니다.", "score");
   }
   if (typeof value.confidence !== "string" || !CONFIDENCE_SET.has(value.confidence)) {

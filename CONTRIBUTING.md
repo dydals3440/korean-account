@@ -19,7 +19,7 @@ pnpm lint           # oxlint + oxfmt --check
 pnpm lint:fix       # 자동 수정 (oxlint --fix + oxfmt)
 pnpm build          # tsdown / rolldown
 pnpm check:dist     # 번들 크기·ESM/CJS 런타임
-pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.0 호환성
+pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.1 공개 API 호환성 + 명시한 0.4 정정
 ```
 
 ## 이슈·PR 작성
@@ -82,3 +82,11 @@ GitHub `dydals3440/korean-account`, workflow `release.yml`, 직접 게시 권한
 1. **구현** — `src/adapters/<lib>/{schema,index}.ts`. 기존 어댑터(zod/valibot/yup/arktype/standard-schema) 중 가장 가까운 것을 미러링. 모든 export 는 그 라이브러리의 **안정 공개 타입으로 명시 어노테이션** (d.ts 에 내부 딥 제네릭이 새지 않게).
 2. **계약 테스트** — `schema.spec.ts` 에서 `describeAdapterContract("<lib>", accepts)` 호출 한 줄. 같은 valid/invalid 표를 통과해야 완료다.
 3. **배선** — package.json exports/typesVersions/optional peer, tsdown 엔트리 2곳, `.size-limit.json` 예산 1건, ci.yml `adapter-compat` 매트릭스 1행.
+
+## 원문·문서·배포 변경
+
+기관 데이터는 [PDF 대조 기록](./docs/source-audit.md)의 판본·페이지·해시를 기준으로 확인합니다. 기대값을 현재 코드에서 생성하지 말고 원문의 숫자 설명·열·각주를 독립적으로 판독합니다. 원문 사실·보강·호환 정책·미확인을 구분하고, 관측 결과가 바뀌면 minor changeset과 입력별 회귀 테스트를 함께 제출합니다.
+
+`compatibility-changes.json`에는 공개 0.3.1과 달라지는 기관 메타데이터 필드의 before/after와 근거를 명시합니다. 변경하지 않은 필드를 비교에서 제외하지 않습니다. 종류·점수·순위·capability의 연쇄 영향도 설명합니다.
+
+상세 문서는 docs, 미디어는 docs/assets에 둡니다. npm 포함 목록은 package.json의 files가 기준이며 `pnpm check:package`가 실제 목록과 README 링크를 확인합니다. root README에 포함되지 않은 파일을 연결할 때는 절대 GitHub URL을 사용합니다. 기존 DOCS 앵커와 영어 안내 경로를 유지합니다.

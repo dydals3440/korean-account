@@ -9,6 +9,7 @@ import {
   ACCOUNT_MIN_DIGITS,
   type DetectionPayload,
   digitCount,
+  isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
 } from "../shared";
@@ -63,7 +64,7 @@ export const detectionSchema: ZodType<DetectionPayload> = z.object({
       label: z.string().optional(),
     })
     .optional(),
-  score: z.number().min(0),
+  score: z.number().min(0).refine(isFiniteNumber, { message: MESSAGES.finiteScore }),
   confidence: z.enum(CONFIDENCE_LEVELS),
   formatted: z.string(),
   capabilities: z.object({

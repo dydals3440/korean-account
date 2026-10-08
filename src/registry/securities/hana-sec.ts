@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const hanaSec = /* @__PURE__ */ defineInstitution({
+export const hanaSec = defineInstitution({
   id: "hana-sec",
   code: "270",
   nameKo: "하나증권",

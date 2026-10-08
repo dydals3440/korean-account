@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const sc = /* @__PURE__ */ defineInstitution({
+export const sc = defineInstitution({
   id: "sc",
   code: "023",
   nameKo: "SC제일은행",
@@ -12,7 +12,7 @@ export const sc = /* @__PURE__ */ defineInstitution({
   userBaseMillions: 2,
   patterns: [
     {
-      template: T("XXX-XX-XXXXX"),
+      template: T("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -22,7 +22,7 @@ export const sc = /* @__PURE__ */ defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXX"),
+      template: T("XXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

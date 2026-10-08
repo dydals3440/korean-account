@@ -1,6 +1,6 @@
 import { defineInstitution } from "../../core/define-institution";
 
-export const kftc = /* @__PURE__ */ defineInstitution({
+export const kftc = defineInstitution({
   id: "kftc",
   code: "099",
   nameKo: "금융결제원",

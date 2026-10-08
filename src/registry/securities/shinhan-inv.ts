@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const shinhanInv = /* @__PURE__ */ defineInstitution({
+export const shinhanInv = defineInstitution({
   id: "shinhan-inv",
   code: "278",
   nameKo: "신한투자증권",

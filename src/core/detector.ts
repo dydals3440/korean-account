@@ -99,10 +99,6 @@ export function createDetector<I extends Institution>(
     const results: DetectionResult<I>[] = [];
 
     for (const institution of candidateInstitutions) {
-      if (!passesOptionFilters(institution, detectOptions, includeSet, excludeSet)) {
-        continue;
-      }
-
       const {
         score: baseScore,
         matchedPattern,
@@ -125,6 +121,11 @@ export function createDetector<I extends Institution>(
         baseScore,
         weights.branchRuleMatch,
       );
+      if (
+        !passesOptionFilters(branchOutcome.routedInstitution, detectOptions, includeSet, excludeSet)
+      ) {
+        continue;
+      }
       if (branchOutcome.score < minScore) {
         continue;
       }

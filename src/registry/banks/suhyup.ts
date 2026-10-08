@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { suhyup11BranchToCoop, suhyup12BranchToCoop, suhyup14BranchToCoop } from "../rules";
 import { defineInstitution } from "../../core/define-institution";
 
-export const suhyup = /* @__PURE__ */ defineInstitution({
+export const suhyup = defineInstitution({
   id: "suhyup",
   code: "007",
   aliasCodes: ["009"],

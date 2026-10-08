@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const gwangju = /* @__PURE__ */ defineInstitution({
+export const gwangju = defineInstitution({
   id: "gwangju",
   code: "034",
   nameKo: "광주은행",
@@ -57,8 +57,7 @@ export const gwangju = /* @__PURE__ */ defineInstitution({
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "107", category: "ordinary" }),
-        // PDF p.8: 13d column layout matches the 12d row — 109 is 국고 (treasury).
-        defineSubject({ code: "109", category: "treasury" }),
+        defineSubject({ code: "109", category: "ordinary" }),
         defineSubject({ code: "121", category: "savings" }),
         defineSubject({ code: "103", category: "household-current" }),
         defineSubject({ code: "101", category: "current" }),

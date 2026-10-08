@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const shinhyup = /* @__PURE__ */ defineInstitution({
+export const shinhyup = defineInstitution({
   id: "shinhyup",
   code: "048",
   aliasCodes: ["047", "049"],
@@ -38,7 +38,7 @@ export const shinhyup = /* @__PURE__ */ defineInstitution({
       ],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({ code: "110", category: "ordinary" }),
+        defineSubject({ code: "110", category: "ordinary", allowsWithdrawal: false }),
         defineSubject({ code: "131", category: "ordinary" }),
         defineSubject({ code: "132", category: "ordinary" }),
         defineSubject({ code: "134", category: "ordinary" }),
@@ -64,7 +64,7 @@ export const shinhyup = /* @__PURE__ */ defineInstitution({
           effectiveFrom: "2026-02-23",
         }),
         defineSubject({ code: "731", category: "ordinary" }),
-        defineSubject({ code: "177", category: "savings" }),
+        defineSubject({ code: "177", category: "savings", allowsWithdrawal: false }),
         defineSubject({ code: "133", category: "free-savings" }),
         defineSubject({ code: "136", category: "free-savings" }),
         defineSubject({ code: "135", category: "corporate-free" }),

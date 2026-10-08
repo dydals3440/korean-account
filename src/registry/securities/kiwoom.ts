@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const kiwoom = /* @__PURE__ */ defineInstitution({
+export const kiwoom = defineInstitution({
   id: "kiwoom",
   code: "264",
   nameKo: "키움증권",

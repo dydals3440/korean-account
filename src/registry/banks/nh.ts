@@ -27,7 +27,7 @@ const nhBankSubjectsOld: Subject[] = [
 // (3/4/5 belong to the NH federation, 농협중앙회).
 const nh13AccountClass = (digits: string): boolean => digits[12] === "1" || digits[12] === "2";
 
-export const nh = /* @__PURE__ */ defineInstitution({
+export const nh = defineInstitution({
   id: "nh",
   code: "011",
   aliasCodes: ["010", "016"],

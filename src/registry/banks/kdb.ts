@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const kdb = /* @__PURE__ */ defineInstitution({
+export const kdb = defineInstitution({
   id: "kdb",
   code: "002",
   nameKo: "KDB산업은행",
@@ -46,7 +46,7 @@ export const kdb = /* @__PURE__ */ defineInstitution({
       identifiers: ["010", "036"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({ code: "010", category: "treasury" }),
+        defineSubject({ code: "010", category: "savings" }),
         defineSubject({
           code: "036",
           category: "installment",

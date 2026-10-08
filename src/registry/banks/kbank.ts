@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { kbank10First9, kbank14First79 } from "../rules";
 import { defineInstitution } from "../../core/define-institution";
 
-export const kbank = /* @__PURE__ */ defineInstitution({
+export const kbank = defineInstitution({
   id: "kbank",
   code: "089",
   nameKo: "K뱅크",
@@ -27,8 +27,8 @@ export const kbank = /* @__PURE__ */ defineInstitution({
     },
     // PDF: 13 digits `serial(2)-phone(3-4-4)` — no specific prefix enumerated.
     {
-      template: T("XXX-XXX-XXXXXXX"),
-      kind: "new",
+      template: T("XX-XXX-XXXX-XXXX"),
+      kind: "incoming-only",
     },
     // branchRule: prefix 7/9 → easy-transfer virtual account, otherwise → loan (여신)
     {

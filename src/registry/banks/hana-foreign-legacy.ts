@@ -1,14 +1,7 @@
 import type { AdditionalRule } from "../../types";
 
-/**
- * Prefixes occupied by 005 Hana Bank's merged foreign-exchange legacy 14d
- * pattern (`XXX-XXXXXX-XXXXX`).
- *
- * Used as an exclusion condition in `additionalRules` so that same-length
- * 14d patterns (iM Bank new, Hana Securities CMA, ...) do not
- * false-positive.
- */
-export const HANA_FOREIGN_LEGACY_PREFIXES: ReadonlySet<string> = /* @__PURE__ */ new Set([
+/** Historical augmentation, not enumerated or proven exclusive by the PDF. */
+export const HANA_FOREIGN_LEGACY_PREFIXES: ReadonlySet<string> = new Set([
   "117",
   "158",
   "161",

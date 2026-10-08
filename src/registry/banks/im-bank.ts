@@ -3,7 +3,7 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
-export const imBank = /* @__PURE__ */ defineInstitution({
+export const imBank = defineInstitution({
   id: "im-bank",
   code: "031",
   nameKo: "iM뱅크",

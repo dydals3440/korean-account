@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const jeju = /* @__PURE__ */ defineInstitution({
+export const jeju = defineInstitution({
   id: "jeju",
   code: "035",
   nameKo: "제주은행",
@@ -27,7 +27,33 @@ export const jeju = /* @__PURE__ */ defineInstitution({
     {
       template: T("XXX-XXXXXX-XXX"),
       kind: "new",
-      identifierRange: { from: 700, to: 779 },
+      identifiers: [
+        "700",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706",
+        "707",
+        "708",
+        "709",
+        "711",
+        "712",
+        "713",
+        "714",
+        "769",
+        "770",
+        "771",
+        "772",
+        "773",
+        "774",
+        "775",
+        "776",
+        "777",
+        "778",
+        "779",
+      ],
       identifierPosition: { start: 0, length: 3 },
       subjectPosition: { start: 0, length: 3 },
       // PDF p.8 full enumeration: 700~706 / 770~779 / 769 / 711,712 / 713,714 / 707~709.

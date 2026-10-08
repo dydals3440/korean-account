@@ -9,7 +9,7 @@ import type { DetectionResult, DetectOptions } from "../types";
  * The pure annotation is load-bearing: without it bundlers cannot drop the
  * registry for consumers that never call the default-registry helpers.
  */
-const defaultDetector = /* @__PURE__ */ createDetector(institutions);
+const defaultDetector = createDetector(institutions);
 
 /**
  * Analyzes an account number against the full built-in registry and returns

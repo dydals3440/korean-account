@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const shinhan = /* @__PURE__ */ defineInstitution({
+export const shinhan = defineInstitution({
   id: "shinhan",
   code: "088",
   aliasCodes: ["021", "026", "028"],
@@ -142,8 +142,8 @@ export const shinhan = /* @__PURE__ */ defineInstitution({
         }),
         defineSubject({
           code: "298",
-          category: "installment",
-          label: "청년희망펀드",
+          category: "trust",
+          label: "청년희망펀드 공익신탁",
           allowsWithdrawal: false,
         }),
       ],
@@ -152,6 +152,7 @@ export const shinhan = /* @__PURE__ */ defineInstitution({
     {
       template: T("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
+      additionalRules: [(digits) => digits.slice(3, 6) !== "901"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
         // PDF p.12: 560/561 are ○×○× (withdrawal transfer unavailable);

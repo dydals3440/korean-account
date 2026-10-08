@@ -14,7 +14,7 @@ const kbSubjectsOld12: Subject[] = [
   defineSubject({ code: "26", category: "yes" }),
 ];
 
-export const kb = /* @__PURE__ */ defineInstitution({
+export const kb = defineInstitution({
   id: "kb",
   code: "004",
   aliasCodes: ["006", "019", "029", "078", "079"],

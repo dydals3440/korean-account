@@ -10,6 +10,7 @@ import {
   ACCOUNT_MIN_DIGITS,
   type DetectionPayload,
   digitCount,
+  isFiniteNumber,
   MESSAGES,
 } from "../shared";
 
@@ -80,7 +81,11 @@ export const detectionSchema: Schema<DetectionPayload> = object({
   })
     .optional()
     .default(undefined),
-  score: number().strict(true).defined().min(0),
+  score: number()
+    .strict(true)
+    .defined()
+    .min(0)
+    .test("finite", MESSAGES.finiteScore, isFiniteNumber),
   confidence: string<Confidence>().strict(true).defined().oneOf(CONFIDENCE_LEVELS),
   formatted: string().strict(true).defined(),
   capabilities: object({

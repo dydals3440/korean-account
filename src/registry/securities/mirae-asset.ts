@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const miraeAsset = /* @__PURE__ */ defineInstitution({
+export const miraeAsset = defineInstitution({
   id: "mirae-asset",
   code: "238",
   aliasCodes: ["230"],

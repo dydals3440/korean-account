@@ -56,7 +56,7 @@ describe("README 코드 예제가 주장하는 값", () => {
   test("조회 — getInstitution / getInstitution", () => {
     expect(getInstitution("shinhan")?.code).toBe("088");
     expect(getInstitution("088")?.id).toBe("shinhan");
-    // README's commonCode caveat: the CMS code and KFTC common bank code differ.
+    // Preserve the library's historical Hana code representation.
     expect(getInstitution("hana")?.code).toBe("005");
     expect(getInstitution("hana")?.commonCode).toBe("081");
   });
