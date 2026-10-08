@@ -92,3 +92,11 @@ describe("신한 통합 14자리 — PDF p.12", () => {
     expect(legacy?.subject?.code).toBe("901");
   });
 });
+
+test("산업 010 — PDF p.1의 저축성 과목이며 기존 출금 flag는 유지한다", () => {
+  const result = scoped("kdb", "01011111111111");
+  expect(result?.subject?.category).toBe("savings");
+  expect(result?.subject?.label).toBe("저축예금");
+  expect(result?.capabilities.allowsWithdrawal).toBe(true);
+  expect(result?.score).toBe(14);
+});

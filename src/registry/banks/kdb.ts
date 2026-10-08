@@ -46,7 +46,7 @@ export const kdb = defineInstitution({
       identifiers: ["010", "036"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({ code: "010", category: "treasury" }),
+        defineSubject({ code: "010", category: "savings" }),
         defineSubject({
           code: "036",
           category: "installment",

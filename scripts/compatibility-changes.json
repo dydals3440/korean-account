@@ -78,5 +78,13 @@
     "operation": "add",
     "source": "PDF p.12",
     "after": [null]
+  },
+  {
+    "id": "kdb",
+    "path": ["patterns", 2, "subjects", 0, "category"],
+    "operation": "replace",
+    "source": "PDF p.1",
+    "before": "treasury",
+    "after": "savings"
   }
 ]
