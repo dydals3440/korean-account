@@ -109,3 +109,10 @@ test("광주 — PDF p.8의 109는 13자리 보통예금·12자리 국고로 구
   expect(legacy?.subject?.category).toBe("treasury");
   expect(legacy?.subject?.label).toBe("국고");
 });
+
+test("신한 298 — PDF p.12·20의 공익신탁과 출금 제한", () => {
+  const result = scoped("shinhan", "298111111111");
+  expect(result?.subject?.category).toBe("trust");
+  expect(result?.subject?.label).toBe("청년희망펀드 공익신탁");
+  expect(result?.capabilities.allowsWithdrawal).toBe(false);
+});

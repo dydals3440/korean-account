@@ -142,8 +142,8 @@ export const shinhan = defineInstitution({
         }),
         defineSubject({
           code: "298",
-          category: "installment",
-          label: "청년희망펀드",
+          category: "trust",
+          label: "청년희망펀드 공익신탁",
           allowsWithdrawal: false,
         }),
       ],

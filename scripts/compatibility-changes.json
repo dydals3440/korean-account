@@ -94,5 +94,21 @@
     "source": "PDF p.8",
     "before": "treasury",
     "after": "ordinary"
+  },
+  {
+    "id": "shinhan",
+    "path": ["patterns", 0, "subjects", 64, "category"],
+    "operation": "replace",
+    "source": "PDF p.12,20",
+    "before": "installment",
+    "after": "trust"
+  },
+  {
+    "id": "shinhan",
+    "path": ["patterns", 0, "subjects", 64, "label"],
+    "operation": "replace",
+    "source": "PDF p.12,20",
+    "before": "청년희망펀드",
+    "after": "청년희망펀드 공익신탁"
   }
 ]
