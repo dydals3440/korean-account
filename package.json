@@ -1,7 +1,7 @@
 {
   "name": "korean-account",
   "version": "0.3.1",
-  "description": "Korean bank account detector · 한국 계좌번호 식별·과목 추출 — KFTC CMS PDF 충실, TypeScript.",
+  "description": "Korean account-number pattern detector · 한국 계좌번호 기관·과목 후보 추론, TypeScript.",
   "keywords": [
     "account",
     "bank",
@@ -34,7 +34,6 @@
     "dist",
     "README.md",
     "README.en.md",
-    "DOCS.md",
     "LICENSE",
     "CHANGELOG.md",
     "THIRD_PARTY_NOTICES.md"
@@ -138,7 +137,7 @@
     "test:coverage": "vitest run --coverage",
     "test:bench": "vitest bench --run",
     "publint": "publint",
-    "check:dist": "pnpm size && pnpm check:runtime",
+    "check:dist": "pnpm size && pnpm check:runtime && pnpm check:package",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "prepublishOnly": "pnpm build && pnpm check:dist",
     "changeset": "changeset",
@@ -147,7 +146,8 @@
     "size": "size-limit",
     "check:runtime": "node scripts/check-runtime.mjs",
     "check:consumer": "node scripts/check-consumer.mjs",
-    "test:adapters": "vitest run src/adapters"
+    "test:adapters": "vitest run src/adapters",
+    "check:package": "node scripts/check-package.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
