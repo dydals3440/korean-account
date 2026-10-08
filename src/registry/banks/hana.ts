@@ -6,11 +6,9 @@ import { isHanaForeignLegacy14 } from "./hana-foreign-legacy";
 export const hana = /* @__PURE__ */ defineInstitution({
   id: "hana",
   code: "005",
-  // The KFTC standard bank code is 081 (after the KEB merger the standard
-  // namespace keeps Hana's representative code).
-  // In the CMS namespace, 081 is occupied by hanaSecuritiesCma — a separate institution.
+  // Historical library codes are preserved; the current PDF lists Hana Bank as 081.
   commonCode: "081",
-  // 081 is excluded from CMS aliasCodes to avoid a code clash with hanaSecuritiesCma.
+  // 081 is excluded from aliasCodes to avoid a code clash with hanaSecuritiesCma.
   aliasCodes: ["025", "033", "080", "082"],
   nameKo: "하나은행",
   nameEn: "Hana Bank",

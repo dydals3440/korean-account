@@ -10,6 +10,8 @@
 - [통합 예제](./docs/recipes.md)
 - [마이그레이션](./docs/migration.md)
 
+- [PDF 근거와 호환 예외](./docs/source-audit.md)
+
 ## 기존 링크 안내
 
 <a id="데이터-레퍼런스--cms-참가기관별-계좌번호-체계"></a>

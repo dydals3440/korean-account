@@ -138,7 +138,7 @@ export interface AccountPattern {
    * major.
    */
   readonly checkDigitPosition?: DigitSpan;
-  /** `false` opts out explicitly. Default `undefined` = no algorithm available. */
+  /** `false` opts out; otherwise a registered verifier runs, if available. */
   readonly validatesCheckDigit?: boolean;
   readonly branchRule?: BranchRule;
   /**
@@ -171,16 +171,11 @@ export interface Institution<
   readonly id: Id;
   readonly code: Code;
   /**
-   * KFTC interbank standard bank code, set only when it differs from the CMS
-   * namespace `code`. Both namespaces are operated by KFTC but diverge for
-   * institutions with merger/split history.
-   *
-   * Example: `hana` has `code: "005"` (CMS — inherited the KEB representative
-   * code after the merger) and `commonCode: "081"` (standard — kept the Hana
-   * representative code). If your backend speaks standard bank codes, read
-   * `institution.commonCode ?? institution.code`.
-   *
-   * When unset, assume it equals `code`.
+   * Interbank code override for the library's historical code representation.
+   * `hana` retains `code: "005"` and `commonCode: "081"` for compatibility;
+   * the current CMS participant table lists Hana Bank under 081.
+   * Use `institution.commonCode ?? institution.code` only after confirming
+   * the code namespace required by your integration.
    */
   readonly commonCode?: string;
   readonly aliasCodes?: readonly string[];

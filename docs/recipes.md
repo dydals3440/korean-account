@@ -4,7 +4,7 @@
 
 # Appendix C. Recipes
 
-복사해 바로 쓰는 실전 패턴 9개.
+통합 패턴 9개. 프레임워크 의존성·서버 API·주변 UI는 애플리케이션에서 구성한다. 생략 기호가 있는 예제는 부분 예제다.
 
 - **프레임워크 무관** — C.1 폼 검증 · C.2 자동이체 가드 · C.9 실시간 포맷팅
 - **React** — C.3 디바운싱 자동완성 · C.7 shadcn/ui 은행 Select
@@ -24,7 +24,7 @@ function validateAccount(input: string): string | undefined {
   const top = detectBest(input);
   if (!top) return "올바른 계좌번호가 아닙니다.";
   if (!top.capabilities.allowsWithdrawal) {
-    return `${top.institution.nameKo} ${top.subject?.label ?? top.kind} 는 자동이체 등록이 불가합니다.`;
+    return `${top.institution.nameKo} ${top.subject?.label ?? top.kind} 는 라이브러리 정책상 출금 가능으로 안내하지 않습니다.`;
   }
   if (top.confidence === "low") return "기관을 특정할 수 없습니다.";
   return undefined;
@@ -42,7 +42,7 @@ function canRegisterAutoDebit(input: string) {
   const top = detectBest(input);
   if (!top) return { ok: false, reason: "계좌 식별 불가" };
   if (!top.capabilities.allowsWithdrawal) {
-    return { ok: false, reason: `${top.kind} 계좌는 자동이체 불가` };
+    return { ok: false, reason: `${top.kind} 계좌는 출금 가능 여부를 별도로 확인해주세요` };
   }
   return { ok: true };
 }
@@ -68,8 +68,8 @@ function AccountInput() {
     <>
       <input value={raw} onChange={(e) => setRaw(e.target.value)} />
       <ul>
-        {candidates.map((c) => (
-          <li key={c.institution.id}>
+        {candidates.map((c, index) => (
+          <li key={`${c.institution.id}:${index}`}>
             {c.institution.nameKo} · {c.subject?.label ?? c.kind} · {c.confidence}
           </li>
         ))}
@@ -222,25 +222,31 @@ export function BankField({ account }: { account: string }) {
 
 ## C.8 TanStack Query — 유료 실명조회 게이트
 
-핵심 비용 패턴. **confidence 가 high 일 때만** 건당 과금되는 실명조회 API 를 호출한다 — 오타·미완성 입력이 유료 호출로 새지 않는다.
+입력 중 높은 confidence가 나와도 입력 완료나 은행 확정을 뜻하지 않는다. 예를 들어 우리은행 예제의 12자리 입력 중간값 `100212345678`, 카카오뱅크 예제의 중간값 `333312345678`도 다른 은행의 high 후보가 나온다. 조회는 사용자가 은행·계좌를 확인하고 제출할 때 실행한다. 조회 API 구현은 애플리케이션에서 주입한다.
 
 ```tsx
-import { useQuery } from "@tanstack/react-query";
-import { detectBest, normalizeAccount } from "korean-account";
+import { useMutation } from "@tanstack/react-query";
+import { normalizeAccount } from "korean-account";
+import { accountSchema } from "korean-account/standard-schema";
 
-export function useAccountHolder(rawAccount: string) {
-  const digits = normalizeAccount(rawAccount);
-  const detected = detectBest(digits);
-  const bankCode = detected?.institution.commonCode ?? detected?.institution.code;
+type ConfirmedAccount = { bankCode: string; rawAccount: string };
 
-  return useQuery({
-    queryKey: ["account-holder", bankCode, digits],
-    queryFn: () => fetchAccountHolder(bankCode!, digits), // 유료: 오픈뱅킹 계좌실명조회 등
-    enabled: detected?.confidence === "high" && detected.capabilities.allowsWithdrawal,
-    staleTime: Infinity, // 같은 계좌는 재조회하지 않는다
+export function useAccountHolder<T>(
+  fetchAccountHolder: (bankCode: string, digits: string) => Promise<T>,
+) {
+  return useMutation({
+    mutationFn: async ({ bankCode, rawAccount }: ConfirmedAccount) => {
+      const result = await accountSchema["~standard"].validate(rawAccount);
+      if (result.issues || !/^\d{3}$/.test(bankCode)) {
+        throw new Error("은행과 계좌번호를 확인해주세요.");
+      }
+      return fetchAccountHolder(bankCode, normalizeAccount(rawAccount));
+    },
   });
 }
 ```
+
+사용자 확인 후 제출 핸들러에서 `mutate({ bankCode, rawAccount })`를 호출한다. 구문 검사는 실제 계좌의 유효성 검사가 아니다. 중복 제출·조회 실패 처리는 애플리케이션의 비용·재시도 정책에 맞춘다.
 
 <a id="c9-입력-중-실시간-포맷팅"></a>
 
