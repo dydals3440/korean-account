@@ -57,5 +57,19 @@
       "778",
       "779"
     ]
+  },
+  {
+    "id": "kyobo-sec",
+    "path": ["patterns", 0, "additionalRules"],
+    "operation": "add",
+    "source": "PDF p.16,20",
+    "after": [null]
+  },
+  {
+    "id": "kyobo-sec",
+    "path": ["patterns", 1, "additionalRules"],
+    "operation": "add",
+    "source": "PDF p.16,20",
+    "after": [null]
   }
 ]

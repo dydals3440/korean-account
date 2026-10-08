@@ -60,3 +60,21 @@ describe("제주 — PDF p.8의 열거 식별자", () => {
     expect(result?.subject !== undefined).toBe(listed.has(prefix));
   });
 });
+
+describe("교보 — PDF p.16·20", () => {
+  test("0으로 시작하는 11자리는 구계좌 과목을 추출하고 규칙 가산점을 받는다", () => {
+    const result = scoped("kyobo-sec", "02301123456");
+    expect(result?.kind).toBe("old");
+    expect(result?.subject?.code).toBe("01");
+    expect(result?.score).toBe(8);
+  });
+  test.each(["12301123456", "92301123456"])(
+    "0 이외의 %s는 구계좌 과목으로 오인하지 않는다",
+    (digits) => {
+      const result = scoped("kyobo-sec", digits);
+      expect(result?.kind).toBe("new");
+      expect(result?.subject).toBeUndefined();
+      expect(result?.score).toBe(4);
+    },
+  );
+});

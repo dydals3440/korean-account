@@ -15,6 +15,7 @@ export const kyoboSec = defineInstitution({
     {
       template: T("XXX-XX-XXXXXX"),
       kind: "old",
+      additionalRules: [(digits) => digits[0] === "0"],
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -33,6 +34,7 @@ export const kyoboSec = defineInstitution({
       // the printed boxes show the last serial run as a single box.
       template: T("XXXX-XXXX-X-XX"),
       kind: "new",
+      additionalRules: [(digits) => digits[0] !== "0"],
       effectiveFrom: "2012-01-25",
     },
   ],
