@@ -110,5 +110,19 @@
     "source": "PDF p.12,20",
     "before": "청년희망펀드",
     "after": "청년희망펀드 공익신탁"
+  },
+  {
+    "id": "shinhyup",
+    "path": ["patterns", 2, "subjects", 0, "allowsWithdrawal"],
+    "operation": "add",
+    "source": "PDF p.9 footnote",
+    "after": false
+  },
+  {
+    "id": "shinhyup",
+    "path": ["patterns", 2, "subjects", 10, "allowsWithdrawal"],
+    "operation": "add",
+    "source": "PDF p.9 footnote",
+    "after": false
   }
 ]

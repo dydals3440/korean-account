@@ -116,3 +116,16 @@ test("신한 298 — PDF p.12·20의 공익신탁과 출금 제한", () => {
   expect(result?.subject?.label).toBe("청년희망펀드 공익신탁");
   expect(result?.capabilities.allowsWithdrawal).toBe(false);
 });
+
+test.each([
+  ["110", "ordinary"],
+  ["177", "savings"],
+] as const)("신협 %s — PDF p.9의 입금전용 각주", (code, category) => {
+  const result = scoped("shinhyup", code + "111111111");
+  expect(result?.kind).toBe("new");
+  expect(result?.subject?.category).toBe(category);
+  expect(result?.subject?.allowsWithdrawal).toBe(false);
+  expect(result?.capabilities.allowsWithdrawal).toBe(false);
+  expect(result?.capabilities.virtual).toBe(false);
+  expect(result?.score).toBe(14);
+});
