@@ -68,7 +68,7 @@ try {
         "--no-fund",
         "--package-lock=false",
         tarball,
-        "korean-account-baseline@npm:korean-account@0.3.0",
+        "korean-account-baseline@npm:korean-account@0.3.1",
         ...(runtimeOnly ? [] : [`typescript@${typescript}`]),
         ...(peer === "none" ? [] : [peer]),
         // ArkType's own declarations refer to NodeJS and buffer types.
@@ -201,20 +201,13 @@ try {
             module,
             moduleResolution: resolution,
           },
-          // 0.3.0's ArkType CJS declaration fails in the frozen Node16 model.
-          // Strictly check the fixed artifact here; compare with 0.3.0 in
-          // NodeNext and Bundler, where its declarations already work.
-          include: legacyEsm
-            ? ["consumer.mts"]
-            : adapter === "arktype" && resolution === "Node16"
-              ? ["current.mts", "current.cts"]
-              : ["consumer.mts", "consumer.cts"],
+          include: legacyEsm ? ["consumer.mts"] : ["consumer.mts", "consumer.cts"],
         }),
       );
       run("npm", ["exec", "--", "tsc", "--project", "tsconfig.json"], cwd);
     }
     console.log(
-      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.0 compatible)`,
+      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.1 compatible)`,
     );
   }
 } finally {
