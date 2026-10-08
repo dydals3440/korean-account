@@ -73,12 +73,13 @@ export interface Subject {
   /** Display label ("정기적금" etc.). Falls back to the category label. */
   readonly label?: string;
   /**
-   * Whether direct-debit withdrawal is possible. When unspecified it is
+   * Static withdrawal hint; final capabilities can apply stricter kind rules.
+   * When unspecified it is
    * derived from the kind — false for `virtual: true` subjects and for
    * `virtual` / `incoming-only` / `lifetime` kinds, true otherwise.
    */
   readonly allowsWithdrawal?: boolean;
-  /** Virtual account (behaves deposit-only). */
+  /** Virtual-account marker; built-in withdrawal policy is conservative. */
   readonly virtual?: boolean;
   readonly effectiveFrom?: string;
   readonly note?: string;
@@ -142,11 +143,9 @@ export interface AccountPattern {
   readonly validatesCheckDigit?: boolean;
   readonly branchRule?: BranchRule;
   /**
-   * Gate-and-score rules for the pattern. On a length-matching input, all
-   * rules must pass or the pattern is rejected; when all pass, each rule adds
-   * to the score. Use for domain constraints the template cannot express
-   * (e.g. `d[3] === "9"` as the KEB 14-digit signal, or prefix-collision
-   * avoidance).
+   * Gate-and-score rules for exact or ±1-digit length matches.
+   * Every rule must pass; each adds the configured rule bonus.
+   * Shorter partial input is exempt from both gating and the bonus.
    */
   readonly additionalRules?: readonly AdditionalRule[];
   readonly effectiveFrom?: string;
@@ -158,7 +157,7 @@ export interface AccountPattern {
  *
  * The generic parameters preserve literals for narrowing:
  * - `Id` — institution id literal such as `"kdb"`
- * - `Code` — CMS representative code literal such as `"002"`
+ * - `Code` — library institution code literal such as `"002"`
  * - `Category` — category literal such as `"bank"`
  *
  * The `defineInstitution` helper infers all three automatically.
@@ -234,6 +233,7 @@ export interface DetectionResult<I extends Institution = Institution> {
  */
 export type InstitutionIdInput<Id extends string = string> = Id | (string & Record<never, never>);
 
+/** Institution filters apply to the final routed institution; exclude wins. */
 export interface DetectOptions<Id extends string = string> {
   readonly categories?: readonly InstitutionCategory[];
   readonly kinds?: readonly AccountKind[];
@@ -250,7 +250,7 @@ export interface DetectOptions<Id extends string = string> {
  * kindNewBonus:0).
  *
  * The defaults read intuitively: right length (+3), matching prefix (+4),
- * matching subject (+3) → score 10 → high confidence.
+ * matching subject (+3), plus code-length bonuses, yield high confidence.
  */
 export interface ScoringWeights {
   /** Bonus when the digit count matches the template exactly (default +3). */

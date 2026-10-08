@@ -104,3 +104,42 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
     );
   });
 });
+
+describe("확장 규칙과 날짜 메타데이터의 사용 계약", () => {
+  test("false global rule은 후보를 거부하지 않으며 추가 규칙은 기존 순서 뒤에서 평가한다", () => {
+    const order: string[] = [];
+    const base = createDetector([myBank], {
+      globalRules: [
+        () => {
+          order.push("base");
+          return false;
+        },
+      ],
+    });
+    const extended = base.extend({
+      globalRules: [
+        () => {
+          order.push("extra");
+          return true;
+        },
+      ],
+    });
+    expect(base.detect("99912345678901")[0]?.score).toBe(9);
+    expect(order).toEqual(["base"]);
+    order.length = 0;
+    expect(extended.detect("99912345678901")[0]?.score).toBe(10);
+    expect(order).toEqual(["base", "extra"]);
+  });
+
+  test("미래 effectiveFrom은 자동 제외하지 않고 undefined 검증 설정에서도 등록 verifier가 실행된다", () => {
+    const future = defineInstitution({
+      ...myBank,
+      patterns: myBank.patterns.map((pattern) => ({ ...pattern, effectiveFrom: "2999-01-01" })),
+    });
+    const detector = createDetector([future], { checkDigitVerifiers: { "my-bank": () => false } });
+    const results = detector.detect("99912345678901");
+    expect(results).toHaveLength(1);
+    expect(results[0]?.matchedPattern.effectiveFrom).toBe("2999-01-01");
+    expect(results[0]?.capabilities.validatedCheckDigit).toBe(false);
+  });
+});
