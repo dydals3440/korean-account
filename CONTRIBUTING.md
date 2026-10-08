@@ -19,7 +19,7 @@ pnpm lint           # oxlint + oxfmt --check
 pnpm lint:fix       # 자동 수정 (oxlint --fix + oxfmt)
 pnpm build          # tsdown / rolldown
 pnpm check:dist     # 번들 크기·ESM/CJS 런타임
-pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.0 호환성
+pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.1 공개 API 호환성 + 명시한 0.4 정정
 ```
 
 ## 이슈·PR 작성

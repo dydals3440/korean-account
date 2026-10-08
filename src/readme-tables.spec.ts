@@ -43,3 +43,22 @@ describe("문서 지원 기관 표 = 레지스트리", () => {
     expect(registryDoc).toContain(`증권사 (${count("securities")})`);
   });
 });
+
+describe("문서 계좌 형식의 자리 수", () => {
+  const rows = registryDoc.split("\n").flatMap((line, index) => {
+    const cells = line.split("|").map((cell) => cell.trim());
+    const formats: { line: number; expected: number; format: string }[] = [];
+    for (let i = 0; i < cells.length - 1; i += 1) {
+      if (!/^\d+$/.test(cells[i]!)) continue;
+      const format = cells[i + 1]!.match(/`([□-]+)`/);
+      if (format) formats.push({ line: index + 1, expected: Number(cells[i]), format: format[1]! });
+    }
+    return formats;
+  });
+  test("정확한 길이가 표기된 형식이 존재한다", () => {
+    expect(rows.length).toBeGreaterThan(80);
+  });
+  test.each(rows)("$line행 $expected자리 $format", ({ expected, format }) => {
+    expect(format.replaceAll("-", "").length).toBe(expected);
+  });
+});
