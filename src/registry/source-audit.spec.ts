@@ -3,7 +3,7 @@ import { createDetector } from "../core/detector";
 import { templateLength } from "../core/template-length";
 import { detect } from "../core/detect";
 import { getInstitution, institutions, type InstitutionId } from "./index";
-import { SOURCE_FORMATS } from "./source-audit.fixtures";
+import { HSBC_SOURCE_RANGES, SOURCE_FORMATS } from "./source-audit.fixtures";
 
 function scoped(id: InstitutionId, digits: string) {
   return createDetector([getInstitution(id)]).detect(digits)[0];
@@ -136,4 +136,38 @@ test("케이뱅크 13자리 — PDF p.13의 전화번호 연결 형식과 입금
   expect(result?.kind).toBe("incoming-only");
   expect(result?.capabilities.allowsWithdrawal).toBe(false);
   expect(result?.capabilities.virtual).toBe(false);
+});
+
+describe("HSBC — PDF p.10의 과목과 부가서비스", () => {
+  for (const { category, ranges } of HSBC_SOURCE_RANGES) {
+    const codes = ranges.flatMap(([from, to]) =>
+      Array.from({ length: to - from + 1 }, (_, i) => String(from + i).padStart(3, "0")),
+    );
+    test.each(codes)(category + " %s", (code) => {
+      const result = scoped("hsbc", "123123451" + code);
+      expect(result?.subject?.code).toBe(code);
+      expect(result?.subject?.category).toBe(category);
+      expect(result?.capabilities.allowsWithdrawal).toBe(true);
+      expect(result?.score).toBe(8);
+    });
+  }
+  test.each([
+    "020",
+    "031",
+    "065",
+    "070",
+    "071",
+    "074",
+    "080",
+    "085",
+    "090",
+    "295",
+    "298",
+    "984",
+    "995",
+  ])("미열거 %s는 과목 가산점을 받지 않는다", (code) => {
+    const result = scoped("hsbc", "123123451" + code);
+    expect(result?.subject).toBeUndefined();
+    expect(result?.score).toBe(3);
+  });
 });

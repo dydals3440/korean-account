@@ -286,3 +286,39 @@ export const SOURCE_FORMATS = [
     lengths: [11],
   },
 ] as const;
+
+export const HSBC_SOURCE_RANGES = [
+  {
+    category: "ordinary",
+    ranges: [
+      [21, 30],
+      [296, 297],
+      [711, 712],
+      [783, 784],
+      [900, 903],
+      [985, 994],
+    ],
+  },
+  {
+    category: "savings",
+    ranges: [
+      [66, 69],
+      [72, 73],
+      [83, 83],
+      [221, 223],
+      [306, 307],
+      [407, 407],
+      [461, 465],
+      [702, 703],
+      [863, 863],
+    ],
+  },
+  {
+    category: "current",
+    ranges: [
+      [1, 10],
+      [76, 79],
+    ],
+  },
+  { category: "corporate-free", ranges: [[86, 89]] },
+] as const;

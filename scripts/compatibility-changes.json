@@ -140,5 +140,297 @@
     "source": "PDF p.13",
     "before": "new",
     "after": "incoming-only"
+  },
+  {
+    "id": "hsbc",
+    "path": ["patterns", 0, "subjects"],
+    "operation": "add",
+    "source": "PDF p.10",
+    "after": [
+      {
+        "code": "021",
+        "category": "ordinary"
+      },
+      {
+        "code": "022",
+        "category": "ordinary"
+      },
+      {
+        "code": "023",
+        "category": "ordinary"
+      },
+      {
+        "code": "024",
+        "category": "ordinary"
+      },
+      {
+        "code": "025",
+        "category": "ordinary"
+      },
+      {
+        "code": "026",
+        "category": "ordinary"
+      },
+      {
+        "code": "027",
+        "category": "ordinary"
+      },
+      {
+        "code": "028",
+        "category": "ordinary"
+      },
+      {
+        "code": "029",
+        "category": "ordinary"
+      },
+      {
+        "code": "030",
+        "category": "ordinary"
+      },
+      {
+        "code": "296",
+        "category": "ordinary"
+      },
+      {
+        "code": "297",
+        "category": "ordinary"
+      },
+      {
+        "code": "711",
+        "category": "ordinary"
+      },
+      {
+        "code": "712",
+        "category": "ordinary"
+      },
+      {
+        "code": "783",
+        "category": "ordinary"
+      },
+      {
+        "code": "784",
+        "category": "ordinary"
+      },
+      {
+        "code": "900",
+        "category": "ordinary"
+      },
+      {
+        "code": "901",
+        "category": "ordinary"
+      },
+      {
+        "code": "902",
+        "category": "ordinary"
+      },
+      {
+        "code": "903",
+        "category": "ordinary"
+      },
+      {
+        "code": "985",
+        "category": "ordinary"
+      },
+      {
+        "code": "986",
+        "category": "ordinary"
+      },
+      {
+        "code": "987",
+        "category": "ordinary"
+      },
+      {
+        "code": "988",
+        "category": "ordinary"
+      },
+      {
+        "code": "989",
+        "category": "ordinary"
+      },
+      {
+        "code": "990",
+        "category": "ordinary"
+      },
+      {
+        "code": "991",
+        "category": "ordinary"
+      },
+      {
+        "code": "992",
+        "category": "ordinary"
+      },
+      {
+        "code": "993",
+        "category": "ordinary"
+      },
+      {
+        "code": "994",
+        "category": "ordinary"
+      },
+      {
+        "code": "066",
+        "category": "savings"
+      },
+      {
+        "code": "067",
+        "category": "savings"
+      },
+      {
+        "code": "068",
+        "category": "savings"
+      },
+      {
+        "code": "069",
+        "category": "savings"
+      },
+      {
+        "code": "072",
+        "category": "savings"
+      },
+      {
+        "code": "073",
+        "category": "savings"
+      },
+      {
+        "code": "083",
+        "category": "savings"
+      },
+      {
+        "code": "221",
+        "category": "savings"
+      },
+      {
+        "code": "222",
+        "category": "savings"
+      },
+      {
+        "code": "223",
+        "category": "savings"
+      },
+      {
+        "code": "306",
+        "category": "savings"
+      },
+      {
+        "code": "307",
+        "category": "savings"
+      },
+      {
+        "code": "407",
+        "category": "savings"
+      },
+      {
+        "code": "461",
+        "category": "savings"
+      },
+      {
+        "code": "462",
+        "category": "savings"
+      },
+      {
+        "code": "463",
+        "category": "savings"
+      },
+      {
+        "code": "464",
+        "category": "savings"
+      },
+      {
+        "code": "465",
+        "category": "savings"
+      },
+      {
+        "code": "702",
+        "category": "savings"
+      },
+      {
+        "code": "703",
+        "category": "savings"
+      },
+      {
+        "code": "863",
+        "category": "savings"
+      },
+      {
+        "code": "001",
+        "category": "current"
+      },
+      {
+        "code": "002",
+        "category": "current"
+      },
+      {
+        "code": "003",
+        "category": "current"
+      },
+      {
+        "code": "004",
+        "category": "current"
+      },
+      {
+        "code": "005",
+        "category": "current"
+      },
+      {
+        "code": "006",
+        "category": "current"
+      },
+      {
+        "code": "007",
+        "category": "current"
+      },
+      {
+        "code": "008",
+        "category": "current"
+      },
+      {
+        "code": "009",
+        "category": "current"
+      },
+      {
+        "code": "010",
+        "category": "current"
+      },
+      {
+        "code": "076",
+        "category": "current"
+      },
+      {
+        "code": "077",
+        "category": "current"
+      },
+      {
+        "code": "078",
+        "category": "current"
+      },
+      {
+        "code": "079",
+        "category": "current"
+      },
+      {
+        "code": "086",
+        "category": "corporate-free"
+      },
+      {
+        "code": "087",
+        "category": "corporate-free"
+      },
+      {
+        "code": "088",
+        "category": "corporate-free"
+      },
+      {
+        "code": "089",
+        "category": "corporate-free"
+      }
+    ]
+  },
+  {
+    "id": "hsbc",
+    "path": ["patterns", 0, "note"],
+    "operation": "replace",
+    "source": "PDF p.10",
+    "before": "서비스 미참가 — 메타데이터 only",
+    "after": "부가서비스 미참가"
   }
 ]
