@@ -110,6 +110,13 @@ try {
               const owner = baseline.institutions.find(i => i.patterns.includes(result.matchedPattern));
               const patternIndex = owner.patterns.indexOf(result.matchedPattern);
               expected.matchedPattern = expectedRegistry.find(i => i.id === owner.id).patterns[patternIndex];
+              if (result.subject) {
+                const subject = expected.matchedPattern.subjects?.find(s => s.code === result.subject.code);
+                assert(subject, "Missing reviewed subject " + result.subject.code);
+                expected.subject = json(baseline.normalizeSubject(subject, result.kind));
+                if (subject.allowsWithdrawal === false) expected.capabilities.allowsWithdrawal = false;
+              }
+
               return expected;
             };
             for (const input of [account, "3333-12-3456789", "1002-123-456789", "12345", "", "000000000000"]) {
