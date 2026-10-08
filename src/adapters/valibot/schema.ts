@@ -9,6 +9,7 @@ import {
   ACCOUNT_MIN_DIGITS,
   type DetectionPayload,
   digitCount,
+  isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
 } from "../shared";
@@ -65,7 +66,11 @@ export const detectionSchema: v.GenericSchema<DetectionPayload> = v.object({
       label: v.optional(v.string()),
     }),
   ),
-  score: v.pipe(v.number(), v.minValue(0)),
+  score: v.pipe(
+    v.number(),
+    v.minValue(0),
+    v.check((score) => isFiniteNumber(score), MESSAGES.finiteScore),
+  ),
   confidence: v.picklist(CONFIDENCE_LEVELS),
   formatted: v.string(),
   capabilities: v.object({

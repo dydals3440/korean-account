@@ -10,6 +10,7 @@ import {
   ACCOUNT_MIN_DIGITS,
   type DetectionPayload,
   digitCount,
+  isFiniteNumber,
   MESSAGES,
 } from "../shared";
 
@@ -65,7 +66,7 @@ export const detectionSchema: Type<DetectionPayload> = type({
     category: subjectCategorySchema,
     "label?": "string",
   },
-  score: "number >= 0",
+  score: type("number >= 0").narrow(isFiniteNumber),
   confidence: "'high' | 'medium' | 'low'",
   formatted: "string",
   capabilities: {

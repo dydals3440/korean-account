@@ -24,6 +24,7 @@ export const MESSAGES = {
   institution: "지원하지 않는 금융기관입니다.",
   accountKind: "지원하지 않는 계좌 종류입니다.",
   subjectCategory: "지원하지 않는 과목 분류입니다.",
+  finiteScore: "score 는 유한한 숫자여야 합니다.",
 } as const;
 
 /** Number of ASCII digits in the input (what the account rules count). */
@@ -55,4 +56,9 @@ export interface DetectionPayload {
     readonly virtual: boolean;
     readonly validatedCheckDigit: boolean | null;
   };
+}
+
+/** Internal finite-number guard shared by detection payload schemas. */
+export function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
 }

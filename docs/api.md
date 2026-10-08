@@ -436,3 +436,5 @@ accountSchema.parse("110-436-387740");
 `detectionSchema`는 직렬화용 `DetectionPayload`를 검사한다. `institution` 객체가 있는 `DetectionResult`를 그대로 전달하는 API가 아니다. `institutionId` 등 필요한 필드를 명시적으로 변환한다. 내장 기관 ID 스키마는 등록 ID만 허용한다.
 
 confidence는 계좌 실재·예금주·입력 완료 확률이 아니다. capability도 정적 규칙에 따른 안내이며 은행의 실제 자동이체 가능 여부를 보장하지 않는다. 상세 근거와 알려진 차이는 [PDF 대조 기록](./source-audit.md)에 있다.
+
+0.4의 `detectionSchema.score`는 모든 어댑터에서 유한한 0 이상 숫자다. `NaN`·양/음의 무한대는 거부하고 `-0`·`0`·소수는 허용한다. 다른 필드의 형변환·추가 키 처리·오류 표현까지 동일하다는 뜻은 아니다.

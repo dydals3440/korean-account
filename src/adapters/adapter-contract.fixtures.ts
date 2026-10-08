@@ -59,6 +59,7 @@ export const ADAPTER_CONTRACT = {
   detection: {
     valid: [
       baseDetection,
+      ...[-0, 0, 0.5, Number.MAX_VALUE].map((score) => ({ ...baseDetection, score })),
       {
         ...baseDetection,
         subject: { code: "110", category: "savings", label: "저축예금" },
@@ -78,6 +79,7 @@ export const ADAPTER_CONTRACT = {
       { ...baseDetection, kind: "weird" },
       { ...baseDetection, institutionId: "unknown" },
       { ...baseDetection, score: -1 },
+      ...[NaN, Infinity, -Infinity].map((score) => ({ ...baseDetection, score })),
       { ...baseDetection, score: "7" },
       { ...baseDetection, capabilities: undefined },
       {
