@@ -196,7 +196,13 @@ export const FIXTURES = [
     subjectCategory: "current",
   },
   {
-    input: "123-15-67890",
+    input: "123-15-67890-1",
+    id: "hana",
+    kind: "old",
+    subjectCategory: "other",
+  },
+  {
+    input: "123-16-123456789",
     id: "sc",
     kind: "virtual",
     subjectCategory: "ordinary",

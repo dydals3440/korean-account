@@ -13,7 +13,7 @@
 | 007  | 수협은행         | Suhyup Bank              | 11·12·14                 |
 | 011  | NH농협은행       | NongHyup Bank            | 11·12·13·14              |
 | 020  | 우리은행         | Woori Bank               | 11·12·13·14              |
-| 023  | SC제일은행       | SC First Bank            | 10·14                    |
+| 023  | SC제일은행       | SC First Bank            | 11·14                    |
 | 027  | 한국씨티은행     | Citibank Korea           | 10·11·12·13              |
 | 031  | iM뱅크           | iM Bank                  | 7·8·9·10·11·12·13·14     |
 | 032  | 부산은행         | Busan Bank               | 12·13                    |

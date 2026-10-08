@@ -12,7 +12,7 @@ export const sc = defineInstitution({
   userBaseMillions: 2,
   patterns: [
     {
-      template: T("XXX-XX-XXXXX"),
+      template: T("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -22,7 +22,7 @@ export const sc = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXX"),
+      template: T("XXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

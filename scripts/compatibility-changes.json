@@ -1,0 +1,18 @@
+[
+  {
+    "id": "sc",
+    "path": ["patterns", 0, "template"],
+    "operation": "replace",
+    "source": "PDF p.5",
+    "before": "XXX-XX-XXXXX",
+    "after": "XXX-XX-XXXXX-X"
+  },
+  {
+    "id": "sc",
+    "path": ["patterns", 1, "template"],
+    "operation": "replace",
+    "source": "PDF p.5",
+    "before": "XXX-XX-XXXXX",
+    "after": "XXX-XX-XXXXX-X"
+  }
+]

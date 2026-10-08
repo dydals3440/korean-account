@@ -1,6 +1,7 @@
 // Test the shipped artifact, not a rebuild against each consumer's peers.
 // An npm alias provides the last public release for API/type/behavior comparison.
 import assert from "node:assert/strict";
+import { applyRegistryChanges } from "./compatibility.mjs";
 import spawn from "cross-spawn";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -8,6 +9,9 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
+const registryChanges = JSON.parse(
+  readFileSync(join(root, "scripts/compatibility-changes.json"), "utf8"),
+);
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const typescript = process.env.CONSUMER_TYPESCRIPT ?? pkg.devDependencies.typescript;
 assert.match(typescript, /^\^?\d+\.\d+\.\d+$/);
@@ -86,6 +90,8 @@ try {
       const entries = ${JSON.stringify(entries)};
       const adapter = ${JSON.stringify(adapter)};
       const json = value => JSON.parse(JSON.stringify(value));
+      const applyRegistryChanges = ${applyRegistryChanges.toString()};
+      const registryChanges = ${JSON.stringify(registryChanges)};
       const account = "110-436-387740";
       for (const mode of ["import", "require"]) {
         const load = name => mode === "import" ? import(name) : require(name);
@@ -95,11 +101,21 @@ try {
           const keys = value => Object.keys(value).filter(key => key !== "__esModule").sort();
           assert.deepEqual(keys(current), keys(baseline), mode + entry + " exports");
           if (!entry) {
+            const expectedRegistry = applyRegistryChanges(json(baseline.institutions), registryChanges);
+            assert.deepEqual(json(current.institutions), expectedRegistry);
+            const expectedResult = result => {
+              if (result === null) return null;
+              const expected = json(result);
+              expected.institution = expectedRegistry.find(i => i.id === result.institution.id);
+              const owner = baseline.institutions.find(i => i.patterns.includes(result.matchedPattern));
+              const patternIndex = owner.patterns.indexOf(result.matchedPattern);
+              expected.matchedPattern = expectedRegistry.find(i => i.id === owner.id).patterns[patternIndex];
+              return expected;
+            };
             for (const input of [account, "3333-12-3456789", "1002-123-456789", "12345", "", "000000000000"]) {
-              assert.deepEqual(json(current.detect(input)), json(baseline.detect(input)));
-              assert.deepEqual(json(current.detectBest(input)), json(baseline.detectBest(input)));
+              assert.deepEqual(json(current.detect(input)), baseline.detect(input).map(expectedResult));
+              assert.deepEqual(json(current.detectBest(input)), expectedResult(baseline.detectBest(input)));
             }
-            assert.deepEqual(json(current.institutions), json(baseline.institutions));
             assert.equal(current.normalizeAccount(account), "110436387740");
             assert.equal(current.createDetector([current.kb, current.shinhan]).detect(account)[0]?.institution.id, "shinhan");
           } else {
@@ -117,6 +133,12 @@ try {
               detectionSchema: { institutionId: "shinhan", kind: "new", score: 14, confidence: "high", formatted: account,
                 capabilities: { allowsWithdrawal: true, virtual: false, validatedCheckDigit: null } },
             };
+            for (const score of [NaN, Infinity, -Infinity]) {
+              assert.equal(accepts(current.detectionSchema, { ...valid.detectionSchema, score }), false);
+            }
+            for (const score of [-0, 0, 0.5, Number.MAX_VALUE]) {
+              assert.equal(accepts(current.detectionSchema, { ...valid.detectionSchema, score }), true);
+            }
             for (const [name, value] of Object.entries(valid)) {
               assert.equal(accepts(current[name], value), true, mode + entry + name);
               for (const input of [value, undefined, null, 42, "invalid"]) {
@@ -207,7 +229,7 @@ try {
       run("npm", ["exec", "--", "tsc", "--project", "tsconfig.json"], cwd);
     }
     console.log(
-      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.1 compatible)`,
+      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.1 API compatible; reviewed 0.4 corrections)`,
     );
   }
 } finally {
