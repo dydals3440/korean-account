@@ -1,6 +1,6 @@
 # korean-account
 
-[English](https://github.com/dydals3440/korean-account/blob/main/README.en.md) · **한국어**
+[English](https://github.com/dydals3440/korean-account/blob/main/docs/README.en.md) · **한국어**
 
 한국 금융기관의 계좌번호 체계로 기관·과목 후보를 찾는 TypeScript 라이브러리입니다. 런타임 의존성 없이 ESM/CJS를 지원하며, 필요한 기관만 골라 사용할 수 있습니다.
 
@@ -34,7 +34,7 @@ console.log(result?.institution.nameKo); // "우리은행"
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/dydals3440/korean-account/main/showcase.gif" alt="계좌번호 입력에 따른 후보 표시 시연" width="400" />
+  <img src="https://raw.githubusercontent.com/dydals3440/korean-account/main/docs/assets/showcase.gif" alt="계좌번호 입력에 따른 후보 표시 시연" width="400" />
 </p>
 
 ## 기능과 한계
@@ -83,4 +83,4 @@ const custom = detector.extend({
 
 ## License
 
-[MIT](https://github.com/dydals3440/korean-account/blob/main/LICENSE). 포함된 외부 코드의 고지는 THIRD_PARTY_NOTICES를 참고합니다.
+[MIT](https://github.com/dydals3440/korean-account/blob/main/LICENSE). 포함된 외부 코드의 고지는 [THIRD_PARTY_NOTICES](https://github.com/dydals3440/korean-account/blob/main/THIRD_PARTY_NOTICES.md)를 참고합니다.
