@@ -1,7 +1,7 @@
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineInstitution } from "../../core/define-institution";
 
-export const jpmc = /* @__PURE__ */ defineInstitution({
+export const jpmc = defineInstitution({
   id: "jpmc",
   code: "057",
   nameKo: "JP모간체이스은행",

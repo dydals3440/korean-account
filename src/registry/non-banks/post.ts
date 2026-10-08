@@ -3,7 +3,7 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 import { expandTwoDigitRange } from "../expand-range";
 
-export const post = /* @__PURE__ */ defineInstitution({
+export const post = defineInstitution({
   id: "post",
   code: "071",
   aliasCodes: ["072", "073", "074", "075"],

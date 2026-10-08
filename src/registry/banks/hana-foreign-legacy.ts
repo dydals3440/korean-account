@@ -1,7 +1,7 @@
 import type { AdditionalRule } from "../../types";
 
 /** Historical augmentation, not enumerated or proven exclusive by the PDF. */
-export const HANA_FOREIGN_LEGACY_PREFIXES: ReadonlySet<string> = /* @__PURE__ */ new Set([
+export const HANA_FOREIGN_LEGACY_PREFIXES: ReadonlySet<string> = new Set([
   "117",
   "158",
   "161",

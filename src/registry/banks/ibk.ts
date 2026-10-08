@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const ibk = /* @__PURE__ */ defineInstitution({
+export const ibk = defineInstitution({
   id: "ibk",
   code: "003",
   aliasCodes: ["043"],

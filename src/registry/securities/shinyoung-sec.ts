@@ -1,7 +1,7 @@
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineInstitution } from "../../core/define-institution";
 
-export const shinyoungSec = /* @__PURE__ */ defineInstitution({
+export const shinyoungSec = defineInstitution({
   id: "shinyoung-sec",
   code: "291",
   nameKo: "신영증권",

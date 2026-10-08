@@ -1,7 +1,7 @@
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineInstitution } from "../../core/define-institution";
 
-export const nhInv = /* @__PURE__ */ defineInstitution({
+export const nhInv = defineInstitution({
   id: "nh-inv",
   code: "247",
   aliasCodes: ["289"],

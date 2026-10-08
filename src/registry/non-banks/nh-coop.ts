@@ -3,10 +3,10 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
 const nhCoopSubjectsNew = [
-  /* @__PURE__ */ defineSubject({ code: "351", category: "ordinary" }),
-  /* @__PURE__ */ defineSubject({ code: "352", category: "savings" }),
-  /* @__PURE__ */ defineSubject({ code: "356", category: "free-savings" }),
-  /* @__PURE__ */ defineSubject({ code: "355", category: "corporate-free" }),
+  defineSubject({ code: "351", category: "ordinary" }),
+  defineSubject({ code: "352", category: "savings" }),
+  defineSubject({ code: "356", category: "free-savings" }),
+  defineSubject({ code: "355", category: "corporate-free" }),
 ];
 
 // PDF p.4: the coop 13d scheme applies only when 계좌구분 (last digit) is 3–5
@@ -15,7 +15,7 @@ const nhCoopSubjectsNew = [
 const ACCOUNT_CLASS_3_TO_5 = (digits: string) =>
   digits[12] === "3" || digits[12] === "4" || digits[12] === "5";
 
-export const nhCoop = /* @__PURE__ */ defineInstitution({
+export const nhCoop = defineInstitution({
   id: "nh-coop",
   code: "012",
   aliasCodes: ["013", "014", "015", "017", "018"],

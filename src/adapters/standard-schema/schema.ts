@@ -77,9 +77,9 @@ export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = picklist
   MESSAGES.subjectCategory,
 );
 
-const CONFIDENCE_SET = /* @__PURE__ */ new Set<string>(CONFIDENCE_LEVELS);
-const KIND_SET = /* @__PURE__ */ new Set<string>(ACCOUNT_KINDS);
-const CATEGORY_SET = /* @__PURE__ */ new Set<string>(SUBJECT_CATEGORIES);
+const CONFIDENCE_SET = new Set<string>(CONFIDENCE_LEVELS);
+const KIND_SET = new Set<string>(ACCOUNT_KINDS);
+const CATEGORY_SET = new Set<string>(SUBJECT_CATEGORIES);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

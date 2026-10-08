@@ -3,7 +3,7 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 import { isHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
-export const hana = /* @__PURE__ */ defineInstitution({
+export const hana = defineInstitution({
   id: "hana",
   code: "005",
   // Historical library codes are preserved; the current PDF lists Hana Bank as 081.

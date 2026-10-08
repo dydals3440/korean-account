@@ -7,7 +7,7 @@ import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 // bank section. A separate institution from 270 Hana Securities (securities
 // category).
 
-export const hanaSecuritiesCma = /* @__PURE__ */ defineInstitution({
+export const hanaSecuritiesCma = defineInstitution({
   id: "hana-securities-cma",
   code: "081",
   nameKo: "하나증권 CMA",

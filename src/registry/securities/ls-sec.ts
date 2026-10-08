@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const lsSec = /* @__PURE__ */ defineInstitution({
+export const lsSec = defineInstitution({
   id: "ls-sec",
   code: "265",
   nameKo: "엘에스투자증권",

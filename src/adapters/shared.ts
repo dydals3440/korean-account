@@ -31,7 +31,7 @@ export function digitCount(value: string): number {
   return value.replace(/\D/g, "").length;
 }
 
-const ID_SET = /* @__PURE__ */ new Set<string>(INSTITUTION_IDS);
+const ID_SET = new Set<string>(INSTITUTION_IDS);
 
 /** Type guard over the registered institution-id literals. */
 export function isRegisteredInstitutionId(value: unknown): value is InstitutionId {

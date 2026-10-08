@@ -1,7 +1,7 @@
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineInstitution } from "../../core/define-institution";
 
-export const dbSec = /* @__PURE__ */ defineInstitution({
+export const dbSec = defineInstitution({
   id: "db-sec",
   code: "279",
   nameKo: "DB증권",

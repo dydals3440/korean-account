@@ -2,7 +2,7 @@ import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 
-export const forest = /* @__PURE__ */ defineInstitution({
+export const forest = defineInstitution({
   id: "forest",
   code: "064",
   nameKo: "산림조합중앙회",

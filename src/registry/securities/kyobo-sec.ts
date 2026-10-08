@@ -3,7 +3,7 @@ import { defineSubject } from "../../core/subjects";
 import { defineInstitution } from "../../core/define-institution";
 import { expandTwoDigitRange } from "../expand-range";
 
-export const kyoboSec = /* @__PURE__ */ defineInstitution({
+export const kyoboSec = defineInstitution({
   id: "kyobo-sec",
   code: "261",
   nameKo: "교보증권",
