@@ -86,5 +86,13 @@
     "source": "PDF p.1",
     "before": "treasury",
     "after": "savings"
+  },
+  {
+    "id": "gwangju",
+    "path": ["patterns", 2, "subjects", 1, "category"],
+    "operation": "replace",
+    "source": "PDF p.8",
+    "before": "treasury",
+    "after": "ordinary"
   }
 ]

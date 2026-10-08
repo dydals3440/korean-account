@@ -100,3 +100,12 @@ test("산업 010 — PDF p.1의 저축성 과목이며 기존 출금 flag는 유
   expect(result?.capabilities.allowsWithdrawal).toBe(true);
   expect(result?.score).toBe(14);
 });
+
+test("광주 — PDF p.8의 109는 13자리 보통예금·12자리 국고로 구분한다", () => {
+  const current = scoped("gwangju", "1109111111111");
+  const legacy = scoped("gwangju", "111109111111");
+  expect(current?.subject?.category).toBe("ordinary");
+  expect(current?.subject?.label).toBe("보통예금");
+  expect(legacy?.subject?.category).toBe("treasury");
+  expect(legacy?.subject?.label).toBe("국고");
+});
