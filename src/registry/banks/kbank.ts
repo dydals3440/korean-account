@@ -27,8 +27,8 @@ export const kbank = defineInstitution({
     },
     // PDF: 13 digits `serial(2)-phone(3-4-4)` — no specific prefix enumerated.
     {
-      template: T("XXX-XXX-XXXXXXX"),
-      kind: "new",
+      template: T("XX-XXX-XXXX-XXXX"),
+      kind: "incoming-only",
     },
     // branchRule: prefix 7/9 → easy-transfer virtual account, otherwise → loan (여신)
     {

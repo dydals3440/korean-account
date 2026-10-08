@@ -129,3 +129,11 @@ test.each([
   expect(result?.capabilities.virtual).toBe(false);
   expect(result?.score).toBe(14);
 });
+
+test("케이뱅크 13자리 — PDF p.13의 전화번호 연결 형식과 입금전용", () => {
+  const result = scoped("kbank", "0010123456789");
+  expect(result?.formatted).toBe("00-101-2345-6789");
+  expect(result?.kind).toBe("incoming-only");
+  expect(result?.capabilities.allowsWithdrawal).toBe(false);
+  expect(result?.capabilities.virtual).toBe(false);
+});

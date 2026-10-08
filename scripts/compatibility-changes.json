@@ -124,5 +124,21 @@
     "operation": "add",
     "source": "PDF p.9 footnote",
     "after": false
+  },
+  {
+    "id": "kbank",
+    "path": ["patterns", 2, "template"],
+    "operation": "replace",
+    "source": "PDF p.13",
+    "before": "XXX-XXX-XXXXXXX",
+    "after": "XX-XXX-XXXX-XXXX"
+  },
+  {
+    "id": "kbank",
+    "path": ["patterns", 2, "kind"],
+    "operation": "replace",
+    "source": "PDF p.13",
+    "before": "new",
+    "after": "incoming-only"
   }
 ]
