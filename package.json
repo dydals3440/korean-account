@@ -156,7 +156,7 @@
     "@vitest/coverage-v8": "^5.0.2",
     "arktype": "^2.2.5",
     "cross-spawn": "^7.0.6",
-    "oxfmt": "^0.70.0",
+    "oxfmt": "^0.71.0",
     "oxlint": "^1.85.0",
     "publint": "^0.3.24",
     "size-limit": "^14.1.0",
