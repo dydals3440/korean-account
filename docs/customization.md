@@ -381,3 +381,5 @@ import { z } from "zod";
 const configuredIds = new Set(["my-bank", "shinhan"]);
 const customInstitutionIdSchema = z.string().refine((id) => configuredIds.has(id));
 ```
+
+0.4부터 `include`·`exclude`·`categories`는 분기 후 최종 기관을 기준으로 적용한다. 최초 기관이 포함 목록 밖이어도 최종 기관이 일치하면 후보가 유지된다. 포함·제외가 겹치면 제외가 우선한다.
