@@ -78,3 +78,17 @@ describe("교보 — PDF p.16·20", () => {
     },
   );
 });
+
+describe("신한 통합 14자리 — PDF p.12", () => {
+  test.each(["560", "561", "562"])("%s의 901 예외와 별도 구계좌 보존", (prefix) => {
+    for (const accountType of ["900", "902"]) {
+      const result = scoped("shinhan", prefix + accountType + "11111111");
+      expect(result?.matchedPattern).toBe(getInstitution("shinhan").patterns[1]);
+      expect(result?.subject?.code).toBe(prefix);
+      expect(result?.score).toBe(9);
+    }
+    const legacy = scoped("shinhan", prefix + "90111111111");
+    expect(legacy?.matchedPattern).toBe(getInstitution("shinhan").patterns[6]);
+    expect(legacy?.subject?.code).toBe("901");
+  });
+});

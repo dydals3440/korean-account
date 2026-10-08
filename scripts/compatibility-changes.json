@@ -71,5 +71,12 @@
     "operation": "add",
     "source": "PDF p.16,20",
     "after": [null]
+  },
+  {
+    "id": "shinhan",
+    "path": ["patterns", 1, "additionalRules"],
+    "operation": "add",
+    "source": "PDF p.12",
+    "after": [null]
   }
 ]

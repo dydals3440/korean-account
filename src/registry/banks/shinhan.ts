@@ -152,6 +152,7 @@ export const shinhan = defineInstitution({
     {
       template: T("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
+      additionalRules: [(digits) => digits.slice(3, 6) !== "901"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
         // PDF p.12: 560/561 are ○×○× (withdrawal transfer unavailable);
