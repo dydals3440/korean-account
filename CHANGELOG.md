@@ -2,6 +2,10 @@
 
 ## 0.4.0
 
+공개 함수·export·Node/peer 지원 범위는 유지하며, 검출 결과와 패키지 파일 구성이 달라지는 minor 릴리스입니다. 업데이트 전 [마이그레이션 안내](https://github.com/dydals3440/korean-account/blob/v0.4.0/docs/migration.md)를 확인해주세요. PDF 정정의 근거와 유지한 호환 정책은 [대조 기록](https://github.com/dydals3440/korean-account/blob/v0.4.0/docs/source-audit.md)에 정리했습니다.
+
+관련 PR: #72, #73, #74, #75, #76, #77, #78.
+
 ### Minor Changes
 
 - 04dcc06: 기관 분기 후 최종 반환 기관에 include·exclude·categories를 적용합니다. 기존 수협 등의 결과가 필터 밖 기관으로 새던 동작을 수정하며, 같은 기관으로 분기한 중복 후보는 보존합니다. 포함·제외가 겹치면 제외가 우선합니다. 0.3의 후보 목록에 의존하는 소비자는 필터 결과를 다시 확인해주세요.
