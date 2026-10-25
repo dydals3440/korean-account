@@ -35,7 +35,7 @@ jobs:
           package-manager-cache: false
 
       - name: Setup npm
-        run: npm install --global npm@12.1.0
+        run: npm install --global npm@12.2.1
 
       - name: Report tool versions
         run: |
