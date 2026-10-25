@@ -48,3 +48,9 @@ updates:
       - dependency-name: zod
         update-types:
           - version-update:semver-major
+      # tsdown 0.23.2+ fails `pnpm build` with TypeScript 7 ("classic TypeScript
+      # API required"). Ignoring it keeps the grouped PR green. Remove this entry
+      # once tsdown supports TS 7 or the tsconfig enables isolatedDeclarations.
+      - dependency-name: tsdown
+        versions:
+          - ">= 0.23.2"
