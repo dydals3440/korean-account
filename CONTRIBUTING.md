@@ -1,6 +1,6 @@
 # Contributing
 
-개발·빌드: Node 24.21.0 LTS (`.nvmrc`) / pnpm 12.6.0 (`packageManager`).
+개발·빌드: Node 24.22.2 LTS (`.nvmrc`) / pnpm 12.18.0 (`packageManager`).
 라이브러리 사용자의 런타임 하한은 Node 22.12.0이며, 개발 도구 버전과 별개다.
 
 ## 셋업
@@ -65,7 +65,7 @@ pnpm check:consumer # 실제 tarball + peer 최소/최신 버전 + 0.3.1 공개 
 배포는 npm Trusted Publishing(OIDC)을 사용한다. npm의 `korean-account` 설정에
 GitHub `dydals3440/korean-account`, workflow `release.yml`, 직접 게시 권한이 연결되어 있다.
 `NPM_TOKEN`을 발급·갱신할 필요가 없다. workflow 이름을 바꿀 때는 npm 연결도 함께 변경한다.
-배포 도구는 Node 24.21.0 / pnpm 12.6.0 / npm 12.1.0이며, pnpm의 native publish가 OIDC 인증을 처리한다.
+배포 도구는 Node 24.22.2 / pnpm 12.18.0 / npm 12.2.2이며, pnpm의 native publish가 OIDC 인증을 처리한다.
 
 실패 시 원인을 수정한 뒤 main에서 Release workflow를 수동 실행할 수 있다.
 재시도 전 npm에 해당 버전이 이미 올라갔는지 확인한다. 게시된 버전은 덮어쓰지 않는다.
