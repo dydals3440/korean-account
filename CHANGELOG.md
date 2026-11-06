@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- b3293e2: arktype 2.1.0 등 peer 범위의 하위 버전에서 institutionIdSchema의 오류가 한국어 메시지 대신 `$ark.message`로 표시되던 문제를 수정합니다. 수락·거부 판정과 공개 타입은 바뀌지 않습니다.
+
 ## 0.4.0
 
 공개 함수·export·Node/peer 지원 범위는 유지하며, 검출 결과와 패키지 파일 구성이 달라지는 minor 릴리스입니다. 업데이트 전 [마이그레이션 안내](https://github.com/dydals3440/korean-account/blob/v0.4.0/docs/migration.md)를 확인해주세요. PDF 정정의 근거와 유지한 호환 정책은 [대조 기록](https://github.com/dydals3440/korean-account/blob/v0.4.0/docs/source-audit.md)에 정리했습니다.
