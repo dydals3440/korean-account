@@ -49,7 +49,7 @@ export const accountSchema: Type<string> = type("string").narrow((value, ctx) =>
 /** Schema accepting only registered institution ids. */
 export const institutionIdSchema: Type<InstitutionId> = type
   .enumerated(...INSTITUTION_IDS)
-  .configure({ message: () => MESSAGES.institution });
+  .configure({ message: MESSAGES.institution });
 
 /** Account kind schema. */
 export const accountKindSchema: Type<AccountKind> = type.enumerated(...ACCOUNT_KINDS);
