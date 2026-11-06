@@ -146,6 +146,10 @@ try {
             for (const score of [-0, 0, 0.5, Number.MAX_VALUE]) {
               assert.equal(accepts(current.detectionSchema, { ...valid.detectionSchema, score }), true);
             }
+            if (lib === "arktype") {
+              // A function-valued message is not resolved below arktype 2.1.20: it renders "$ark.message".
+              assert.equal(String(current.institutionIdSchema("unknown")), "지원하지 않는 금융기관입니다.");
+            }
             for (const [name, value] of Object.entries(valid)) {
               assert.equal(accepts(current[name], value), true, mode + entry + name);
               for (const input of [value, undefined, null, 42, "invalid"]) {
