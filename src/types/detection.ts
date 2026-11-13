@@ -1,6 +1,12 @@
 import type { CONFIDENCE_LEVELS } from "../constants";
 import type { Institution, InstitutionCategory, InstitutionIdInput } from "./institution";
-import type { AccountKind, AccountPattern, CmsServices, Subject, SubjectCategory } from "./pattern";
+import type {
+  AccountKind,
+  AccountPattern,
+  CmsServices,
+  ResolvedSubject,
+  SubjectCategory,
+} from "./pattern";
 
 /** Confidence band derived from the score. */
 export type Confidence = (typeof CONFIDENCE_LEVELS)[number];
@@ -30,7 +36,7 @@ export interface DetectionResult<TInstitution extends Institution = Institution>
   readonly institution: TInstitution;
   readonly matchedPattern: AccountPattern;
   readonly kind: AccountKind;
-  readonly subject?: Subject;
+  readonly subject?: ResolvedSubject;
   /** Input digits grouped by the matched template. */
   readonly formatted: string;
   readonly score: number;
@@ -129,7 +135,7 @@ export interface Detector<TInstitution extends Institution = Institution> {
     options?: DetectOptions<TInstitution["id"]>,
   ): readonly DetectionResult<TInstitution>[];
   /** Returns a new detector with extra institutions, rules, weights or verifiers. */
-  extend<TExtra extends Institution>(
+  extend<TExtra extends Institution = never>(
     options: ExtendDetectorOptions<TInstitution, TExtra>,
   ): Detector<TInstitution | TExtra>;
   /** Returns a new detector without the institutions matching an id or predicate. */

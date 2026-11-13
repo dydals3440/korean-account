@@ -49,16 +49,26 @@ export interface Subject {
   readonly code: string;
   readonly category: SubjectCategory;
   /** Display label. Defaults to the category label. */
-  readonly label?: string;
+  readonly label?: string | undefined;
   /** Overrides whether direct debit is allowed for this subject. */
-  readonly allowsWithdrawal?: boolean;
+  readonly allowsWithdrawal?: boolean | undefined;
   /** Per-code exceptions to the pattern's `services`, e.g. "(91,92 불가)". */
-  readonly services?: Partial<CmsServices>;
+  readonly services?: { readonly [TService in CmsService]?: boolean | undefined } | undefined;
   /** Marks a virtual-account subject. */
-  readonly virtual?: boolean;
+  readonly virtual?: boolean | undefined;
   /** ISO date the subject took effect. */
-  readonly effectiveFrom?: string;
-  readonly note?: string;
+  readonly effectiveFrom?: string | undefined;
+  readonly note?: string | undefined;
+}
+
+/** A {@link Subject} as it appears in a detection result, with every default filled in. */
+export interface ResolvedSubject extends Subject {
+  /** The subject label, or the category label when the registry gives none. */
+  readonly label: string;
+  /** Whether direct debit is allowed for this subject. */
+  readonly allowsWithdrawal: boolean;
+  /** Whether this subject marks a virtual account. */
+  readonly virtual: boolean;
 }
 
 /** Gate-and-score predicate over normalized digits. */
@@ -67,16 +77,16 @@ export type AdditionalRule = (digits: string) => boolean;
 /** Adjustment produced by a {@link BranchRule}. */
 export interface BranchRuleResult {
   /** Reroutes the result to another institution id. */
-  readonly institutionId?: string;
+  readonly institutionId?: string | undefined;
   /** Replaces the matched pattern's kind. */
-  readonly kindOverride?: AccountKind;
+  readonly kindOverride?: AccountKind | undefined;
   /** Replaces `capabilities.virtual`. */
-  readonly virtualOverride?: boolean;
+  readonly virtualOverride?: boolean | undefined;
   /**
    * Marks an "otherwise" branch. Its condition proves nothing, so it neither counts as
    * evidence nor earns the branch bonus.
    */
-  readonly isFallback?: boolean;
+  readonly isFallback?: boolean | undefined;
 }
 
 /** Digit-based rule that reroutes or reclassifies a match, e.g. the Suhyup bank/coop split. */
@@ -91,24 +101,24 @@ export interface BranchRule {
 export interface AccountPattern {
   readonly template: PatternTemplate;
   readonly kind: AccountKind;
-  readonly identifierPosition?: DigitSpan;
-  readonly identifiers?: readonly string[];
-  readonly identifierRange?: { readonly from: number; readonly to: number };
-  readonly subjectPosition?: DigitSpan;
-  readonly subjects?: readonly Subject[];
+  readonly identifierPosition?: DigitSpan | undefined;
+  readonly identifiers?: readonly string[] | undefined;
+  readonly identifierRange?: { readonly from: number; readonly to: number } | undefined;
+  readonly subjectPosition?: DigitSpan | undefined;
+  readonly subjects?: readonly Subject[] | undefined;
   /** @deprecated Unused. A registered `CheckDigitVerifier` knows its own digit positions. */
-  readonly checkDigitPosition?: DigitSpan;
+  readonly checkDigitPosition?: DigitSpan | undefined;
   /** Service availability printed for this format; drives `capabilities.allowsWithdrawal`. */
-  readonly services?: CmsServices;
+  readonly services?: CmsServices | undefined;
   /** `false` skips any registered check-digit verifier for this pattern. */
-  readonly validatesCheckDigit?: boolean;
-  readonly branchRule?: BranchRule;
+  readonly validatesCheckDigit?: boolean | undefined;
+  readonly branchRule?: BranchRule | undefined;
   /**
    * Rules that must all pass for exact or ±1-length input; each adds the rule bonus.
    * Shorter partial input skips them.
    */
-  readonly additionalRules?: readonly AdditionalRule[];
+  readonly additionalRules?: readonly AdditionalRule[] | undefined;
   /** ISO date the format took effect. */
-  readonly effectiveFrom?: string;
-  readonly note?: string;
+  readonly effectiveFrom?: string | undefined;
+  readonly note?: string | undefined;
 }

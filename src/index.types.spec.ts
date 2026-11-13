@@ -18,6 +18,7 @@ import type {
   ExtendDetectorOptions,
   GlobalRule,
   Institution,
+  ResolvedSubject,
   InstitutionCategory,
   InstitutionCode,
   InstitutionId,
@@ -70,9 +71,10 @@ type PublicTypeSurface = [
   Subject,
   SubjectCategory,
   DetectionPayload,
+  ResolvedSubject,
 ];
 
-test("공개 타입 export 32개가 모두 존재한다", () => {
+test("공개 타입 export 33개가 모두 존재한다", () => {
   // Given
   type Surface = PublicTypeSurface;
 
@@ -80,5 +82,19 @@ test("공개 타입 export 32개가 모두 존재한다", () => {
   type ExportCount = Surface["length"];
 
   // Then
-  expectTypeOf<ExportCount>().toEqualTypeOf<32>();
+  expectTypeOf<ExportCount>().toEqualTypeOf<33>();
+});
+
+test("DetectionResult.subject 는 기본값이 채워진 ResolvedSubject 다", () => {
+  // Given
+  type DetectedSubject = NonNullable<DetectionResult["subject"]>;
+
+  // When
+  type Label = DetectedSubject["label"];
+  type AllowsWithdrawal = DetectedSubject["allowsWithdrawal"];
+
+  // Then
+  expectTypeOf<DetectedSubject>().toEqualTypeOf<ResolvedSubject>();
+  expectTypeOf<Label>().toEqualTypeOf<string>();
+  expectTypeOf<AllowsWithdrawal>().toEqualTypeOf<boolean>();
 });

@@ -23,6 +23,7 @@ export type {
   DigitSpan,
   PatternTemplate,
   PatternToken,
+  ResolvedSubject,
   Subject,
   SubjectCategory,
 } from "./pattern";

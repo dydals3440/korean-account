@@ -18,22 +18,22 @@ export interface Institution<
   /** Representative CMS participant code. */
   readonly code: TCode;
   /** Interbank code when it differs from `code`, e.g. Hana keeps `code: "005"` with `commonCode: "081"`. */
-  readonly commonCode?: string;
+  readonly commonCode?: string | undefined;
   /** Additional CMS participant codes. */
-  readonly aliasCodes?: readonly string[];
+  readonly aliasCodes?: readonly string[] | undefined;
   readonly nameKo: string;
-  readonly nameEn?: string;
+  readonly nameEn?: string | undefined;
   readonly category: TCategory;
   /** Search aliases such as short or former names. */
   readonly aliases: readonly string[];
   /** Retail customers in millions; feeds the tie-break prior, never the score. */
-  readonly userBaseMillions?: number;
+  readonly userBaseMillions?: number | undefined;
   /** Explicit tie-break prior that replaces the computed prevalence. */
-  readonly priority?: number;
+  readonly priority?: number | undefined;
   readonly patterns: readonly AccountPattern[];
   /** Ids of institutions merged into this one. */
-  readonly successorOf?: readonly string[];
-  readonly notes?: string;
+  readonly successorOf?: readonly string[] | undefined;
+  readonly notes?: string | undefined;
 }
 
 /** Institution id that autocompletes known literals but still accepts any string. */

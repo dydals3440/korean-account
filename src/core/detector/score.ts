@@ -188,7 +188,7 @@ function scoreIdentifier(
   }
 
   const identifier = extractIdentifier(digits, pattern);
-  if (!isIdentifierMatch(identifier, pattern, lookup)) {
+  if (identifier === null || !isIdentifierMatch(identifier, pattern, lookup)) {
     return NO_CODE_MATCH;
   }
   return {
@@ -227,10 +227,6 @@ function isIdentifierMatch(
   pattern: AccountPattern,
   lookup: PatternLookup,
 ): boolean {
-  const expectedLength = pattern.identifierPosition?.length ?? 0;
-  if (identifier.length === 0 || identifier.length < expectedLength) {
-    return false;
-  }
   if (lookup.identifiers.has(identifier)) {
     return true;
   }
