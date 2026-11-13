@@ -232,7 +232,7 @@ detector는 넘겨받은 기관 객체를 복사하거나 동결하지 않습니
 | 필드             | 타입                            | 설명                                                                                                      |
 | ---------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `institution`    | `TInstitution`                  | 후보 기관. 분기 규칙이 재배정했으면 재배정된 기관                                                         |
-| `matchedPattern` | `AccountPattern`                | 일치한 패턴. 재배정됐으면 원래 기관의 패턴이고, 점수가 같으면 먼저 선언된 패턴                            |
+| `matchedPattern` | `AccountPattern`                | 일치한 패턴. 재배정됐으면 원래 기관의 패턴입니다. 근거 있는 등급 → 점수 → 선언 순서로 고릅니다            |
 | `kind`           | `AccountKind`                   | 분기 규칙의 `kindOverride`, 없으면 `matchedPattern.kind`                                                  |
 | `subject`        | `ResolvedSubject` (선택)        | 과목 코드가 일치할 때만 있음. 없으면 키 자체가 없음                                                       |
 | `formatted`      | `string`                        | `matchedPattern.template`대로 묶은 입력. 짧은 입력은 마지막 숫자에서 끝나고, 넘치는 숫자는 묶지 않고 붙음 |
@@ -744,12 +744,12 @@ function extractIdentifier(
 ): string | null;
 ```
 
-`identifierPosition`의 숫자를 잘라 반환합니다. `identifiers`와 비교하지는 않습니다. 입력이 구간 중간에서 끝나면 입력된 부분까지 반환하고, 패턴에 `identifierPosition`이 없거나 입력이 구간 시작 전에 끝나면 `null`입니다.
+`identifierPosition`의 숫자를 잘라 반환합니다. `identifiers`와 비교하지는 않습니다. 패턴에 `identifierPosition`이 없거나 입력이 구간을 다 채우지 못하면 `extractSubject`처럼 `null`입니다.
 
 ```ts
 const pattern = { identifierPosition: { start: 0, length: 4 } };
 extractIdentifier("3333123456789", pattern); // => "3333"
-extractIdentifier("33", pattern); // => "33"
+extractIdentifier("333", pattern); // => null (구간이 아직 다 채워지지 않음)
 extractIdentifier("", pattern); // => null
 ```
 
@@ -844,14 +844,15 @@ if (best) payloadSchema.parse(toDetectionPayload(best)).institutionId; // => "sh
 
 ### 어댑터별 차이
 
-| 어댑터            | 스키마 타입               | `accountSchema` 오류 보고                                       | `detectionSchema`의 알 수 없는 키 |
-| ----------------- | ------------------------- | --------------------------------------------------------------- | --------------------------------- |
-| `standard-schema` | `StandardSchemaV1<T>`     | 첫 오류 하나. `validate`는 동기 함수                            | 유지                              |
-| `zod`             | `ZodString`, `ZodType<T>` | 실패한 규칙 전부(규칙 순서, `issues[0]`이 가장 앞 규칙)         | 제거                              |
-| `valibot`         | `v.GenericSchema<T>`      | 실패한 규칙 전부(규칙 순서)                                     | 제거                              |
-| `yup`             | `Schema<T>`               | 첫 오류 하나(`abortEarly: false`면 전부). strict라 형변환 안 함 | 유지                              |
-| `arktype`         | `Type<T>`                 | 첫 오류 하나. 중첩해도 메시지 앞에 키가 붙지 않음               | 유지                              |
+| 어댑터            | 스키마 타입               | `accountSchema` 오류 보고                                       | 비고                                            |
+| ----------------- | ------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| `standard-schema` | `StandardSchemaV1<T>`     | 첫 오류 하나. `validate`는 동기 함수                            | 모든 필드 오류를 `path`와 함께 한 번에 보고     |
+| `zod`             | `ZodString`, `ZodType<T>` | 실패한 규칙 전부(규칙 순서, `issues[0]`이 가장 앞 규칙)         |                                                 |
+| `valibot`         | `v.GenericSchema<T>`      | 실패한 규칙 전부(규칙 순서)                                     |                                                 |
+| `yup`             | `Schema<T>`               | 첫 오류 하나(`abortEarly: false`면 전부). strict라 형변환 안 함 | `strict: true`로 검증하면 키 정리 변환을 건너뜀 |
+| `arktype`         | `Type<T>`                 | 첫 오류 하나. 중첩해도 메시지 앞에 키가 붙지 않음               |                                                 |
 
+- `detectionSchema`는 다섯 어댑터 모두 `DetectionPayload` 밖의 키를 모든 단계에서 지우고, 선택 필드에 명시한 `undefined`를 받습니다. 문자열이 아니거나 `null`인 리터럴 값은 라이브러리 메시지(`MESSAGES`)로 거부합니다.
 - zod의 `accountSchema`는 `ZodString`이므로 zod 3·4 모두 `z.input`·`z.infer`가 `string`입니다. 다른 zod 스키마의 타입은 `z.infer`로 읽습니다(zod 4의 `z.input`은 `unknown`).
 - zod 3.23은 Standard Schema를 구현하지 않습니다. Standard Schema를 받는 라이브러리(TanStack Form 등)에는 `korean-account/standard-schema`를 씁니다.
 - 각 어댑터의 추론 타입은 peer 하한 버전과 최신 버전에서 `pnpm check:consumer`가 검사합니다.

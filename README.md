@@ -38,7 +38,7 @@ detectBest("3333-12-3456789");
 - **모호성 표시**: 같은 신뢰도에 다른 기관이 있으면 `ambiguous: true`입니다. 그대로 확정하지 말고 사용자에게 고르게 하세요.
 - **PDF 서비스 열**: 가상계좌 발급·출금이체·입금이체·부가서비스 가능 여부를 `capabilities.services`로 돌려줍니다.
 - **타입 안전**: 기관 ID가 리터럴 유니온으로 좁혀지고, 기관을 골라 만든 detector는 결과 타입도 그 기관들로 좁혀집니다.
-- **작은 번들**: 전체 레지스트리는 11.6 kB이고, `createDetector([kb, shinhan, toss])`처럼 고르면 4.2 kB입니다(minify + brotli).
+- **작은 번들**: 전체 레지스트리는 11.8 kB이고, `createDetector([kb, shinhan, toss])`처럼 고르면 4.4 kB입니다(minify + brotli).
 - **검증 어댑터**: Standard Schema(의존성 없음), Zod 3·4, Valibot, Yup, ArkType용 스키마를 같은 규칙으로 제공합니다.
 
 ## 설치

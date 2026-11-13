@@ -22,7 +22,7 @@ Korean transfer and direct-debit forms ask the user to pick a bank next to the a
 - **Ambiguity flag**: `ambiguous: true` when another institution sits in the same confidence band, so you know to ask the user.
 - **KFTC service columns**: virtual-account issuance, direct debit, direct credit and additional services via `capabilities.services`.
 - **Type-safe**: institution ids are literal unions, and a detector built from a subset narrows its result types to that subset.
-- **Small**: 11.6 kB for the full registry, 4.2 kB for `createDetector([kb, shinhan, toss])` (minified + brotli).
+- **Small**: 11.8 kB for the full registry, 4.4 kB for `createDetector([kb, shinhan, toss])` (minified + brotli).
 - **Validation adapters**: Standard Schema (no dependency), Zod 3/4, Valibot, Yup and ArkType, all with the same rules.
 
 ## Install
