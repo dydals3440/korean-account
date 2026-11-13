@@ -8,6 +8,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 3
     commit-message:
       prefix: "ci(deps)"
     labels:
@@ -24,6 +26,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 3
     versioning-strategy: increase-if-necessary
     commit-message:
       prefix: "build(deps)"

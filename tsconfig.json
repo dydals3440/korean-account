@@ -18,6 +18,6 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["src/**/*", "tsdown.config.ts", "vitest.config.ts"],
+  "include": ["src/**/*", "*.config.ts"],
   "exclude": ["node_modules", "dist", "coverage"]
 }
