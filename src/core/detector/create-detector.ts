@@ -34,17 +34,55 @@ interface DetectorConfig {
 }
 
 /**
- * Creates an immutable detector over the given institutions.
- * Results narrow `institution.id` to the ids you pass in.
+ * Returns an immutable detector that infers account candidates from the given institutions.
  *
- * @throws {RangeError} When a `scoring` weight is not a finite number ≥ 0.
+ * Prefer it over the built-in `detect` when bundle size or behaviour matters: passing only the
+ * institutions you support, e.g. `createDetector([kb, shinhan])`, lets bundlers drop the rest
+ * of the registry, and results narrow `institution.id` to the ids passed in. Institutions and
+ * weights are indexed once here, so create the detector at module scope and reuse it.
+ *
+ * `detector.detect(input, options)` works like the built-in `detect` over this list: input is
+ * normalized, candidates come back ranked (an empty array when nothing matches) with
+ * `confidence` (`"high"` at score ≥ 7, `"medium"` at ≥ 4, else `"low"`; always `"low"` without
+ * identifier, subject or non-fallback branch evidence) and `ambiguous` (another institution sits
+ * in the same band, so ask the user). Results are hints, not proof that an account exists: let
+ * the user confirm the institution, then verify it with a paid account-holder lookup API.
+ * `extend` and `remove` return new detectors and leave this one unchanged.
+ *
+ * @typeParam TInstitution - Inferred from `institutions`; registry constants and
+ *   {@link defineInstitution} results keep their literal ids.
+ * @param institutions - Institutions to detect. Treat them as read-only afterwards.
+ * @param options - Detector-wide settings; omitted or `undefined` fields use the defaults.
+ *   `scoring` overrides individual weights. Each `globalRules` entry that passes for a matched
+ *   institution adds `scoring.globalRule` points. `checkDigitVerifiers` maps an institution id to
+ *   a verifier over normalized digits; its outcome is `capabilities.validatedCheckDigit`, which
+ *   is `null` when no verifier applies. None are built in, as the algorithms are not published.
+ * @returns A detector exposing `institutions`, `detect`, `extend` and `remove`.
+ * @throws {RangeError} When a `scoring` weight is not a finite number ≥ 0. The returned
+ *   `detect` throws like the built-in one for an invalid `limit` or `minScore`.
  * @example Only the institutions you ship
- * const detector = createDetector([kb, shinhan, toss]);
- * detector.detect("110-436-387740")[0]?.institution.id; // "shinhan"
+ * import { createDetector, kb, shinhan, toss } from "korean-account";
  *
- * @example Custom weights and institutions
- * const custom = createDetector(institutions, { scoring: { identifierMatch: 6 } })
- *   .extend({ institutions: [myInstitution] });
+ * const detector = createDetector([kb, shinhan, toss]);
+ * detector.detect("110-436-387740")[0]?.institution.id;
+ * // => "shinhan" (typed as "kb" | "shinhan" | "toss")
+ *
+ * @example Tuning the full registry
+ * const detector = createDetector(institutions, { scoring: { identifierMatch: 6 } }).remove(
+ *   (institution) => institution.category === "securities",
+ * );
+ * detector.detect("110-436-387740").map((result) => [result.institution.id, result.score]);
+ * // => [["shinhan", 11], ["post", 11], ["shinhyup", 11]]
+ *
+ * @example Adding a custom institution and check-digit verifier
+ * const detector = createDetector([shinhan]).extend({
+ *   institutions: [myBank], // from defineInstitution
+ *   checkDigitVerifiers: { "my-bank": verifyMyBankCheckDigit },
+ * });
+ * detector.detect("999-123-456789")[0]?.capabilities.validatedCheckDigit;
+ * // => verifyMyBankCheckDigit("999123456789")
+ * @see {@link defineInstitution} for custom institutions and patterns.
+ * @see {@link toDetectionPayload} to serialize a result.
  */
 export function createDetector<TInstitution extends Institution>(
   institutions: readonly TInstitution[],

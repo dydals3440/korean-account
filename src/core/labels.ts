@@ -1,6 +1,12 @@
 import type { AccountKind, SubjectCategory } from "../types";
 
-/** Korean display names per subject category. */
+/**
+ * Korean display label per `SubjectCategory`; the default for `Subject.label`.
+ *
+ * @example
+ * subjectCategoryLabels.ordinary; // "보통예금"
+ * subjectCategoryLabels["corporate-free"]; // "기업자유"
+ */
 export const subjectCategoryLabels = {
   ordinary: "보통예금",
   treasury: "국고",
@@ -17,7 +23,13 @@ export const subjectCategoryLabels = {
   other: "기타",
 } as const satisfies Record<SubjectCategory, string>;
 
-/** Korean display names per account kind. */
+/**
+ * Korean display label per `AccountKind`.
+ *
+ * @example
+ * const best = detectBest("1712-3456-7890");
+ * best && accountKindLabels[best.kind]; // "가상계좌"
+ */
 export const accountKindLabels = {
   new: "신계좌",
   old: "구계좌",
