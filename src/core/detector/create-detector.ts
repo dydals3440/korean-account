@@ -16,7 +16,7 @@ import { resolveCapabilities, toVerifierMap, verifyCheckDigit } from "./capabili
 import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
 import { normalizeSubject } from "./normalize-subject";
-import { type RankableDetection, rankDetections } from "./rank";
+import { type BandMember, type RankableDetection, rankDetections } from "./rank";
 import { resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
 import { scoreInstitution } from "./score";
 
@@ -63,15 +63,16 @@ function buildDetector<TInstitution extends Institution>(
     input: string,
     options: DetectOptions<TInstitution["id"]> = {},
   ): readonly DetectionResult<TInstitution>[] => {
+    const limit = resolveLimit(options.limit);
+    const minScore = resolveMinScore(options.minScore);
+    const isRequested = createInstitutionFilter<TInstitution>(options);
     const digits = normalizeAccount(input);
     if (digits.length === 0) {
       return [];
     }
 
-    const limit = resolveLimit(options.limit);
-    const minScore = resolveMinScore(options.minScore);
-    const isRequested = createInstitutionFilter<TInstitution>(options);
     const candidates: RankableDetection<TInstitution>[] = [];
+    const bandMembers: BandMember[] = [];
 
     for (const candidate of lengthIndex.candidatesNear(digits.length)) {
       const match = scoreInstitution(digits, candidate, config.globalRules, weights);
@@ -85,6 +86,10 @@ function buildDetector<TInstitution extends Institution>(
         hasPatternEvidence: match.hasEvidence,
       });
       const score = match.score + branch.bonus;
+      const confidence = branch.hasEvidence ? scoreToConfidence(score) : "low";
+      // Ambiguity describes the input, so it counts matches the options filter out below.
+      bandMembers.push({ institution: branch.institution, confidence });
+
       const isWantedKind = options.kinds?.includes(branch.kind) ?? true;
       if (score < minScore || !isWantedKind || !isRequested(branch.institution)) {
         continue;
@@ -105,7 +110,7 @@ function buildDetector<TInstitution extends Institution>(
         ...(subject && { subject }),
         formatted: match.formatted,
         score,
-        confidence: branch.hasEvidence ? scoreToConfidence(score) : "low",
+        confidence,
         capabilities: resolveCapabilities({
           kind: branch.kind,
           subject,
@@ -115,7 +120,7 @@ function buildDetector<TInstitution extends Institution>(
       });
     }
 
-    return rankDetections(candidates).slice(0, limit);
+    return rankDetections(candidates, bandMembers).slice(0, limit);
   };
 
   const extend = <TExtra extends Institution>(

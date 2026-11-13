@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import { institutions } from "../../registry";
 import type { Subject } from "../../types";
+import { defineInstitution } from "../define/define-institution";
+import { patternTemplate } from "../define/pattern-template";
 import { createDetector } from "./create-detector";
 import { normalizeSubject } from "./normalize-subject";
 
@@ -98,5 +100,98 @@ describe("normalizeSubject 의 출금 판정은 computeCapabilities 와 같은 �
         expect(result.subject.allowsWithdrawal).toBe(result.capabilities.allowsWithdrawal);
       }
     }
+  });
+});
+
+describe("순위는 신뢰도 등급을 점수보다 먼저 본다", () => {
+  const evidenced = defineInstitution({
+    id: "evidenced",
+    code: "901",
+    nameKo: "근거 기관",
+    category: "bank",
+    aliases: [],
+    priority: 1,
+    patterns: [
+      {
+        template: patternTemplate("XXX-XXXXXXX"),
+        kind: "old",
+        identifierPosition: { start: 0, length: 3 },
+        identifiers: ["123"],
+      },
+    ],
+  });
+  const lengthOnly = defineInstitution({
+    id: "length-only",
+    code: "902",
+    nameKo: "길이만 맞는 기관",
+    category: "bank",
+    aliases: [],
+    priority: 100,
+    patterns: [{ template: patternTemplate("XXXXXXXXXX"), kind: "new" }],
+  });
+
+  test("근거 없는 low 후보는 점수가 더 높아도 근거 있는 후보보다 뒤에 온다", () => {
+    // Given
+    const detector = createDetector([lengthOnly, evidenced], {
+      scoring: { identifierMatch: 0.5, kindNewBonus: 3 },
+    });
+
+    // When
+    const results = detector.detect("1234567890");
+
+    // Then
+    expect(results.map((result) => [result.institution.id, result.confidence])).toEqual([
+      ["evidenced", "medium"],
+    ]);
+  });
+});
+
+describe("ambiguous 는 옵션 필터와 무관하게 입력 기준으로 판정한다", () => {
+  const twin = (id: string, code: string) =>
+    defineInstitution({
+      id,
+      code,
+      nameKo: id,
+      category: id === "twin-a" ? "bank" : "non-bank",
+      aliases: [],
+      patterns: [
+        {
+          template: patternTemplate("XXX-XXXXXXX"),
+          kind: "new",
+          identifierPosition: { start: 0, length: 3 },
+          identifiers: ["123"],
+        },
+      ],
+    });
+  const detector = createDetector([twin("twin-a", "903"), twin("twin-b", "904")]);
+
+  test.each([
+    { include: ["twin-a"] },
+    { exclude: ["twin-b"] },
+    { categories: ["bank"] },
+    { limit: 1 },
+  ] as const)("%j 로 경쟁 기관을 숨겨도 ambiguous 는 true 다", (options) => {
+    // Given
+    const input = "1234567890";
+
+    // When
+    const [top] = detector.detect(input, options);
+
+    // Then
+    expect(top?.institution.id).toBe("twin-a");
+    expect(top?.ambiguous).toBe(true);
+  });
+});
+
+describe("옵션 검증은 입력과 무관하다", () => {
+  test.each(["", "숫자 없음"])("입력 %j 에도 잘못된 limit 은 RangeError 다", (input) => {
+    // Given
+    const detector = createDetector(institutions);
+
+    // When
+    const run = () => detector.detect(input, { limit: -1 });
+
+    // Then
+    expect(run).toThrow(RangeError);
   });
 });

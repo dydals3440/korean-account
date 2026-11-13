@@ -7,7 +7,12 @@ export type RankableDetection<TInstitution extends Institution> = Omit<
   "ambiguous"
 >;
 
-type ComparableDetection = Pick<DetectionResult, "score" | "institution" | "kind">;
+type ComparableDetection = Pick<DetectionResult, "confidence" | "score" | "institution" | "kind">;
+
+/** Institution and band of every match, before option filters; decides `ambiguous`. */
+export type BandMember = Pick<DetectionResult, "confidence" | "institution">;
+
+const CONFIDENCE_RANK: Readonly<Record<Confidence, number>> = { high: 3, medium: 2, low: 1 };
 
 /** Tie-break order between account kinds; higher ranks first. */
 const KIND_RANK: Readonly<Record<AccountKind, number>> = {
@@ -19,9 +24,13 @@ const KIND_RANK: Readonly<Record<AccountKind, number>> = {
   "merged-legacy": 1,
 };
 
-/** Orders by score, then prevalence prior, then kind rank (all descending). */
+/**
+ * Orders by confidence band, then score, prevalence prior and kind rank (all descending).
+ * The band comes first so an unevidenced `low` match never outranks an evidenced one.
+ */
 export function compareDetections(a: ComparableDetection, b: ComparableDetection): number {
   return (
+    CONFIDENCE_RANK[b.confidence] - CONFIDENCE_RANK[a.confidence] ||
     b.score - a.score ||
     prevalence(b.institution) - prevalence(a.institution) ||
     KIND_RANK[b.kind] - KIND_RANK[a.kind]
@@ -29,11 +38,12 @@ export function compareDetections(a: ComparableDetection, b: ComparableDetection
 }
 
 /**
- * Sorts candidates, drops low-confidence ones when the top result is high or medium,
- * and marks candidates that share their confidence band with another institution.
+ * Sorts candidates, drops low-confidence ones when the top result is high or medium, and marks
+ * candidates whose band holds another institution among `bandMembers`.
  */
 export function rankDetections<TInstitution extends Institution>(
   candidates: readonly RankableDetection<TInstitution>[],
+  bandMembers: readonly BandMember[],
 ): readonly DetectionResult<TInstitution>[] {
   // Sorts a copy instead of `toSorted` to keep pre-ES2023 runtimes supported.
   // oxlint-disable-next-line unicorn/no-array-sort
@@ -45,10 +55,10 @@ export function rankDetections<TInstitution extends Institution>(
     : sorted;
 
   const institutionIdsByConfidence = new Map<Confidence, Set<string>>();
-  for (const candidate of kept) {
-    const ids = institutionIdsByConfidence.get(candidate.confidence) ?? new Set<string>();
-    ids.add(candidate.institution.id);
-    institutionIdsByConfidence.set(candidate.confidence, ids);
+  for (const member of bandMembers) {
+    const ids = institutionIdsByConfidence.get(member.confidence) ?? new Set<string>();
+    ids.add(member.institution.id);
+    institutionIdsByConfidence.set(member.confidence, ids);
   }
 
   return kept.map((candidate) => ({
