@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const capeInv = defineInstitution({
   id: "cape-inv",
@@ -13,7 +11,7 @@ export const capeInv = defineInstitution({
   successorOf: ["lig-investment"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -36,7 +34,7 @@ export const capeInv = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXXX-XXX"),
+      template: patternTemplate("XXX-XX-XXXXXX-XXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

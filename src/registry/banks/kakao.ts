@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const kakao = defineInstitution({
   id: "kakao",
@@ -16,7 +15,7 @@ export const kakao = defineInstitution({
     // consumer KakaoBank account carries them and no other 13-digit pattern
     // collides.
     {
-      template: T("XXXX-XX-XXXXXXX"),
+      template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["3333", "7979"],

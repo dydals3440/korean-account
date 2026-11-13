@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const meritz = defineInstitution({
   id: "meritz",
@@ -14,7 +12,7 @@ export const meritz = defineInstitution({
   successorOf: ["im-investment-sec"],
   patterns: [
     {
-      template: T("XXXX-XXXX-XX"),
+      template: patternTemplate("XXXX-XXXX-XX"),
       kind: "old",
       subjectPosition: { start: 8, length: 2 },
       // PDF p.18: only 15/16 allow withdrawal transfer (×○○○); every other
@@ -41,13 +39,13 @@ export const meritz = defineInstitution({
       effectiveFrom: "2009-09-24",
     },
     {
-      template: T("XXXX-XXXX-XX"),
+      template: patternTemplate("XXXX-XXXX-XX"),
       kind: "new",
       effectiveFrom: "2012-07-26",
       note: "00 사용 불가",
     },
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

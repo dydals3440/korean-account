@@ -1,6 +1,5 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { suhyup11BranchToCoop, suhyup12BranchToCoop, suhyup14BranchToCoop } from "../rules";
+import { defineInstitution, patternTemplate } from "../../core/define";
+import { suhyup11BranchToCoop, suhyup12BranchToCoop, suhyup14BranchToCoop } from "../branch-rules";
 
 export const suhyup = defineInstitution({
   id: "suhyup",
@@ -14,7 +13,7 @@ export const suhyup = defineInstitution({
   patterns: [
     // branchRule: routes to 030 Suhyup federation when digits 4-5 are a branch code
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
       branchRule: suhyup11BranchToCoop,
       validatesCheckDigit: false,
@@ -22,7 +21,7 @@ export const suhyup = defineInstitution({
     },
     // branchRule: routes to 030 Suhyup federation when the first digit is 2/7/9
     {
-      template: T("XXX-XXXXXXXXX"),
+      template: patternTemplate("XXX-XXXXXXXXX"),
       kind: "new",
       // No `identifiers`, so no score bonus. Still required — the public API
       // `extractIdentifier(digits, pattern)` reads this position.
@@ -34,7 +33,7 @@ export const suhyup = defineInstitution({
     },
     // branchRule: routes to 030 Suhyup federation when digits 1-3 are 481~489/493
     {
-      template: T("XXX-XXXXXXXXXXX"),
+      template: patternTemplate("XXX-XXXXXXXXXXX"),
       kind: "virtual",
       branchRule: suhyup14BranchToCoop,
       validatesCheckDigit: false,

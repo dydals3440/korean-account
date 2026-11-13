@@ -1,8 +1,7 @@
 import { type } from "arktype";
 
-import type { InstitutionId } from "../../registry";
-import { INSTITUTION_IDS } from "../../registry/institution-ids";
-import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../constants";
+import { INSTITUTION_IDS, type InstitutionId } from "../../registry/institution-ids";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -13,30 +12,18 @@ import {
   digitCount,
   isFiniteNumber,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 
-// ArkType is ESM-only. CJS declarations must resolve its types as imports,
-// including consumers using TypeScript's frozen Node16 module model.
-// The inline query preserves resolution-mode in tsdown's TS7 declarations.
+// ArkType is ESM-only; the inline import keeps `resolution-mode` in emitted CJS declarations.
+// oxlint-disable-next-line typescript/consistent-type-imports
 type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type<T>;
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 
-// Exports are annotated `Type<T>` (stable across arktype 2.x; its `out t`
-// variance makes narrowed results assignable). All account rules live in one
-// `.narrow` instead of native length/regex constraints: `ctx.reject({ problem })`
-// is arktype's only mechanism that replaces the composed English
-// "must be … (was …)" sentence with our exact Korean messages.
-// Known deviation (documented): nested `detectionSchema` field errors keep
-// arktype's default English composition — the contract tests assert
-// accept/reject behavior only.
+// `Type<T>` annotations keep d.ts stable across arktype 2.x. Account rules use one `.narrow`
+// because `ctx.reject({ problem })` is the only way to replace arktype's English messages.
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: Type<string> = type("string").narrow((value, ctx) => {
   if (value.length === 0) return ctx.reject({ problem: MESSAGES.required });
   if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return ctx.reject({ problem: MESSAGES.tooLong });
@@ -47,18 +34,18 @@ export const accountSchema: Type<string> = type("string").narrow((value, ctx) =>
   return true;
 });
 
-/** Schema accepting only registered institution ids. */
+/** Built-in institution id. */
 export const institutionIdSchema: Type<InstitutionId> = type
   .enumerated(...INSTITUTION_IDS)
   .configure({ message: MESSAGES.institution });
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: Type<AccountKind> = type.enumerated(...ACCOUNT_KINDS);
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: Type<SubjectCategory> = type.enumerated(...SUBJECT_CATEGORIES);
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: Type<DetectionPayload> = type({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,

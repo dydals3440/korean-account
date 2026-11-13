@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const gwangju = defineInstitution({
   id: "gwangju",
@@ -12,7 +10,7 @@ export const gwangju = defineInstitution({
   userBaseMillions: 1.5,
   patterns: [
     {
-      template: T("XXX-XXX-XXXXX-X"),
+      template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 3 },
       subjects: [
@@ -36,7 +34,7 @@ export const gwangju = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XXX-XXXXXX"),
+      template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "old",
       identifierPosition: { start: 3, length: 3 },
       identifiers: ["731"],
@@ -52,7 +50,7 @@ export const gwangju = defineInstitution({
       note: "체크디지트 검증 X",
     },
     {
-      template: T("X-XXX-XXXXXXXX-X"),
+      template: patternTemplate("X-XXX-XXXXXXXX-X"),
       kind: "new",
       subjectPosition: { start: 1, length: 3 },
       subjects: [

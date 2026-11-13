@@ -20,23 +20,22 @@ assert.match(typescript, /^\^?\d+\.\d+\.\d+$/);
 const runtimeOnly = process.env.CONSUMER_RUNTIME_ONLY === "true";
 const legacyEsm = typescript === "5.1.6";
 const selected = process.argv.slice(2);
-const cases = selected.length
-  ? selected
-  : legacyEsm
-    ? ["arktype@2.1.0", "arktype@^2"]
-    : [
-        "none",
-        "zod@3.23.0",
-        "zod@^3",
-        "zod@4.0.0",
-        "zod@^4",
-        "valibot@1.0.0",
-        "valibot@^1",
-        "yup@1.4.0",
-        "yup@^1",
-        "arktype@2.1.0",
-        "arktype@^2",
-      ];
+const ALL_PEER_CASES = [
+  "none",
+  "zod@3.23.0",
+  "zod@^3",
+  "zod@4.0.0",
+  "zod@^4",
+  "valibot@1.0.0",
+  "valibot@^1",
+  "yup@1.4.0",
+  "yup@^1",
+  "arktype@2.1.0",
+  "arktype@^2",
+];
+const LEGACY_ESM_PEER_CASES = ["arktype@2.1.0", "arktype@^2"];
+const defaultCases = legacyEsm ? LEGACY_ESM_PEER_CASES : ALL_PEER_CASES;
+const cases = selected.length > 0 ? selected : defaultCases;
 for (const peer of cases) {
   assert.match(peer, /^(none|(?:zod|valibot|yup|arktype)@\^?\d+(?:\.\d+){0,2})$/);
 }

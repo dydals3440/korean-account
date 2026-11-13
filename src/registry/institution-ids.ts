@@ -1,9 +1,6 @@
 /**
- * Registered institution ids as pure literals — no factory calls.
- *
- * Kept separate from `institutions` so the zod adapter can validate ids
- * without dragging the full registry into the bundle. Kept in sync by
- * `institution-ids.types.spec.ts` (order-sensitive).
+ * Built-in institution ids as plain literals, so adapters can validate ids
+ * without bundling the registry. `institution-ids.types.spec.ts` keeps it in sync.
  */
 export const INSTITUTION_IDS = [
   // banks (25)
@@ -67,3 +64,6 @@ export const INSTITUTION_IDS = [
   "cape-inv",
   "woori-inv",
 ] as const;
+
+/** Union of built-in institution ids. */
+export type InstitutionId = (typeof INSTITUTION_IDS)[number];

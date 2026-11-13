@@ -1,14 +1,8 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
 import { expandTwoDigitRange } from "../expand-range";
 
-/**
- * Subject set shared by the integrated Citi 13-digit ('06.7.18) pattern and
- * the former KorAm 11-digit pattern. The PDF states "(former KorAm) — same as
- * integrated Citi".
- */
+/** Subjects of the integrated Citi 13-digit and former KorAm 11-digit formats (PDF p.6). */
 const integratedCitiSubjects: readonly Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),
   defineSubject({ code: "11", category: "ordinary" }),
@@ -100,7 +94,7 @@ export const citi = defineInstitution({
   userBaseMillions: 0.5,
   patterns: [
     {
-      template: T("X-XXXXXX-XX-X"),
+      template: patternTemplate("X-XXXXXX-XX-X"),
       kind: "new",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["5", "0"],
@@ -115,7 +109,7 @@ export const citi = defineInstitution({
       ],
     },
     {
-      template: T("X-XXXXXX-X-XX-XX"),
+      template: patternTemplate("X-XXXXXX-X-XX-XX"),
       kind: "new",
       subjectPosition: { start: 8, length: 2 },
       subjects: [
@@ -131,7 +125,7 @@ export const citi = defineInstitution({
       effectiveFrom: "2008-10-06",
     },
     {
-      template: T("XXX-XXXXX-XX-X-XX"),
+      template: patternTemplate("XXX-XXXXX-XX-X-XX"),
       kind: "new",
       subjectPosition: { start: 8, length: 2 },
       subjects: integratedCitiSubjects,
@@ -139,14 +133,14 @@ export const citi = defineInstitution({
     },
     // Subject set identical to integrated Citi 13d (PDF: "(former KorAm) — same as integrated Citi").
     {
-      template: T("XXX-XXXXX-XX-X"),
+      template: patternTemplate("XXX-XXXXX-XX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 8, length: 2 },
       subjects: integratedCitiSubjects,
       note: "(구)한미은행",
     },
     {
-      template: T("XX-XX-XXXXX-X"),
+      template: patternTemplate("XX-XX-XXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 2, length: 2 },
       subjects: formerCitiSubjects,

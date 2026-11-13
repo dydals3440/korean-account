@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const kbSec = defineInstitution({
   id: "kb-sec",
@@ -14,7 +12,7 @@ export const kbSec = defineInstitution({
   successorOf: ["hyundai-sec"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -43,9 +41,9 @@ export const kbSec = defineInstitution({
     },
     // PDF p.14: 일련번호(8)-검증번호(1)-일련번호(2) = 11 digits; the printed
     // boxes omit the check-digit between the two serial runs.
-    { template: T("XXX-XXX-XX-X-XX"), kind: "new" },
+    { template: patternTemplate("XXX-XXX-XX-X-XX"), kind: "new" },
     // PDF p.14: 일련번호(8)-검증번호(1) = 9 digits; the printed boxes omit
     // the trailing check-digit.
-    { template: T("XXX-XXX-XX-X"), kind: "new" },
+    { template: patternTemplate("XXX-XXX-XX-X"), kind: "new" },
   ],
 });

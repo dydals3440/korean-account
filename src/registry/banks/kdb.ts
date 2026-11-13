@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const kdb = defineInstitution({
   id: "kdb",
@@ -12,7 +10,7 @@ export const kdb = defineInstitution({
   userBaseMillions: 0.5,
   patterns: [
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -24,7 +22,7 @@ export const kdb = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XXXXXXX-X-XXX"),
+      template: patternTemplate("XXX-XXXXXXX-X-XXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["013", "020", "019", "011", "022"],
@@ -40,7 +38,7 @@ export const kdb = defineInstitution({
     // PDF p.1: the 010 row is ×○○○ (withdrawal transfer available); only
     // 036 (정기적금) is deposit-only per the 비고.
     {
-      template: T("XXX-XXXXXXXX-XXX"),
+      template: patternTemplate("XXX-XXXXXXXX-XXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["010", "036"],

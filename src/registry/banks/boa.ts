@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const boa = defineInstitution({
   id: "boa",
@@ -11,12 +10,12 @@ export const boa = defineInstitution({
   userBaseMillions: 0.01,
   patterns: [
     {
-      template: T("XXXX-XXXXX-XX-X"),
+      template: patternTemplate("XXXX-XXXXX-XX-X"),
       kind: "new",
       effectiveFrom: "2012-07-16",
     },
     {
-      template: T("XXXX-XXXXXXXXXX"),
+      template: patternTemplate("XXXX-XXXXXXXXXX"),
       kind: "incoming-only",
       note: "조회·입금 전용 (PDF: 출금이체 ×)",
     },

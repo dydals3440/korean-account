@@ -1,6 +1,5 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { suhyupCoop12BranchToBank } from "../rules";
+import { defineInstitution, patternTemplate } from "../../core/define";
+import { suhyupCoop12BranchToBank } from "../branch-rules";
 
 export const suhyupCoop = defineInstitution({
   id: "suhyup-coop",
@@ -14,7 +13,7 @@ export const suhyupCoop = defineInstitution({
   patterns: [
     // branchRule: first digit 2/7/9 stays with the central coop; otherwise routes to 007 Suhyup Bank.
     {
-      template: T("X-XXXXXXXXXXX"),
+      template: patternTemplate("X-XXXXXXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["2", "7", "9"],

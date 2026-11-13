@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const samsungSec = defineInstitution({
   id: "samsung-sec",
@@ -10,11 +9,11 @@ export const samsungSec = defineInstitution({
   aliases: ["삼성증권"],
   userBaseMillions: 12.5,
   patterns: [
-    { template: T("XXXXXXXX"), kind: "new" },
-    { template: T("XXXXXXXXXX"), kind: "new", effectiveFrom: "2013-05-20" },
-    { template: T("XXXXXXXXXXXX"), kind: "new", effectiveFrom: "2013-05-20" },
+    { template: patternTemplate("XXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXXXX"), kind: "new", effectiveFrom: "2013-05-20" },
+    { template: patternTemplate("XXXXXXXXXXXX"), kind: "new", effectiveFrom: "2013-05-20" },
     {
-      template: T("X-XXXXX-XXXXXXXX"),
+      template: patternTemplate("X-XXXXX-XXXXXXXX"),
       kind: "new",
       effectiveFrom: "2010-12-13",
     },

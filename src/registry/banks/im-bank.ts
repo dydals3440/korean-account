@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 export const imBank = defineInstitution({
@@ -13,7 +11,7 @@ export const imBank = defineInstitution({
   userBaseMillions: 3,
   patterns: [
     {
-      template: T("XX-XXXXXXXXXXX"),
+      template: patternTemplate("XX-XXXXXXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 2 },
       identifiers: ["91", "92", "93", "94", "96"],
@@ -27,15 +25,15 @@ export const imBank = defineInstitution({
       ],
     },
     // PDF p.7: plain serial-only formats (7–11 digits), no subject codes.
-    { template: T("XXXXXXX"), kind: "old" },
-    { template: T("XXXXXXXX"), kind: "old" },
-    { template: T("XXXXXXXXX"), kind: "old" },
-    { template: T("XXXXXXXXXX"), kind: "old" },
-    { template: T("XXXXXXXXXXX"), kind: "old" },
+    { template: patternTemplate("XXXXXXX"), kind: "old" },
+    { template: patternTemplate("XXXXXXXX"), kind: "old" },
+    { template: patternTemplate("XXXXXXXXX"), kind: "old" },
+    { template: patternTemplate("XXXXXXXXXX"), kind: "old" },
+    { template: patternTemplate("XXXXXXXXXXX"), kind: "old" },
     // Deposit-only 3-digit prefixes such as 524 (재형) cannot map onto this
     // pattern's 2-digit subject position.
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -85,7 +83,7 @@ export const imBank = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["505", "508", "502", "501", "504"],
@@ -148,7 +146,7 @@ export const imBank = defineInstitution({
     // Avoids prefix collisions with Hana's merged foreign-exchange 14d —
     // HANA_FOREIGN_LEGACY_PREFIXES excluded.
     {
-      template: T("XXX-XX-XXXXXX-XXX"),
+      template: patternTemplate("XXX-XX-XXXXXX-XXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
       additionalRules: [isNotHanaForeignLegacy14],
@@ -168,7 +166,7 @@ export const imBank = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XXXXXXXXXX-X"),
+      template: patternTemplate("XXX-XXXXXXXXXX-X"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["937", "938", "999"],

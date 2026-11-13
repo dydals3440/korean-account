@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 
-import { type ContractSchemaName, describeAdapterContract } from "../adapter-contract.fixtures";
-import { MESSAGES } from "../shared";
+import { MESSAGES } from "../contract";
+import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,

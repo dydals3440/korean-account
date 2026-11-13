@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 
-import { type InstitutionId, institutions } from "./index";
-import { INSTITUTION_IDS } from "./institution-ids";
+import { INSTITUTION_IDS, type InstitutionId } from "./institution-ids";
+import { institutions, type RegisteredInstitution } from "./institutions";
 
 describe("INSTITUTION_IDS ↔ institutions 동기화", () => {
   test("런타임: 순서까지 포함해 institutions 의 id 와 정확히 일치한다", () => {
@@ -12,9 +12,9 @@ describe("INSTITUTION_IDS ↔ institutions 동기화", () => {
     expect([...INSTITUTION_IDS]).toEqual(registryIds);
   });
 
-  test("타입: 두 union 이 서로를 완전히 덮는다 (양방향 exhaustiveness)", () => {
+  test("타입: 리터럴 id union 이 레지스트리 기관 id union 과 같다", () => {
     // Given / When / Then — adding an id to only one side breaks compilation here.
-    expectTypeOf<(typeof INSTITUTION_IDS)[number]>().toEqualTypeOf<InstitutionId>();
+    expectTypeOf<InstitutionId>().toEqualTypeOf<RegisteredInstitution["id"]>();
   });
 
   test("팩토리 호출 없이 리터럴만 담아 번들러가 순수하다고 판단할 수 있다", () => {

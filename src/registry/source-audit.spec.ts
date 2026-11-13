@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { detect } from "../core/detect";
-import { createDetector } from "../core/detector";
-import { templateLength } from "../core/template-length";
-import { getInstitution, institutions, type InstitutionId } from "./index";
+import { institutions, type InstitutionId } from ".";
+import { detect } from "../builtin/detect";
+import { getInstitution } from "../builtin/get-institution";
+import { templateLength } from "../core/account/template-length";
+import { createDetector } from "../core/detector/create-detector";
 import { HSBC_SOURCE_RANGES, SOURCE_FORMATS } from "./source-audit.fixtures";
 
 function scoped(id: InstitutionId, digits: string) {

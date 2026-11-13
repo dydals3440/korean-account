@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const hanaSec = defineInstitution({
   id: "hana-sec",
@@ -12,9 +10,9 @@ export const hanaSec = defineInstitution({
   userBaseMillions: 4.8,
   successorOf: ["hana-fin-invest"],
   patterns: [
-    { template: T("XXXXXXX-X"), kind: "new" },
+    { template: patternTemplate("XXXXXXX-X"), kind: "new" },
     {
-      template: T("XXXXXXX-X-XX"),
+      template: patternTemplate("XXXXXXX-X-XX"),
       kind: "merged-legacy",
       subjectPosition: { start: 8, length: 2 },
       subjects: [
@@ -32,12 +30,12 @@ export const hanaSec = defineInstitution({
       ],
     },
     {
-      template: T("XXXXXXXX-XXX"),
+      template: patternTemplate("XXXXXXXX-XXX"),
       kind: "new",
       effectiveFrom: "2016-11-21",
     },
     {
-      template: T("XXXXXXXX-XXX-XXX"),
+      template: patternTemplate("XXXXXXXX-XXX-XXX"),
       kind: "new",
       effectiveFrom: "2016-11-21",
     },

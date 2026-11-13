@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const jeonbuk = defineInstitution({
   id: "jeonbuk",
@@ -14,7 +12,7 @@ export const jeonbuk = defineInstitution({
     // PDF p.8: digit-count 12 (branch 3 - subject 2 - serial 6 - check 1);
     // the printed boxes omit the trailing check-digit box.
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -34,7 +32,7 @@ export const jeonbuk = defineInstitution({
       ],
     },
     {
-      template: T("X-XXX-XX-XXXXXX-X"),
+      template: patternTemplate("X-XXX-XX-XXXXXX-X"),
       kind: "new",
       identifierPosition: { start: 1, length: 3 },
       identifiers: ["013", "021", "012", "011", "023"],

@@ -18,19 +18,16 @@ export default defineConfig({
         "src/**/*.spec.ts",
         "src/**/*.bench.ts",
         "src/**/*.fixtures.ts",
-        // The registry is declarative data, not logic. Including it would drown
-        // real logic coverage in data volume.
+        // Declarative data and re-export barrels would dilute logic coverage.
         "src/registry/**",
-        // Re-export barrels have no executable statements.
         "src/**/index.ts",
       ],
-      // Ratchet: pinned just below measured coverage (97.83 / 94.73 / 96.92 / 98.33
-      // under @vitest/coverage-v8 4.x). CI fails if coverage drops.
+      // Ratchet just below measured coverage; raise when it improves.
       thresholds: {
-        statements: 97,
-        branches: 94,
-        functions: 96,
-        lines: 98,
+        statements: 98.5,
+        branches: 96.5,
+        functions: 97.5,
+        lines: 99,
       },
     },
   },

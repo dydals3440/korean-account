@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
-import type { InstitutionId } from "../../registry";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
+import type { InstitutionId } from "../../registry/institution-ids";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -13,22 +13,13 @@ import {
   isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 
-// Every export is annotated `v.GenericSchema<T>` — valibot's documented alias
-// for explicit annotations. Without it, the generated d.ts inlines
-// `SchemaWithPipe<[StringSchema<…>, MinLengthAction<…, "메시지">, …]>` — deep
-// internal generics (with the message literals as type arguments) pinned to a
-// valibot minor. The adapter-compat CI greps dist/valibot.d.ts for them.
+// `v.GenericSchema<T>` annotations keep valibot-minor-specific pipe generics out of the d.ts.
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: v.GenericSchema<string> = v.pipe(
   v.string(MESSAGES.charset),
   v.minLength(1, MESSAGES.required),
@@ -38,25 +29,25 @@ export const accountSchema: v.GenericSchema<string> = v.pipe(
   v.check((input) => digitCount(input) <= ACCOUNT_MAX_DIGITS, MESSAGES.maxDigits),
 );
 
-/** Schema accepting only registered institution ids. */
+/** Built-in institution id. */
 export const institutionIdSchema: v.GenericSchema<InstitutionId> = v.custom<InstitutionId>(
   isRegisteredInstitutionId,
   MESSAGES.institution,
 );
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: v.GenericSchema<AccountKind> = v.picklist(
   ACCOUNT_KINDS,
   MESSAGES.accountKind,
 );
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: v.GenericSchema<SubjectCategory> = v.picklist(
   SUBJECT_CATEGORIES,
   MESSAGES.subjectCategory,
 );
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: v.GenericSchema<DetectionPayload> = v.object({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,

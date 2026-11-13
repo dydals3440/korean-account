@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 export const hana = defineInstitution({
@@ -18,7 +16,7 @@ export const hana = defineInstitution({
   successorOf: ["keb-foreign-exchange"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -44,7 +42,7 @@ export const hana = defineInstitution({
       note: "평생계좌 자동이체 등록 불가",
     },
     {
-      template: T("XXX-XXXXXX-XXX"),
+      template: patternTemplate("XXX-XXXXXX-XXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["611", "620", "600", "601", "630", "621", "631", "610"],
@@ -126,7 +124,7 @@ export const hana = defineInstitution({
       effectiveFrom: "2009-06-15",
     },
     {
-      template: T("XXX-XXXXXX-XXXXX"),
+      template: patternTemplate("XXX-XXXXXX-XXXXX"),
       kind: "merged-legacy",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["117", "158", "161", "162", "210", "379", "600", "655"],

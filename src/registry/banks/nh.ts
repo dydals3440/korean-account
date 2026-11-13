@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
 
 const nhBankSubjectsOld: Subject[] = [
@@ -38,19 +36,19 @@ export const nh = defineInstitution({
   userBaseMillions: 25,
   patterns: [
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: nhBankSubjectsOld,
     },
     {
-      template: T("XXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 4, length: 2 },
       subjects: nhBankSubjectsOld,
     },
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["301", "302", "312", "306", "305", "317"],
@@ -67,7 +65,7 @@ export const nh = defineInstitution({
     },
     // 13d next-gen installment savings (deposit-only) — codes enumerated in the PDF.
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["304", "310", "314", "321", "324", "334", "345", "347", "349", "359", "380"],
@@ -84,7 +82,7 @@ export const nh = defineInstitution({
     },
     // 13d next-gen trust (deposit-only) — codes enumerated in the PDF.
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["028", "031", "043", "046", "079", "081", "086", "087", "088"],
@@ -95,7 +93,7 @@ export const nh = defineInstitution({
       ),
     },
     {
-      template: T("XXXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 6, length: 2 },
       subjects: [
@@ -106,7 +104,7 @@ export const nh = defineInstitution({
       note: "HMC·삼성·미래에셋·현대·NH·한화 증권 한정",
     },
     {
-      template: T("XXX-XXXX-XXXX-XX-X"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX-X"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["790", "791"],

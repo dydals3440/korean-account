@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const shinhanInv = defineInstitution({
   id: "shinhan-inv",
@@ -13,7 +11,7 @@ export const shinhanInv = defineInstitution({
   successorOf: ["shinhan-fin-invest"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

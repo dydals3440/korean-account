@@ -1,11 +1,7 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
-// Uses bank code 081 in the CMS participant namespace — registered in the
-// bank section. A separate institution from 270 Hana Securities (securities
-// category).
+// CMS lists this CMA under bank code 081, separate from Hana Securities (270).
 
 export const hanaSecuritiesCma = defineInstitution({
   id: "hana-securities-cma",
@@ -22,7 +18,7 @@ export const hanaSecuritiesCma = defineInstitution({
     // merged foreign-exchange prefix set → hana-cma score 8 vs
     // foreign-exchange score 7 → foreign-exchange wins.
     {
-      template: T("XXX-XXXXXXXX-X-XX"),
+      template: patternTemplate("XXX-XXXXXXXX-X-XX"),
       kind: "new",
       additionalRules: [(d) => d.length === 14 && d[3] === "9", isNotHanaForeignLegacy14],
       subjectPosition: { start: 12, length: 2 },

@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const miraeAsset = defineInstitution({
   id: "mirae-asset",
@@ -14,15 +12,15 @@ export const miraeAsset = defineInstitution({
   patterns: [
     // PDF p.15: plain-serial lengths 8-10 and 12-14. New registration was cut
     // to 12 digits only from 2017-01-01, but accounts registered earlier persist.
-    { template: T("XXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: T("XXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: T("XXXXXXXX-XX"), kind: "new" },
-    { template: T("XXXXXXXXXXX"), kind: "new" },
-    { template: T("XXXXXXXXXXXX"), kind: "new", effectiveFrom: "2017-01-01" },
-    { template: T("XXXXXXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: T("XXXXXXXXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
+    { template: patternTemplate("XXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
+    { template: patternTemplate("XXXXXXXX-XX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXXXXXX"), kind: "new", effectiveFrom: "2017-01-01" },
+    { template: patternTemplate("XXXXXXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
+    { template: patternTemplate("XXXXXXXXXXXXXX"), kind: "new" },
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -43,7 +41,7 @@ export const miraeAsset = defineInstitution({
     // PDF p.15: 12d coded legacy 점번호(3)-과목코드(2)-일련번호(7), registration
     // limited to accounts opened by 2016-12-31. Coexists with the plain 12d above.
     {
-      template: T("XXX-XX-XXXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXXX"),
       kind: "old",
       note: "2016.12.31 이전 등록에 한함",
       subjectPosition: { start: 3, length: 2 },

@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const sc = defineInstitution({
   id: "sc",
@@ -12,7 +10,7 @@ export const sc = defineInstitution({
   userBaseMillions: 2,
   patterns: [
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -22,7 +20,7 @@ export const sc = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -37,7 +35,7 @@ export const sc = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXXXXX"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

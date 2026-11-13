@@ -1,63 +1,40 @@
-export {
-  defineBranchRule,
-  kb11FirstDigit,
-  kbank10First9,
-  kbank14First79,
-  suhyup11BranchToCoop,
-  suhyup12BranchToCoop,
-  suhyup14BranchToCoop,
-  suhyupCoop12BranchToBank,
-  toss12First1719,
-} from "./registry/rules";
-export { scoreToConfidence } from "./core/confidence";
-export { prevalence } from "./core/prevalence";
-export type { CreateDetectorOptions } from "./core/detector";
-export { createDetector } from "./core/detector";
-export { patternTemplate } from "./core/pattern-template";
-export { detect, detectBest } from "./core/detect";
-export { extractIdentifier } from "./core/extract-identifier";
-export { extractSubject } from "./core/extract-subject";
-export { formatAccount } from "./core/format-account";
-export { normalizeAccount } from "./core/normalize-account";
-export type { SearchInstitutionsFilter } from "./core/search-institutions";
-export { searchInstitutions } from "./core/search-institutions";
-export type { PickPatternFilter } from "./core/pick-pattern";
-export { pickPattern } from "./core/pick-pattern";
-export { defineInstitution } from "./core/define-institution";
-export {
-  accountKindLabels,
-  defineSubject,
-  normalizeSubject,
-  subjectCategoryLabels,
-} from "./core/subjects";
-export * from "./registry";
+export { detect, detectBest } from "./builtin/detect";
+export { getInstitution } from "./builtin/get-institution";
+export { pickPattern, type PickPatternFilter } from "./builtin/pick-pattern";
+export { searchInstitutions, type SearchInstitutionsFilter } from "./builtin/search-institutions";
+
+export { createDetector } from "./core/detector/create-detector";
+export { prevalence } from "./core/detector/prevalence";
+
+export { defineBranchRule, defineInstitution, defineSubject, patternTemplate } from "./core/define";
+
+export { extractIdentifier } from "./core/account/extract-identifier";
+export { extractSubject } from "./core/account/extract-subject";
+export { formatAccount } from "./core/account/format-account";
+export { normalizeAccount } from "./core/account/normalize-account";
+
+export { accountKindLabels, subjectCategoryLabels } from "./core/labels";
+
 export {
   ACCOUNT_KINDS,
   CONFIDENCE_LEVELS,
   INSTITUTION_CATEGORIES,
   SUBJECT_CATEGORIES,
-} from "./shared/constants";
+} from "./constants";
 
-export type {
-  AccountKind,
-  AccountPattern,
-  AdditionalRule,
-  BranchRule,
-  BranchRuleResult,
-  CheckDigitVerifier,
-  Confidence,
-  DetectionCapabilities,
-  DetectionResult,
-  DetectOptions,
-  Detector,
-  DigitSpan,
-  GlobalRule,
-  Institution,
-  InstitutionCategory,
-  InstitutionIdInput,
-  PatternTemplate,
-  PatternToken,
-  ScoringWeights,
-  Subject,
-  SubjectCategory,
-} from "./types";
+export * from "./registry";
+
+export {
+  kb11FirstDigit,
+  kbank10First9,
+  kbank14First79,
+  normalizeSubject,
+  scoreToConfidence,
+  suhyup11BranchToCoop,
+  suhyup12BranchToCoop,
+  suhyup14BranchToCoop,
+  suhyupCoop12BranchToBank,
+  toss12First1719,
+} from "./deprecated";
+
+export type * from "./types";

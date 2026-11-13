@@ -4,13 +4,13 @@
       - any-glob-to-any-file: ["src/registry/**"]
 "area: core":
   - changed-files:
-      - any-glob-to-any-file: ["src/core/**"]
+      - any-glob-to-any-file: ["src/core/**", "src/builtin/**"]
 "area: adapters":
   - changed-files:
       - any-glob-to-any-file: ["src/adapters/**"]
 "area: types":
   - changed-files:
-      - any-glob-to-any-file: ["src/types.ts", "src/shared/**", "src/**/*.types.spec.ts"]
+      - any-glob-to-any-file: ["src/types/**", "src/constants.ts", "src/**/*.types.spec.ts"]
 "area: build":
   - changed-files:
       - any-glob-to-any-file:

@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const bookookSec = defineInstitution({
   id: "bookook-sec",
@@ -12,7 +10,7 @@ export const bookookSec = defineInstitution({
   userBaseMillions: 0.7,
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

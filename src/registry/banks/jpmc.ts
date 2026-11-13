@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const jpmc = defineInstitution({
   id: "jpmc",
@@ -9,5 +8,5 @@ export const jpmc = defineInstitution({
   category: "bank",
   aliases: ["JPM", "JP모간", "JPMorgan", "체이스"],
   userBaseMillions: 0.01,
-  patterns: [{ template: T("XXXXXXXXXX"), kind: "new" }],
+  patterns: [{ template: patternTemplate("XXXXXXXXXX"), kind: "new" }],
 });

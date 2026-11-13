@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const lsSec = defineInstitution({
   id: "ls-sec",
@@ -13,7 +11,7 @@ export const lsSec = defineInstitution({
   successorOf: ["ebest-legacy"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -33,7 +31,7 @@ export const lsSec = defineInstitution({
         ),
       ],
     },
-    { template: T("XXXXXXXXX"), kind: "new", effectiveFrom: "2012-07-09" },
-    { template: T("XXXXXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXXX"), kind: "new", effectiveFrom: "2012-07-09" },
+    { template: patternTemplate("XXXXXXXXXXX"), kind: "new" },
   ],
 });
