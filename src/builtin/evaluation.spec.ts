@@ -228,8 +228,8 @@ describe("평가 기준: 실제 계좌 코퍼스 래칫", () => {
     expect(highRatio).toBeGreaterThanOrEqual(0.95);
   });
 
-  // Measured 1.375 after shared identifier/subject spans stopped counting twice (0.5.0).
-  test("1·2순위 평균 점수 마진 래칫 (≥ 1.3)", () => {
+  // Measured 0.75 once overlapping identifier/subject digits count once (0.5.0); ties surface as `ambiguous`.
+  test("1·2순위 평균 점수 마진 래칫 (≥ 0.7)", () => {
     // Given
     const multiCandidateHits = evaluations.filter(
       (evaluation) => evaluation.rank === 0 && evaluation.results.length > 1,
@@ -242,7 +242,7 @@ describe("평가 기준: 실제 계좌 코퍼스 래칫", () => {
     const averageMargin = margins.reduce((sum, margin) => sum + margin, 0) / margins.length;
 
     // Then
-    expect(averageMargin).toBeGreaterThanOrEqual(1.3);
+    expect(averageMargin).toBeGreaterThanOrEqual(0.7);
   });
 });
 

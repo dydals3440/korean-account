@@ -1,4 +1,11 @@
-import type { AccountPattern, GlobalRule, Institution, ScoringWeights, Subject } from "../../types";
+import type {
+  AccountPattern,
+  DigitSpan,
+  GlobalRule,
+  Institution,
+  ScoringWeights,
+  Subject,
+} from "../../types";
 import { extractIdentifier } from "../account/extract-identifier";
 import { extractSubject } from "../account/extract-subject";
 import { formatAccount } from "../account/format-account";
@@ -119,7 +126,7 @@ function scorePattern(
   };
 }
 
-/** The same digits count once: when identifier and subject share a span, only the larger score counts. */
+/** The same digits count once: when identifier and subject spans overlap, only the larger score counts. */
 function combineCodeScores(
   pattern: AccountPattern,
   identifierScore: number,
@@ -127,13 +134,16 @@ function combineCodeScores(
 ): number {
   const identifierSpan = pattern.identifierPosition;
   const subjectSpan = pattern.subjectPosition;
-  const isSharedSpan =
+  const isOverlapping =
     identifierSpan !== undefined &&
     subjectSpan !== undefined &&
-    identifierSpan.start === subjectSpan.start &&
-    identifierSpan.length === subjectSpan.length;
+    spansOverlap(identifierSpan, subjectSpan);
 
-  return isSharedSpan ? Math.max(identifierScore, subjectScore) : identifierScore + subjectScore;
+  return isOverlapping ? Math.max(identifierScore, subjectScore) : identifierScore + subjectScore;
+}
+
+function spansOverlap(first: DigitSpan, second: DigitSpan): boolean {
+  return first.start < second.start + second.length && second.start < first.start + first.length;
 }
 
 function measureLengthFit(digitCount: number, templateDigits: number): LengthFit {
