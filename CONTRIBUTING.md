@@ -39,7 +39,8 @@ pnpm check   # typecheck + lint + test
 - **peer 조합**: peer 없음, zod 3.23.0·^3·4.0.0·^4, valibot 1.0.0·^1, yup 1.4.0·^1, arktype 2.1.0·^2. 각 peer의 하한과 최신 버전에서 따로 검사합니다. `pnpm check:consumer zod@^4`처럼 인자로 조합 하나만 고를 수 있습니다.
 - **런타임**: ESM·CJS 모두에서 0.4.1의 export가 빠지지 않았는지, 기관 ID 목록이 같은지, 대표 입력의 1순위가 바뀌지 않았는지(의도한 변경은 스크립트의 `REVIEWED_TOP_CHANGES`에 사유와 함께 기록), 어댑터의 통과·거부가 0.4.1과 같은지, `exports`·`engines`·peer 설정이 같은지, 런타임 의존성이 0개이고 다른 peer를 요구하지 않는지 확인합니다.
 - **타입**: 새 선언이 0.4.1 자리에 그대로 들어가는지(의도한 시그니처 변경은 `ROOT_TYPE_EXCEPTIONS`)를 Node16·NodeNext·Bundler 해석에서 검사하고, 각 어댑터의 추론 타입(`z.infer`, `v.InferOutput`, `InferType`, `.infer`, `StandardSchemaV1.InferOutput`)이 기대한 `string`·`InstitutionId`·`DetectionPayload<…>`인지 peer 버전별로 확인합니다.
-- **환경 변수**: `CONSUMER_TYPESCRIPT=5.1.6`으로 소비자 TypeScript 버전을, `CONSUMER_RUNTIME_ONLY=true`로 런타임 검사만 실행합니다.
+- **환경 변수**: `CONSUMER_TYPESCRIPT=5.1.6`으로 소비자 TypeScript 버전을, `CONSUMER_RUNTIME_ONLY=true`로 런타임 검사만 실행합니다. TypeScript 5.1.6에서는 기본으로 ArkType 두 조합(`arktype@2.1.0`, `arktype@^2`)만 검사합니다. 이 버전에서 ESM 타입 해석을 확인하려는 용도이며, 모든 peer의 최소 TypeScript 호환 검사가 아닙니다.
+- **패키지 메타데이터**: `exports`·`typesVersions`·`engines`·`peerDependencies`·`peerDependenciesMeta`·`sideEffects`는 0.4.1의 항목이 모두 그대로 남아 있어야 합니다. 새 서브패스나 optional peer처럼 항목을 **추가**하는 것은 허용하고, 기존 항목을 바꾸거나 지우면 실패합니다.
 
 ## 폴더 구조와 계층 규칙
 
@@ -151,7 +152,8 @@ PDF에 나열되지 않은 접두어·운영 코드는 내장 레지스트리가
 
 1. **구현**: `src/adapters/<lib>/{schema,index}.ts`. 가장 가까운 기존 어댑터를 따르고, 모든 export에 그 라이브러리의 안정된 공개 타입을 명시합니다(선언에 내부 제네릭이 새지 않게).
 2. **계약 테스트**: `schema.spec.ts`에서 `describeAdapterContract("<lib>", { schemas, createAccountSchema, createInstitutionIdSchema, createDetectionSchema, firstIssue })`를 호출합니다.
-3. **배선**: `package.json`의 `exports`·`typesVersions`·optional peer, `tsdown.config.ts` 엔트리 2곳, `.size-limit.json` 예산, `ci.yml`의 `adapter-compat` 행(하한·최신), `scripts/check-consumer.mjs`의 peer 조합과 `INFERENCE_CHECKS`.
+3. **배선**: `package.json`의 `exports`·`typesVersions`·optional peer, `tsdown.config.ts` 엔트리 2곳, `.size-limit.json` 예산, `ci.yml`의 `adapter-compat` 행(하한·최신), `scripts/check-consumer.mjs`의 `ALL_PEER_CASES`(하한·최신)와 `INFERENCE_CHECKS`.
+4. **호환 검사**: `pnpm check:consumer <lib>@<하한>`과 `<lib>@<최신>`을 실행합니다. 기준 버전(0.4.1)에 없는 서브패스는 drop-in 비교에서 자동으로 빠지고, `package.json` 메타데이터는 추가만 했다면 통과합니다.
 
 ## 이슈·PR·커밋
 

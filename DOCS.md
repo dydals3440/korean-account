@@ -427,7 +427,7 @@
 
 <a id="d13-089-k뱅크--13d-100-prefix-narrowing"></a>
 
-[D.1.3 089 K뱅크 — 13d 100 prefix narrowing](./docs/customization.md#케이뱅크-12자리-상품-코드-좁히기)
+[D.1.3 089 K뱅크 — 12자리 상품 코드 좁히기 (구 "13d 100 prefix narrowing")](./docs/customization.md#케이뱅크-12자리-상품-코드-좁히기)
 
 <a id="d14-090-카카오뱅크--4자리-prefix-tightening-020-에서-core-로-승격됨"></a>
 

@@ -76,8 +76,11 @@ export function BankConfirm({
   account: string;
   onConfirm: (institutionId: string) => void;
 }) {
-  const [manualId, setManualId] = useState<string | null>(null);
+  // 수동 선택은 고른 시점의 계좌번호와 함께 기억합니다. 번호가 바뀌면 자동으로 무효가 되어,
+  // 새 후보 목록에 없는 기관이 화면에 안 보이는 채로 제출되는 일을 막습니다.
+  const [manual, setManual] = useState<{ account: string; id: string } | null>(null);
   const suggestion = suggestBank(account);
+  const manualId = manual?.account === account ? manual.id : null;
   const selectedId = manualId ?? suggestion.preselected?.id ?? null;
   const choices = suggestion.options.length > 0 ? suggestion.options : allInstitutions;
 
@@ -90,7 +93,7 @@ export function BankConfirm({
             type="radio"
             name="institution"
             checked={selectedId === institution.id}
-            onChange={() => setManualId(institution.id)}
+            onChange={() => setManual({ account, id: institution.id })}
           />
           {institution.nameKo}
         </label>
@@ -230,23 +233,31 @@ export function AccountForm({ onSubmit }: { onSubmit: (account: string) => void 
   });
 
   return (
-    <form.Field name="account" validators={{ onChange: accountSchema }}>
-      {(field) => {
-        const detected = detectBest(field.state.value);
-        return (
-          <>
-            <input
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            {detected?.confidence === "high" && !detected.ambiguous && (
-              <span>{detected.institution.nameKo}</span>
-            )}
-            <p role="alert">{field.state.meta.errors[0]?.message}</p>
-          </>
-        );
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        void form.handleSubmit();
       }}
-    </form.Field>
+    >
+      <form.Field name="account" validators={{ onChange: accountSchema }}>
+        {(field) => {
+          const detected = detectBest(field.state.value);
+          return (
+            <>
+              <input
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              {detected?.confidence === "high" && !detected.ambiguous && (
+                <span>{detected.institution.nameKo}</span>
+              )}
+              <p role="alert">{field.state.meta.errors[0]?.message}</p>
+            </>
+          );
+        }}
+      </form.Field>
+      <button type="submit">확인</button>
+    </form>
   );
 }
 ```
@@ -391,11 +402,15 @@ import { detectBest, toDetectionPayload } from "korean-account";
 
 export async function submitAccount(account: string, institutionId: string): Promise<void> {
   const best = detectBest(account);
-  await fetch("/api/accounts", {
+  const response = await fetch("/api/accounts", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ account, institutionId, detection: best && toDetectionPayload(best) }),
   });
+  // fetch는 400·500 응답에도 reject하지 않으므로 상태를 직접 확인합니다.
+  if (!response.ok) {
+    throw new Error(`계좌를 저장하지 못했습니다 (HTTP ${response.status}).`);
+  }
 }
 ```
 

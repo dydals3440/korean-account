@@ -42,7 +42,9 @@ Metadata workflow(`.github/workflows/labeler.yml`)는 제목에서 type과 비�
 큰 변경은 `gh stack`으로 쌓은 PR로 받습니다. 절차는 [기여 안내](../CONTRIBUTING.md#쌓인-prstacked-pr)에 있습니다.
 
 - CI는 base 브랜치와 관계없이 모든 PR에서 실행되므로 각 층이 자기 base 기준으로 검증됩니다. 제목 검사와 Metadata 라벨도 PR마다 따로 적용됩니다.
-- 아래 층부터 squash merge합니다. `gh stack merge --squash --yes`는 스택 전체를 아래에서 위로 한 번에 머지하고, 하나라도 머지할 수 없으면 아무것도 머지하지 않습니다. `gh pr merge`는 쌓인 PR에 쓰지 않습니다.
+- 아래 층부터 squash merge합니다. `gh stack merge --squash --yes`로 머지 방식을 항상 명시합니다(생략하면 마지막에 쓴 방식을 재사용합니다). `gh pr merge`는 쌓인 PR에 쓰지 않습니다.
+- 스택 머지는 원자적이지 않습니다. 중간에 멈추면 아래 PR만 머지되고 위 PR은 열린 채로 남을 수 있고, merge queue를 쓰면 여러 묶음으로 나뉘어 처리될 수 있습니다. 재시도하기 전에 `gh stack view --json`으로 어떤 PR까지 머지됐는지 확인합니다.
+- 스택의 모든 PR은 main의 규칙(ruleset)으로 평가되고, 스택 머지에서는 규칙을 우회할 수 없습니다. 혼자 충족할 수 없는 규칙(승인 수, CODEOWNERS 승인, 리뷰 스레드 해결 필수)을 main에 두지 않습니다.
 - 층마다 changeset을 둘 수 있습니다. main에 들어오면 Changesets 버전 PR이 모두 모읍니다.
 - 머지 후에는 `gh stack sync --prune`으로 남은 층을 main 위로 다시 쌓습니다.
 
