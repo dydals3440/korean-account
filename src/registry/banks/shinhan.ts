@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const shinhan = defineInstitution({
   id: "shinhan",
@@ -14,6 +15,7 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: [
         "100",
@@ -130,19 +132,25 @@ export const shinhan = defineInstitution({
         ),
         defineSubject({
           code: "268",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
+          effectiveFrom: "2016-04-12",
         }),
         defineSubject({
           code: "269",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
+          effectiveFrom: "2016-03-14",
         }),
         defineSubject({
           code: "298",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "trust",
           label: "청년희망펀드 공익신탁",
           allowsWithdrawal: false,
+          effectiveFrom: "2015-10-12",
         }),
       ],
       effectiveFrom: "2006-10-09",
@@ -150,11 +158,10 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit"),
       additionalRules: [(digits) => digits.slice(3, 6) !== "901"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        // PDF p.12: 560/561 are ○×○× (withdrawal transfer unavailable);
-        // 562 is ○○○○ and keeps withdrawal.
         defineSubject({
           code: "560",
           category: "ordinary",
@@ -167,12 +174,23 @@ export const shinhan = defineInstitution({
           virtual: true,
           allowsWithdrawal: false,
         }),
-        defineSubject({ code: "562", category: "ordinary", virtual: true }),
+        defineSubject({
+          code: "562",
+          services: cmsServices(
+            "virtualAccount",
+            "directDebit",
+            "directCredit",
+            "additionalServices",
+          ),
+          category: "ordinary",
+          virtual: true,
+        }),
       ],
     },
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -191,9 +209,9 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit"),
       subjectPosition: { start: 3, length: 2 },
       subjects: [
-        // PDF p.12: ○×○× — withdrawal transfer unavailable.
         defineSubject({ code: "81", category: "ordinary", virtual: true, allowsWithdrawal: false }),
         defineSubject({ code: "82", category: "ordinary", virtual: true, allowsWithdrawal: false }),
       ],
@@ -202,6 +220,7 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -218,6 +237,7 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 2 },
       subjects: [defineSubject({ code: "99", category: "ordinary", virtual: true })],
       note: "(구)신한(026) 가상계좌",
@@ -225,6 +245,7 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 3 },
       subjects: [defineSubject({ code: "901", category: "ordinary", virtual: true })],
       note: "(구)신한(026) 가상계좌 14d",

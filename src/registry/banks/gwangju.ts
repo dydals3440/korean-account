@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const gwangju = defineInstitution({
   id: "gwangju",
@@ -12,6 +13,7 @@ export const gwangju = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 3 },
       subjects: [
         defineSubject({ code: "107", category: "ordinary" }),
@@ -26,23 +28,26 @@ export const gwangju = defineInstitution({
         defineSubject({ code: "127", category: "corporate-free" }),
         defineSubject({
           code: "716",
+          services: { directDebit: false },
           category: "isa",
           label: "ISA",
           allowsWithdrawal: false,
           note: "출금이체 불가",
+          effectiveFrom: "2016-05-23",
         }),
       ],
     },
     {
       template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 3, length: 3 },
       identifiers: ["731"],
       subjectPosition: { start: 3, length: 3 },
       subjects: [
         defineSubject({
           code: "731",
-          category: "linked",
+          category: "other",
           effectiveFrom: "2012-03-23",
         }),
       ],
@@ -52,6 +57,7 @@ export const gwangju = defineInstitution({
     {
       template: patternTemplate("X-XXX-XXXXXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "107", category: "ordinary" }),

@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const kiwoom = defineInstitution({
   id: "kiwoom",
@@ -12,6 +13,7 @@ export const kiwoom = defineInstitution({
     {
       template: patternTemplate("XXXX-XXXX-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 8, length: 2 },
       subjects: [
         defineSubject({ code: "11", category: "ordinary" }),
@@ -20,60 +22,70 @@ export const kiwoom = defineInstitution({
         defineSubject({ code: "41", category: "savings" }),
         defineSubject({
           code: "50",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "51",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "52",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "53",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "54",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "55",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "56",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "57",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "58",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
         }),
         defineSubject({
           code: "59",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
           label: "ISA",
@@ -85,6 +97,6 @@ export const kiwoom = defineInstitution({
         defineSubject({ code: "98", category: "other" }),
       ],
     },
-    { template: patternTemplate("XXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXX"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },
   ],
 });

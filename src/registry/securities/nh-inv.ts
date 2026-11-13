@@ -1,4 +1,5 @@
 import { defineInstitution, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const nhInv = defineInstitution({
   id: "nh-inv",
@@ -11,6 +12,11 @@ export const nhInv = defineInstitution({
   userBaseMillions: 10.5,
   successorOf: ["wooriinvest-legacy", "nh-nonghyup-sec"],
   patterns: [
-    { template: patternTemplate("XXXXXXXXXXX"), kind: "new", effectiveFrom: "2009-08-04" },
+    {
+      template: patternTemplate("XXXXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-08-04",
+    },
   ],
 });

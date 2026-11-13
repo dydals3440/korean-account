@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const kbSec = defineInstitution({
   id: "kb-sec",
@@ -14,6 +15,7 @@ export const kbSec = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -39,11 +41,11 @@ export const kbSec = defineInstitution({
         defineSubject({ code: "69", category: "savings" }),
       ],
     },
-    // PDF p.14: 일련번호(8)-검증번호(1)-일련번호(2) = 11 digits; the printed
-    // boxes omit the check-digit between the two serial runs.
-    { template: patternTemplate("XXX-XXX-XX-X-XX"), kind: "new" },
-    // PDF p.14: 일련번호(8)-검증번호(1) = 9 digits; the printed boxes omit
-    // the trailing check-digit.
-    { template: patternTemplate("XXX-XXX-XX-X"), kind: "new" },
+    {
+      template: patternTemplate("XXX-XXX-XX-X-XX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+    },
+    { template: patternTemplate("XXX-XXX-XX-X"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },
   ],
 });

@@ -1,4 +1,5 @@
 import { defineInstitution, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const imSec = defineInstitution({
   id: "im-sec",
@@ -11,13 +12,10 @@ export const imSec = defineInstitution({
   successorOf: ["hi-investment-sec"],
   patterns: [
     {
-      // PDF p.16: 일련번호(7)-검증번호(1)-과목코드(2) — the subject code sits
-      // at the tail with the full 01~99 range and no per-code categories.
       template: patternTemplate("XXXXXXX-X-XX"),
       kind: "new",
-      // PDF p.16 puts 과목코드(2) 01~99 at the tail, but a full-range code
-      // matches every input and carries zero selectivity — deliberately not
-      // modeled as an identifier signal.
+      services: REGULAR_ACCOUNT_SERVICES,
+      /** p.16 과목코드 01~99 spans every value, so it identifies nothing and is not modeled. */
       note: "과목코드 01~99 (전 범위 — 식별 신호로 미사용)",
     },
   ],

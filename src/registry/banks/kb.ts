@@ -1,6 +1,6 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
-import { kb11FirstDigit } from "../branch-rules";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 const kbSubjectsOld12: Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),
@@ -9,7 +9,7 @@ const kbSubjectsOld12: Subject[] = [
   defineSubject({ code: "05", category: "household-current" }),
   defineSubject({ code: "04", category: "current" }),
   defineSubject({ code: "25", category: "corporate-free" }),
-  defineSubject({ code: "26", category: "yes" }),
+  defineSubject({ code: "26", category: "linked" }),
 ];
 
 export const kb = defineInstitution({
@@ -25,31 +25,38 @@ export const kb = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXX"),
       kind: "incoming-only",
+      services: cmsServices("directCredit"),
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["0"],
       note: "고객지정/핸드폰 입금 전용",
     },
-    // 11d: branchRule forks the kind by first digit (0 = incoming-only, 9 = lifetime).
+    /** p.1 11자리 0-고객지정번호(10): 고객지정계좌·핸드폰, 입금만 가능. */
     {
       template: patternTemplate("XXX-XXXX-XXXX"),
-      kind: "new",
-      branchRule: kb11FirstDigit,
-      additionalRules: [(d) => d.length === 11 && (d[0] === "0" || d[0] === "9")],
+      kind: "incoming-only",
+      services: cmsServices("directCredit"),
       identifierPosition: { start: 0, length: 1 },
-      identifiers: ["0", "9"],
-      note: "11자리: 0=입금전용, 9=평생계좌",
+      identifiers: ["0"],
+    },
+    /** p.1 11자리 9-고객지정번호(10): 고객지정·평생계좌, 자유입출금식 온라인예금 가능. */
+    {
+      template: patternTemplate("XXX-XXXX-XXXX"),
+      kind: "lifetime",
+      services: REGULAR_ACCOUNT_SERVICES,
+      identifierPosition: { start: 0, length: 1 },
+      identifiers: ["9"],
     },
     {
       template: patternTemplate("XXX-XX-XXXX-XX-X"),
       kind: "old",
-      identifierPosition: { start: 3, length: 2 },
-      identifiers: ["01", "21", "24", "05", "04", "25", "26"],
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 2 },
       subjects: kbSubjectsOld12,
     },
     {
       template: patternTemplate("XXXX-XX-XXXXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit", "additionalServices"),
       subjectPosition: { start: 4, length: 2 },
       subjects: [
         defineSubject({
@@ -65,16 +72,18 @@ export const kb = defineInstitution({
     {
       template: patternTemplate("XXXX-XX-XXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 4, length: 2 },
       subjects: [
         defineSubject({ code: "06", category: "household-current" }),
         defineSubject({ code: "18", category: "current" }),
       ],
-      note: "(구)주택 12자리, 연계예금(90) CMS 계약 업체만",
+      note: "(구)주택 12자리",
     },
     {
       template: patternTemplate("XXXX-XX-XXXXXXX-X"),
       kind: "merged-legacy",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 4, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -84,7 +93,7 @@ export const kb = defineInstitution({
         defineSubject({
           code: "90",
           category: "linked",
-          allowsWithdrawal: false,
+          note: "국민은행과 CMS 제공계약을 체결한 업체가 발행한 계좌만 이용 가능",
         }),
       ],
       note: "(구)주택 14자리",

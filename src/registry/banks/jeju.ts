@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const jeju = defineInstitution({
   id: "jeju",
@@ -12,6 +13,7 @@ export const jeju = defineInstitution({
     {
       template: patternTemplate("XX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 2, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -25,6 +27,7 @@ export const jeju = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXXX-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifiers: [
         "700",
         "701",

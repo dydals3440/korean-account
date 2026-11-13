@@ -17,6 +17,8 @@ export type {
   AdditionalRule,
   BranchRule,
   BranchRuleResult,
+  CmsService,
+  CmsServices,
   DigitSpan,
   PatternTemplate,
   PatternToken,

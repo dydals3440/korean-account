@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const kdb = defineInstitution({
   id: "kdb",
@@ -12,6 +13,7 @@ export const kdb = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "13", category: "ordinary" }),
@@ -24,6 +26,7 @@ export const kdb = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXXXX-X-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["013", "020", "019", "011", "022"],
       subjectPosition: { start: 0, length: 3 },
@@ -35,11 +38,10 @@ export const kdb = defineInstitution({
         defineSubject({ code: "022", category: "corporate-free" }),
       ],
     },
-    // PDF p.1: the 010 row is ×○○○ (withdrawal transfer available); only
-    // 036 (정기적금) is deposit-only per the 비고.
     {
       template: patternTemplate("XXX-XXXXXXXX-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["010", "036"],
       subjectPosition: { start: 0, length: 3 },

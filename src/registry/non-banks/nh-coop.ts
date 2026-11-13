@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 const nhCoopSubjectsNew = [
   defineSubject({ code: "351", category: "ordinary" }),
@@ -7,9 +8,7 @@ const nhCoopSubjectsNew = [
   defineSubject({ code: "355", category: "corporate-free" }),
 ];
 
-// PDF p.4: the coop 13d scheme applies only when 계좌구분 (last digit) is 3–5
-// (농협은행 owns 1–2). 028 exists on both sides; this digit is the only
-// disambiguator.
+/** p.4: a 13-digit account belongs to the coops only when 계좌구분 is 3–5; it alone splits 028 trusts. */
 const ACCOUNT_CLASS_3_TO_5 = (digits: string) =>
   digits[12] === "3" || digits[12] === "4" || digits[12] === "5";
 
@@ -26,19 +25,19 @@ export const nhCoop = defineInstitution({
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["351", "352", "356", "355"],
       subjectPosition: { start: 0, length: 3 },
       subjects: nhCoopSubjectsNew,
-      // PDF p.4: the coop 13d scheme applies only when 계좌구분 (last digit)
-      // is 3, 4, or 5 (1/2 belong to NH Bank).
       additionalRules: [ACCOUNT_CLASS_3_TO_5],
       effectiveFrom: "2009-01-28",
     },
-    // 13d next-gen installment savings (incoming only) — 5 codes listed in the PDF.
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-28",
       additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["354", "360", "384", "394", "398"],
@@ -51,10 +50,11 @@ export const nhCoop = defineInstitution({
         }),
       ),
     },
-    // 13d next-gen trust (incoming only) — PDF lists 028.
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-28",
       additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["028"],
@@ -70,6 +70,7 @@ export const nhCoop = defineInstitution({
     {
       template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 6, length: 2 },
       subjects: [
         defineSubject({ code: "51", category: "ordinary" }),
@@ -81,6 +82,7 @@ export const nhCoop = defineInstitution({
     {
       template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit"),
       subjectPosition: { start: 6, length: 2 },
       subjects: [
         defineSubject({ code: "66", category: "ordinary", virtual: true }),
@@ -92,6 +94,7 @@ export const nhCoop = defineInstitution({
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit"),
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["792"],
       subjectPosition: { start: 0, length: 3 },

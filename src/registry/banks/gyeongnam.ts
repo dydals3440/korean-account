@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const gyeongnam = defineInstitution({
   id: "gyeongnam",
@@ -9,11 +10,10 @@ export const gyeongnam = defineInstitution({
   aliases: ["경남", "BNK경남"],
   userBaseMillions: 2,
   patterns: [
-    // PDF p.8: digit-count 12 (branch 3 - subject 2 - serial 6 - check 1);
-    // the printed boxes omit the trailing check-digit box.
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "07", category: "ordinary" }),
@@ -23,7 +23,7 @@ export const gyeongnam = defineInstitution({
         defineSubject({ code: "22", category: "free-savings" }),
         defineSubject({
           code: "32",
-          category: "corporate-free",
+          category: "other",
           label: "기업BEST",
         }),
         defineSubject({ code: "03", category: "household-current" }),
@@ -34,6 +34,7 @@ export const gyeongnam = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXXXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["207", "209", "220", "221", "222", "232", "203", "201", "235"],
       subjectPosition: { start: 0, length: 3 },
@@ -45,7 +46,7 @@ export const gyeongnam = defineInstitution({
         defineSubject({ code: "222", category: "free-savings" }),
         defineSubject({
           code: "232",
-          category: "corporate-free",
+          category: "other",
           label: "기업BEST",
         }),
         defineSubject({ code: "203", category: "household-current" }),

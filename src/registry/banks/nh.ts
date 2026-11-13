@@ -1,5 +1,6 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 const nhBankSubjectsOld: Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),
@@ -12,7 +13,7 @@ const nhBankSubjectsOld: Subject[] = [
   }),
   defineSubject({ code: "05", category: "current" }),
   defineSubject({ code: "17", category: "corporate-free" }),
-  // Deposit-only subjects (PDF p.4 비고: 입금만가능과목 — 적금/신탁).
+  /** p.4 비고 "입금만 가능과목": 적금·신탁. */
   ...["04", "10", "14", "21", "24", "34", "45", "47", "49", "59", "80"].map((code) =>
     defineSubject({ code, category: "installment", allowsWithdrawal: false }),
   ),
@@ -21,8 +22,7 @@ const nhBankSubjectsOld: Subject[] = [
   ),
 ];
 
-// PDF p.4: NH Bank 13d is valid only when the last digit (계좌구분) is 1 or 2
-// (3/4/5 belong to the NH federation, 농협중앙회).
+/** p.4: a 13-digit account belongs to NH Bank only when its last digit (계좌구분) is 1 or 2. */
 const nh13AccountClass = (digits: string): boolean => digits[12] === "1" || digits[12] === "2";
 
 export const nh = defineInstitution({
@@ -38,18 +38,22 @@ export const nh = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: nhBankSubjectsOld,
     },
     {
       template: patternTemplate("XXXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 4, length: 2 },
       subjects: nhBankSubjectsOld,
     },
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-28",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["301", "302", "312", "306", "305", "317"],
       additionalRules: [nh13AccountClass],
@@ -63,10 +67,11 @@ export const nh = defineInstitution({
         defineSubject({ code: "317", category: "corporate-free" }),
       ],
     },
-    // 13d next-gen installment savings (deposit-only) — codes enumerated in the PDF.
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-28",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["304", "310", "314", "321", "324", "334", "345", "347", "349", "359", "380"],
       additionalRules: [nh13AccountClass],
@@ -80,10 +85,11 @@ export const nh = defineInstitution({
           }),
       ),
     },
-    // 13d next-gen trust (deposit-only) — codes enumerated in the PDF.
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-28",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["028", "031", "043", "046", "079", "081", "086", "087", "088"],
       additionalRules: [nh13AccountClass],
@@ -95,6 +101,7 @@ export const nh = defineInstitution({
     {
       template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit"),
       subjectPosition: { start: 6, length: 2 },
       subjects: [
         defineSubject({ code: "64", category: "ordinary", virtual: true }),
@@ -106,6 +113,7 @@ export const nh = defineInstitution({
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directDebit"),
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["790", "791"],
       subjectPosition: { start: 0, length: 3 },

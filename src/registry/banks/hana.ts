@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 import { isHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 export const hana = defineInstitution({
@@ -18,6 +19,7 @@ export const hana = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "13", category: "ordinary" }),
@@ -29,7 +31,6 @@ export const hana = defineInstitution({
         defineSubject({ code: "26", category: "household-current" }),
         defineSubject({ code: "11", category: "current" }),
         defineSubject({ code: "22", category: "corporate-free" }),
-        // Deposit-only (withdrawal transfers cannot be registered)
         ...["15", "23", "24", "29", "70", "73", "74", "75", "77"].map((code) =>
           defineSubject({
             code,
@@ -44,20 +45,19 @@ export const hana = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXXX-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["611", "620", "600", "601", "630", "621", "631", "610"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
         defineSubject({ code: "611", category: "ordinary" }),
-        defineSubject({ code: "610", category: "treasury" }),
+        defineSubject({ code: "610", category: "treasury", effectiveFrom: "2009-06-15" }),
         defineSubject({ code: "620", category: "savings" }),
         defineSubject({ code: "600", category: "household-current" }),
         defineSubject({ code: "601", category: "current" }),
         defineSubject({ code: "630", category: "corporate-free" }),
         defineSubject({ code: "621", category: "yes" }),
         defineSubject({ code: "631", category: "yes" }),
-        // Deposit-only 3-digit codes (PDF p.2 비고) — 3-digit twins of the
-        // 2-digit deposit-only set (15/23/24/29/70/73/74/75/77) on the 11d pattern.
         defineSubject({
           code: "810",
           category: "installment",
@@ -121,14 +121,12 @@ export const hana = defineInstitution({
           }),
         ),
       ],
-      effectiveFrom: "2009-06-15",
     },
     {
       template: patternTemplate("XXX-XXXXXX-XXXXX"),
       kind: "merged-legacy",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["117", "158", "161", "162", "210", "379", "600", "655"],
-      // Score boost on prefix match — avoids ties with weaker matches like hana-securities-cma.
       additionalRules: [isHanaForeignLegacy14],
       note: "구 외환 통합 신상품 prefix",
     },

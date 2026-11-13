@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const meritz = defineInstitution({
   id: "meritz",
@@ -14,23 +15,55 @@ export const meritz = defineInstitution({
     {
       template: patternTemplate("XXXX-XXXX-XX"),
       kind: "old",
+      services: cmsServices("directCredit", "additionalServices"),
       subjectPosition: { start: 8, length: 2 },
-      // PDF p.18: only 15/16 allow withdrawal transfer (×○○○); every other
-      // era-1 code is deposit-only (××○○) or fully service-excluded (××××).
       subjects: [
         defineSubject({ code: "11", category: "ordinary", allowsWithdrawal: false }),
-        defineSubject({ code: "15", category: "savings" }),
-        defineSubject({ code: "16", category: "savings" }),
+        defineSubject({
+          code: "15",
+          services: cmsServices("directDebit", "directCredit", "additionalServices"),
+          category: "savings",
+        }),
+        defineSubject({
+          code: "16",
+          services: cmsServices("directDebit", "directCredit", "additionalServices"),
+          category: "savings",
+        }),
         defineSubject({ code: "21", category: "savings", allowsWithdrawal: false }),
         defineSubject({ code: "22", category: "savings", allowsWithdrawal: false }),
         defineSubject({ code: "23", category: "savings", allowsWithdrawal: false }),
         defineSubject({ code: "31", category: "savings", allowsWithdrawal: false }),
         defineSubject({ code: "61", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "62", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "63", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "64", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "65", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "66", category: "savings", allowsWithdrawal: false }),
+        defineSubject({
+          code: "62",
+          services: cmsServices(),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "63",
+          services: cmsServices(),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "64",
+          services: cmsServices(),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "65",
+          services: cmsServices(),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "66",
+          services: cmsServices(),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
         defineSubject({ code: "41", category: "household-current", allowsWithdrawal: false }),
         defineSubject({ code: "42", category: "household-current", allowsWithdrawal: false }),
         defineSubject({ code: "71", category: "current", allowsWithdrawal: false }),
@@ -41,12 +74,14 @@ export const meritz = defineInstitution({
     {
       template: patternTemplate("XXXX-XXXX-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       effectiveFrom: "2012-07-26",
       note: "00 사용 불가",
     },
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -55,6 +90,7 @@ export const meritz = defineInstitution({
         defineSubject({ code: "54", category: "savings" }),
         defineSubject({
           code: "21",
+          services: cmsServices("directCredit", "additionalServices"),
           category: "savings",
           allowsWithdrawal: false,
         }),

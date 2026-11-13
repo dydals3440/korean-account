@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const hanaSec = defineInstitution({
   id: "hana-sec",
@@ -10,10 +11,11 @@ export const hanaSec = defineInstitution({
   userBaseMillions: 4.8,
   successorOf: ["hana-fin-invest"],
   patterns: [
-    { template: patternTemplate("XXXXXXX-X"), kind: "new" },
+    { template: patternTemplate("XXXXXXX-X"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },
     {
       template: patternTemplate("XXXXXXX-X-XX"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 8, length: 2 },
       subjects: [
         defineSubject({ code: "11", category: "ordinary" }),
@@ -32,11 +34,13 @@ export const hanaSec = defineInstitution({
     {
       template: patternTemplate("XXXXXXXX-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       effectiveFrom: "2016-11-21",
     },
     {
       template: patternTemplate("XXXXXXXX-XXX-XXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       effectiveFrom: "2016-11-21",
     },
   ],

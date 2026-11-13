@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const yuanta = defineInstitution({
   id: "yuanta",
@@ -12,6 +13,7 @@ export const yuanta = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -22,10 +24,9 @@ export const yuanta = defineInstitution({
       ],
     },
     {
-      // PDF p.14: 고객지정번호(8)-랜덤부여(3)-검증번호(1) = 12 digits; the
-      // printed boxes omit the trailing check-digit.
       template: patternTemplate("XXXX-XXXX-XXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       effectiveFrom: "2011-01-03",
     },
   ],

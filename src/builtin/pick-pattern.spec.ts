@@ -45,7 +45,7 @@ describe("pickPattern", () => {
   describe("kind 필터", () => {
     test("kind=new — 신계좌 패턴만 반환한다", () => {
       // Given
-      const id = "kb";
+      const id = "shinhan";
 
       // When
       const result = pickPattern(id, { kind: "new" });

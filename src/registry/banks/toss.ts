@@ -1,5 +1,6 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { toss12First1719 } from "../branch-rules";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const toss = defineInstitution({
   id: "toss",
@@ -10,10 +11,10 @@ export const toss = defineInstitution({
   aliases: ["토스", "토스뱅크"],
   userBaseMillions: 13.8,
   patterns: [
-    // PDF: `subject(3)-serial(8)-check(1)`. ordinary: 100 / corporate-free: 150.
     {
       template: patternTemplate("XXXX-XXXX-XXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["100", "150"],
       subjectPosition: { start: 0, length: 3 },
@@ -23,18 +24,15 @@ export const toss = defineInstitution({
       ],
       effectiveFrom: "2021-10-05",
     },
-    // PDF: "17 or 19 + serial(10)" virtual accounts. The prefix overlaps
-    // Shinhyup's 12d installment (170~178), so subjects are enumerated too to
-    // force a score tie, letting priority (Toss 75 > Shinhyup 40) rank Toss
-    // first.
+    /** p.13 17·19 + 일련번호(10): shares its prefix with Shinhyup 170–178, so both stay candidates. */
     {
       template: patternTemplate("XXXX-XXXX-XXXX"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit"),
       identifierPosition: { start: 0, length: 2 },
       identifiers: ["17", "19"],
       subjectPosition: { start: 0, length: 2 },
       subjects: [
-        // PDF p.13: withdrawal transfer unavailable (○×○×).
         defineSubject({ code: "17", category: "ordinary", virtual: true, allowsWithdrawal: false }),
         defineSubject({ code: "19", category: "ordinary", virtual: true, allowsWithdrawal: false }),
       ],

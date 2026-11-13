@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const busan = defineInstitution({
   id: "busan",
@@ -12,6 +13,7 @@ export const busan = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -28,10 +30,9 @@ export const busan = defineInstitution({
       ],
     },
     {
-      // The PDF row header says 13 digits but draws only 12 boxes (check digit
-      // omitted) — normalized to 13 digits.
       template: patternTemplate("XXX-XXXX-XXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["101", "102", "112", "103", "109", "113"],
       subjectPosition: { start: 0, length: 3 },

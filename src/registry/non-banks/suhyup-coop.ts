@@ -1,5 +1,6 @@
 import { defineInstitution, patternTemplate } from "../../core/define";
 import { suhyupCoop12BranchToBank } from "../branch-rules";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const suhyupCoop = defineInstitution({
   id: "suhyup-coop",
@@ -11,10 +12,10 @@ export const suhyupCoop = defineInstitution({
   aliases: ["수협중앙회", "단위수협"],
   priority: 25,
   patterns: [
-    // branchRule: first digit 2/7/9 stays with the central coop; otherwise routes to 007 Suhyup Bank.
     {
       template: patternTemplate("X-XXXXXXXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["2", "7", "9"],
       branchRule: suhyupCoop12BranchToBank,

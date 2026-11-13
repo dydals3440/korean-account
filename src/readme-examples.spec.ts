@@ -56,6 +56,12 @@ describe("README 코드 예제가 주장하는 값", () => {
       allowsWithdrawal: true,
       virtual: false,
       validatedCheckDigit: null,
+      services: {
+        virtualAccount: false,
+        directDebit: true,
+        directCredit: true,
+        additionalServices: true,
+      },
     });
   });
 

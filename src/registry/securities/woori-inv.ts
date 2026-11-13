@@ -1,4 +1,5 @@
 import { defineInstitution, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const wooriInv = defineInstitution({
   id: "woori-inv",
@@ -13,8 +14,7 @@ export const wooriInv = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
-      // No `subjects`, so no score bonus — but `matchedPattern` is public output,
-      // and dropping this would change what consumers observe. Kept as in the PDF table.
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       effectiveFrom: "2019-12-20",
     },

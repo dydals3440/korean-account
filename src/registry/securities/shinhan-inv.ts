@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const shinhanInv = defineInstitution({
   id: "shinhan-inv",
@@ -13,12 +14,13 @@ export const shinhanInv = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
         defineSubject({ code: "11", category: "ordinary" }),
       ],
-      note: "01·11 종합계좌는 2017.09.04 이후 신규 발급 중단, 기존 계좌만 매칭",
+      note: "과목 01·11은 2017.09.04 삭제(PDF p.18·20), 과거 계좌 매칭용으로 유지",
     },
   ],
 });

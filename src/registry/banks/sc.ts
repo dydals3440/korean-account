@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const sc = defineInstitution({
   id: "sc",
@@ -12,6 +13,7 @@ export const sc = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "10", category: "ordinary" }),
@@ -22,6 +24,7 @@ export const sc = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({
@@ -37,9 +40,9 @@ export const sc = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXXXXX"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 2 },
       subjects: [
-        // PDF p.5: withdrawal transfer unavailable (○×○○), like sibling 15.
         defineSubject({
           code: "16",
           category: "ordinary",

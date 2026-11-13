@@ -6,7 +6,13 @@ export { searchInstitutions, type SearchInstitutionsFilter } from "./builtin/sea
 export { createDetector } from "./core/detector/create-detector";
 export { prevalence } from "./core/detector/prevalence";
 
-export { defineBranchRule, defineInstitution, defineSubject, patternTemplate } from "./core/define";
+export {
+  cmsServices,
+  defineBranchRule,
+  defineInstitution,
+  defineSubject,
+  patternTemplate,
+} from "./core/define";
 
 export { extractIdentifier } from "./core/account/extract-identifier";
 export { extractSubject } from "./core/account/extract-subject";

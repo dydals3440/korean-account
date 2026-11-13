@@ -12,7 +12,12 @@ import type {
 } from "../../types";
 import { normalizeAccount } from "../account/normalize-account";
 import { applyBranchRule } from "./apply-branch-rule";
-import { resolveCapabilities, toVerifierMap, verifyCheckDigit } from "./capabilities";
+import {
+  resolveCapabilities,
+  resolveServices,
+  toVerifierMap,
+  verifyCheckDigit,
+} from "./capabilities";
 import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
 import { normalizeSubject } from "./normalize-subject";
@@ -95,7 +100,10 @@ function buildDetector<TInstitution extends Institution>(
         continue;
       }
 
-      const subject = match.subject ? normalizeSubject(match.subject, branch.kind) : undefined;
+      const services = resolveServices(match.matchedPattern, match.subject);
+      const subject = match.subject
+        ? normalizeSubject(match.subject, branch.kind, services)
+        : undefined;
       const validatedCheckDigit = verifyCheckDigit(
         digits,
         match.matchedPattern,
@@ -114,6 +122,7 @@ function buildDetector<TInstitution extends Institution>(
         capabilities: resolveCapabilities({
           kind: branch.kind,
           subject,
+          services,
           virtualOverride: branch.virtualOverride,
           validatedCheckDigit,
         }),

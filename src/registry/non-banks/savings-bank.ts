@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const savingsBank = defineInstitution({
   id: "savings-bank",
@@ -12,6 +13,7 @@ export const savingsBank = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XX-XXXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 5, length: 2 },
       subjects: [
         defineSubject({ code: "13", category: "ordinary" }),

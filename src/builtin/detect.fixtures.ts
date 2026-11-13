@@ -117,11 +117,11 @@ export const FIXTURES = [
     kind: "incoming-only",
     subjectCategory: "installment",
   },
-  // Post office 14d deposit-only — preferential savings (05). No withdrawal, but the category stays savings.
+  // Post office 14d preferential savings (05) shares the ordinary-account row (p.11).
   {
     input: "123456-05-12345-6",
     id: "post",
-    kind: "incoming-only",
+    kind: "new",
     subjectCategory: "savings",
   },
   // KFCC 13d new savings (deposit-only). Prefix 9206 = savings 206.

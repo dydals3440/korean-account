@@ -1,5 +1,6 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 import { expandTwoDigitRange } from "../expand-range";
 
 /** Subjects of the integrated Citi 13-digit and former KorAm 11-digit formats (PDF p.6). */
@@ -35,10 +36,15 @@ const integratedCitiSubjects: readonly Subject[] = [
     category: "household-current",
     label: "가계종합",
   }),
-  // PDF p.6: 91/92 are virtual (가상 ○) and excluded from withdrawal transfer
-  // (출금이체 91,92불가).
-  defineSubject({ code: "91", category: "linked", virtual: true, allowsWithdrawal: false }),
-  defineSubject({ code: "92", category: "linked", virtual: true, allowsWithdrawal: false }),
+  ...["91", "92"].map((code) =>
+    defineSubject({
+      code,
+      category: "linked",
+      virtual: true,
+      allowsWithdrawal: false,
+      services: { directDebit: false, additionalServices: false },
+    }),
+  ),
 ];
 
 /**
@@ -65,11 +71,13 @@ const formerCitiSubjects: readonly Subject[] = [
   ...expandTwoDigitRange(43, 45).map((code) => defineSubject({ code, category: "savings" })),
   ...expandTwoDigitRange(50, 58).map((code) => defineSubject({ code, category: "savings" })),
   ...["63", "64"].map((code) => defineSubject({ code, category: "savings" })),
-  // free-savings: 63·64 within 60~69 are excluded — classified as savings (duplicated in the PDF).
+  // 63·64 appear under both 저축 and 자유저축 in the PDF; they are kept as savings.
   ...["60", "61", "62", "65", "66", "67", "68", "69"].map((code) =>
     defineSubject({ code, category: "free-savings" }),
   ),
-  ...expandTwoDigitRange(0, 19).map((code) => defineSubject({ code, category: "current" })),
+  // p.6 부가서비스 ○(00불가)
+  defineSubject({ code: "00", category: "current", services: { additionalServices: false } }),
+  ...expandTwoDigitRange(1, 19).map((code) => defineSubject({ code, category: "current" })),
   defineSubject({ code: "59", category: "corporate-free" }),
   defineSubject({
     code: "40",
@@ -95,12 +103,13 @@ export const citi = defineInstitution({
   patterns: [
     {
       template: patternTemplate("X-XXXXXX-XX-X"),
-      kind: "new",
+      kind: "merged-legacy",
+      services: cmsServices("directDebit", "directCredit"),
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["5", "0"],
       subjectPosition: { start: 0, length: 1 },
       subjects: [
-        defineSubject({ code: "5", category: "ordinary" }),
+        defineSubject({ code: "5", services: { additionalServices: false }, category: "ordinary" }),
         defineSubject({
           code: "0",
           category: "household-current",
@@ -111,6 +120,7 @@ export const citi = defineInstitution({
     {
       template: patternTemplate("X-XXXXXX-X-XX-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 8, length: 2 },
       subjects: [
         defineSubject({ code: "25", category: "ordinary" }),
@@ -127,14 +137,15 @@ export const citi = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXX-XX-X-XX"),
       kind: "new",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 8, length: 2 },
       subjects: integratedCitiSubjects,
       effectiveFrom: "2006-07-18",
     },
-    // Subject set identical to integrated Citi 13d (PDF: "(former KorAm) — same as integrated Citi").
     {
       template: patternTemplate("XXX-XXXXX-XX-X"),
       kind: "merged-legacy",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 8, length: 2 },
       subjects: integratedCitiSubjects,
       note: "(구)한미은행",
@@ -142,6 +153,7 @@ export const citi = defineInstitution({
     {
       template: patternTemplate("XX-XX-XXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 2, length: 2 },
       subjects: formerCitiSubjects,
       note: "(구) 053 씨티은행",

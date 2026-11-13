@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const lsSec = defineInstitution({
   id: "ls-sec",
@@ -13,6 +14,7 @@ export const lsSec = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -21,17 +23,27 @@ export const lsSec = defineInstitution({
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "55", category: "savings" }),
         defineSubject({ code: "56", category: "savings" }),
-        // Deposit-only: no withdrawal transfers
         ...["65", "77", "78"].map((code) =>
           defineSubject({
             code,
             category: "savings",
             allowsWithdrawal: false,
+            services: cmsServices("directCredit", "additionalServices"),
           }),
         ),
       ],
     },
-    { template: patternTemplate("XXXXXXXXX"), kind: "new", effectiveFrom: "2012-07-09" },
-    { template: patternTemplate("XXXXXXXXXXX"), kind: "new" },
+    {
+      template: patternTemplate("XXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2012-07-09",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2012-07-09",
+    },
   ],
 });

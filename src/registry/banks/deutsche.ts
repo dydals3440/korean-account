@@ -1,4 +1,4 @@
-import { defineInstitution, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, patternTemplate } from "../../core/define";
 
 export const deutsche = defineInstitution({
   id: "deutsche",
@@ -8,5 +8,11 @@ export const deutsche = defineInstitution({
   category: "bank",
   aliases: ["도이치"],
   userBaseMillions: 0.01,
-  patterns: [{ template: patternTemplate("XXXXXXXXXX"), kind: "new" }],
+  patterns: [
+    {
+      template: patternTemplate("XXXXXXXXXX"),
+      kind: "new",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit"),
+    },
+  ],
 });

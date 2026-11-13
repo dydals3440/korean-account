@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const miraeAsset = defineInstitution({
   id: "mirae-asset",
@@ -10,47 +11,94 @@ export const miraeAsset = defineInstitution({
   aliases: ["미래에셋", "미래에셋대우"],
   userBaseMillions: 13,
   patterns: [
-    // PDF p.15: plain-serial lengths 8-10 and 12-14. New registration was cut
-    // to 12 digits only from 2017-01-01, but accounts registered earlier persist.
-    { template: patternTemplate("XXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: patternTemplate("XXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: patternTemplate("XXXXXXXX-XX"), kind: "new" },
-    { template: patternTemplate("XXXXXXXXXXX"), kind: "new" },
-    { template: patternTemplate("XXXXXXXXXXXX"), kind: "new", effectiveFrom: "2017-01-01" },
-    { template: patternTemplate("XXXXXXXXXXXXX"), kind: "old", note: "2016.12.31 이전 등록분" },
-    { template: patternTemplate("XXXXXXXXXXXXXX"), kind: "new" },
+    /** p.15: 230(구 미래에셋대우) plain serials are registrable only if opened by 2016.12.31. */
+    {
+      template: patternTemplate("XXXXXXXX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
+    {
+      template: patternTemplate("XXXXXXXXX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
+    {
+      template: patternTemplate("XXXXXXXX-XX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2017.1.1 이후 신규 등록은 12자리만 가능",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXXXX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXXXXX"),
+      kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      note: "2016.12.31 이전 등록분",
+    },
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
         defineSubject({ code: "99", category: "ordinary" }),
-        // PDF p.15 marks 31/44/51 as deposit-only (출금이체 ×).
-        defineSubject({ code: "31", category: "savings", allowsWithdrawal: false }),
-        defineSubject({ code: "44", category: "savings", allowsWithdrawal: false }),
+        defineSubject({
+          code: "31",
+          services: cmsServices("directCredit", "additionalServices"),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
+        defineSubject({
+          code: "44",
+          services: cmsServices("directCredit", "additionalServices"),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
         defineSubject({
           code: "46",
           category: "savings",
           note: "장기주택마련저축·연금·개인연금 계좌는 출금이체 제외",
         }),
-        defineSubject({ code: "51", category: "savings", allowsWithdrawal: false }),
+        defineSubject({
+          code: "51",
+          services: cmsServices("directCredit", "additionalServices"),
+          category: "savings",
+          allowsWithdrawal: false,
+        }),
         defineSubject({ code: "77", category: "savings" }),
       ],
     },
-    // PDF p.15: 12d coded legacy 점번호(3)-과목코드(2)-일련번호(7), registration
-    // limited to accounts opened by 2016-12-31. Coexists with the plain 12d above.
+    /** p.15 238 점번호(3)-과목(2)-일련번호(7): 2016.12.31 이전 등록분, plain 12d coexists. */
     {
       template: patternTemplate("XXX-XX-XXXXXXX"),
       kind: "old",
+      services: cmsServices("directCredit", "additionalServices"),
       note: "2016.12.31 이전 등록에 한함",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
-        // Withdrawal-allowed group (×○○○).
         ...["20", "21", "22", "33", "39", "51", "58"].map((code) =>
-          defineSubject({ code, category: "other" }),
+          defineSubject({ code, category: "other", services: REGULAR_ACCOUNT_SERVICES }),
         ),
-        // Deposit-only group (××○○).
         ...["05", "15", "34", "37", "60", "62", "63", "90", "91"].map((code) =>
           defineSubject({ code, category: "other", allowsWithdrawal: false }),
         ),
