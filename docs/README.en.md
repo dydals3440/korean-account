@@ -22,7 +22,7 @@ Korean transfer and direct-debit forms ask the user to pick a bank next to the a
 - **Ambiguity flag**: `ambiguous: true` when another institution sits in the same confidence band, so you know to ask the user.
 - **KFTC service columns**: virtual-account issuance, direct debit, direct credit and additional services via `capabilities.services`.
 - **Type-safe**: institution ids are literal unions, and a detector built from a subset narrows its result types to that subset.
-- **Small**: 11.8 kB for the full registry, 4.4 kB for `createDetector([kb, shinhan, toss])` (minified + brotli).
+- **Small**: 11.9 kB for the full registry, 4.6 kB for `createDetector([kb, shinhan, toss])` (minified + brotli).
 - **Validation adapters**: Standard Schema (no dependency), Zod 3/4, Valibot, Yup and ArkType, all with the same rules.
 
 ## Install
@@ -80,7 +80,7 @@ const accountSchema = createAccountSchema({
 
 - Institutions that share a numbering scheme cannot be told apart from the number alone; `ambiguous` is `true` then.
 - Check-digit algorithms are not public, so none are built in; register your own with `checkDigitVerifiers`.
-- Candidates appear once the input is within one digit of a pattern length.
+- By default, candidates appear once the input is within one digit of a pattern length. Pass `{ partial: true }` to suggest from a typed prefix; those suggestions are always `low`, so list them but never preselect one.
 - `capabilities` are static facts from the KFTC tables, not a guarantee for a specific account.
 
 ## Documentation

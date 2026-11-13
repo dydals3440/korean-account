@@ -38,7 +38,7 @@ detectBest("3333-12-3456789");
 - **모호성 표시**: 같은 신뢰도에 다른 기관이 있으면 `ambiguous: true`입니다. 그대로 확정하지 말고 사용자에게 고르게 하세요.
 - **PDF 서비스 열**: 가상계좌 발급·출금이체·입금이체·부가서비스 가능 여부를 `capabilities.services`로 돌려줍니다.
 - **타입 안전**: 기관 ID가 리터럴 유니온으로 좁혀지고, 기관을 골라 만든 detector는 결과 타입도 그 기관들로 좁혀집니다.
-- **작은 번들**: 전체 레지스트리는 11.8 kB이고, `createDetector([kb, shinhan, toss])`처럼 고르면 4.4 kB입니다(minify + brotli).
+- **작은 번들**: 전체 레지스트리는 11.9 kB이고, `createDetector([kb, shinhan, toss])`처럼 고르면 4.6 kB입니다(minify + brotli).
 - **검증 어댑터**: Standard Schema(의존성 없음), Zod 3·4, Valibot, Yup, ArkType용 스키마를 같은 규칙으로 제공합니다.
 
 ## 설치
@@ -77,7 +77,8 @@ for (const candidate of detect("110-436-387740", { limit: 3 })) {
 import { detect } from "korean-account";
 
 function suggestBank(input: string) {
-  const candidates = detect(input, { limit: 3 });
+  // partial: 입력 중에도 앞자리로 후보를 제안합니다(완성된 번호의 결과는 같음).
+  const candidates = detect(input, { limit: 3, partial: true });
   const [top] = candidates;
   const isConfident = top !== undefined && top.confidence === "high" && !top.ambiguous;
   return { preselected: isConfident ? top.institution : null, candidates };
@@ -146,7 +147,7 @@ const payload = detectionSchema.parse(await request.json());
 
 - 같은 번호 체계를 쓰는 기관은 번호만으로 가를 수 없습니다. 예를 들어 `110-436-387740`은 신한·우체국·신협 형식에 모두 맞습니다. 이때 `ambiguous`가 `true`입니다.
 - 검증번호 알고리즘은 공개되지 않아 내장하지 않았습니다. 알고 있다면 `checkDigitVerifiers`로 넣을 수 있습니다.
-- 후보는 입력이 거의 끝났을 때(패턴 길이 ±1자리) 나타납니다. 앞 몇 자리만으로는 추천하지 않습니다.
+- 기본값은 입력이 패턴 길이에 가까워졌을 때(±1자리) 후보를 냅니다. 입력 중 앞자리로 제안하려면 `detect(input, { partial: true })`를 씁니다. 이때 후보는 항상 `low`이므로 목록으로만 보여 주고 미리 선택하지 않습니다.
 - `capabilities`는 PDF에 적힌 정적 정보입니다. 실제 자동이체 가능 여부는 기관과 계약 조건에 따라 다릅니다.
 - 레지스트리는 금융결제원 「참가기관별 CMS 계좌번호 체계」(2026.05.08, [2026.11.11 게시](https://www.cmsedi.or.kr/cms/board/workdata/view/1031)) 기준입니다. 원문과의 차이와 해석은 [PDF 대조 기록](https://github.com/dydals3440/korean-account/blob/main/docs/source-audit.md)에 있습니다.
 

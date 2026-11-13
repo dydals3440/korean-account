@@ -235,6 +235,19 @@ export interface DetectOptions<TId extends string = string> {
    * @default 1
    */
   readonly minScore?: number | undefined;
+  /**
+   * Treats the input as possibly unfinished: also scores formats longer than the input by two or
+   * more digits, so a typed prefix such as Kakao Bank's `3333` already finds candidates. Without
+   * it, only formats within one digit of the input length are scored.
+   *
+   * A prefix earns only half the identifier and subject points and no length points, so these
+   * candidates are `"low"`: list them as suggestions, never preselect one, and never call a paid
+   * lookup on them. Complete numbers rank the same with or without it, so it can stay on while
+   * the user types. Registered check-digit verifiers then also receive short digit strings.
+   *
+   * @default false
+   */
+  readonly partial?: boolean | undefined;
 }
 
 /**

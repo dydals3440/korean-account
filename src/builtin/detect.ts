@@ -9,8 +9,9 @@ const builtinDetector = createDetector(institutions);
  * Returns the built-in institutions an account number may belong to, ranked best first.
  *
  * Input goes through {@link normalizeAccount}, so hyphens, spaces and full-width digits are
- * accepted as typed or pasted. An institution is scored only when one of its patterns is within
- * one digit of the input length, so candidates appear once the number is nearly complete.
+ * accepted as typed or pasted. By default an institution is scored only when one of its patterns
+ * is within one digit of the input length, so candidates appear once the number is nearly
+ * complete; pass `partial: true` to suggest `"low"` candidates from a typed prefix.
  * Candidates are ordered by confidence band, then evidence, score, the {@link prevalence} prior
  * and account kind, so a match backed only by length never outranks one backed by its digits.
  * Each institution appears at most once, even when a branch rule reroutes several readings to it.

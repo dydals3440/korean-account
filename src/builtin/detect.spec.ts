@@ -321,3 +321,65 @@ describe("기관당 후보 하나", () => {
     expect(duplicated).toEqual([]);
   });
 });
+
+describe("partial 옵션", () => {
+  test.each(["1", "11"])("숫자가 너무 적은 %j 는 후보가 없다", (input) => {
+    // Given
+    const options = { partial: true };
+
+    // When
+    const results = detect(input, options);
+
+    // Then
+    expect(results).toEqual([]);
+  });
+
+  test("카카오뱅크 앞 4자리 3333 은 카카오뱅크를 1순위 low 로 제안한다", () => {
+    // Given
+    const input = "3333";
+
+    // When
+    const results = detect(input, { partial: true });
+
+    // Then
+    expect(
+      results.map((result) => [result.institution.id, result.confidence, result.ambiguous]),
+    ).toEqual([
+      ["kakao", "low", true],
+      ["citi", "low", true],
+    ]);
+  });
+
+  test("110 은 같은 식별자를 쓰는 신한·우체국·신협을 모두 제안한다", () => {
+    // Given
+    const input = "110";
+
+    // When
+    const ids = detect(input, { partial: true }).map((result) => result.institution.id);
+
+    // Then
+    expect(ids).toEqual(["shinhan", "post", "shinhyup"]);
+  });
+
+  test("근거 있는 앞자리 일치가 길이만 맞은 후보보다 앞에 온다", () => {
+    // Given
+    const input = "3333-12";
+
+    // When
+    const [top] = detect(input, { partial: true });
+
+    // Then
+    expect(top?.institution.id).toBe("kakao");
+  });
+
+  test("partial 없이는 패턴 길이에 가까워질 때까지 후보가 없다", () => {
+    // Given
+    const input = "3333";
+
+    // When
+    const results = detect(input);
+
+    // Then
+    expect(results).toEqual([]);
+  });
+});

@@ -344,3 +344,64 @@ describe("평가 기준: 무작위 입력 불변식", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe("평가 기준: 입력 중 제안(partial)", () => {
+  const samples = sampleIdentifiablePatterns(institutions, SAMPLES_PER_PATTERN, 0xacc0);
+  const expectedIdOf = (sample: (typeof samples)[number]): string =>
+    sample.pattern.branchRule?.evaluate(sample.digits)?.institutionId ?? sample.institution.id;
+
+  test("완성된 번호는 partial 여부와 관계없이 결과 전체가 같다", () => {
+    // Given
+    const inputs = samples.map((sample) => sample.digits);
+
+    // When
+    const changed = inputs.filter(
+      (input) => JSON.stringify(detect(input)) !== JSON.stringify(detect(input, { partial: true })),
+    );
+
+    // Then
+    expect(inputs.length).toBeGreaterThanOrEqual(1900);
+    expect(changed).toEqual([]);
+  });
+
+  // Measured top-5 recall on 2026-11-14: 29.6% · 43.4% · 59.7% · 77.0%; default mode 16% · 17% · 6% · 5%.
+  test.each([
+    [2, 0.28],
+    [3, 0.42],
+    [4, 0.58],
+    [6, 0.75],
+  ])("끝 %i자리를 덜 입력해도 정답 기관이 top-5 에 드는 비율이 %f 이상이다", (missing, floor) => {
+    // Given
+    const cutSamples = samples.map((sample) => ({
+      input: sample.digits.slice(0, sample.digits.length - missing),
+      expectedId: expectedIdOf(sample),
+    }));
+
+    // When
+    const recall = (options: { readonly partial: boolean }): number =>
+      cutSamples.filter(({ input, expectedId }) =>
+        detect(input, options).some((result) => result.institution.id === expectedId),
+      ).length / cutSamples.length;
+    const partialRecall = recall({ partial: true });
+    const defaultRecall = recall({ partial: false });
+
+    // Then
+    expect(partialRecall).toBeGreaterThanOrEqual(floor);
+    expect(partialRecall).toBeGreaterThan(defaultRecall);
+  });
+
+  test("입력 중 제안은 근거가 있어도 모두 low 다", () => {
+    // Given
+    const prefixes = samples.map((sample) => sample.digits.slice(0, 4));
+
+    // When
+    const confident = prefixes.flatMap((prefix) =>
+      detect(prefix, { partial: true, limit: Infinity })
+        .filter((result) => result.confidence !== "low")
+        .map((result) => `${prefix} → ${result.institution.id}:${result.confidence}`),
+    );
+
+    // Then
+    expect(confident).toEqual([]);
+  });
+});

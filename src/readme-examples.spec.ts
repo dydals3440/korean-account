@@ -90,15 +90,18 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(count).toBe(57);
   });
 
-  test("한계 — 입력이 패턴 길이에 가깝지 않으면 후보가 없다", () => {
+  test("한계 — 기본값은 앞자리만으로 후보를 내지 않고, partial 이면 low 로 제안한다", () => {
     // Given
     const prefixOnly = "3333";
 
     // When
-    const candidates = detect(prefixOnly);
+    const byDefault = detect(prefixOnly);
+    const [suggested] = detect(prefixOnly, { partial: true });
 
     // Then
-    expect(candidates).toEqual([]);
+    expect(byDefault).toEqual([]);
+    expect(suggested?.institution.id).toBe("kakao");
+    expect(suggested?.confidence).toBe("low");
   });
 
   test("검증 어댑터 — 메시지를 키별로 바꾸고 전각 입력도 받는다", () => {

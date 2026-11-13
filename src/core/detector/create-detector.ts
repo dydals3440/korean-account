@@ -119,7 +119,11 @@ function buildDetector<TInstitution extends Institution>(
     const candidates: RankableCandidate<TInstitution>[] = [];
     const bandMembers: BandMember[] = [];
 
-    for (const candidate of lengthIndex.candidatesNear(digits.length)) {
+    // A pattern two or more digits shorter than the input always scores 0, so scoring every
+    // institution only adds the longer formats a prefix may still grow into.
+    const pool =
+      options.partial === true ? institutions : lengthIndex.candidatesNear(digits.length);
+    for (const candidate of pool) {
       const match = scoreInstitution(digits, candidate, config.globalRules, weights);
       if (match.matchedPattern === null) {
         continue;

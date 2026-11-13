@@ -268,7 +268,12 @@ import { useDeferredValue, useMemo, useState } from "react";
 export function AccountInput() {
   const [raw, setRaw] = useState("");
   const deferred = useDeferredValue(raw);
-  const candidates = useMemo(() => detect(deferred, { limit: 3 }), [deferred]);
+  // 3자리 미만은 후보가 너무 많아 의미가 없으므로 기다립니다.
+  const candidates = useMemo(
+    () =>
+      deferred.replace(/\D/g, "").length < 3 ? [] : detect(deferred, { limit: 3, partial: true }),
+    [deferred],
+  );
 
   return (
     <>
@@ -287,7 +292,7 @@ export function AccountInput() {
 }
 ```
 
-후보는 입력 자릿수와 1자리 이내인 형식에서만 나오므로, 번호를 거의 다 입력해야 목록이 채워집니다. `detect`는 동기 함수이고 기관 색인을 미리 만들어 두므로 매 입력마다 호출해도 됩니다.
+`partial: true`는 입력이 아직 짧을 수 있다고 보고 더 긴 형식의 앞자리 일치도 후보로 냅니다. 예를 들어 `3333`만 입력해도 카카오뱅크가 1순위로 나옵니다. 앞자리 일치는 항상 `low`이므로 목록으로만 보여 주고, 번호를 다 입력한 뒤의 `high` 결과로만 미리 선택합니다. 완성된 번호의 결과는 partial 여부와 같으므로 입력하는 내내 켜 둬도 됩니다. `detect`는 동기 함수이므로 매 입력마다 호출해도 됩니다.
 
 ## 입력 중 포맷팅
 
