@@ -247,25 +247,33 @@ describe("평가 기준: 실제 계좌 코퍼스 래칫", () => {
 });
 
 describe("평가 기준: 무작위 입력 불변식", () => {
-  test("임의 14자리 digits 1000건이면 limit·정렬·confidence 상한을 지킨다", () => {
+  test("임의 14자리 digits 1000건이면 limit·기관 중복 없음·정렬·confidence 상한을 지킨다", () => {
     // Given
     const rng = createSeededRandom(0xc0ffee);
     const inputs = Array.from({ length: 1000 }, () => randomDigits(rng, 14));
 
     // When
-    const resultsPerInput = inputs.map((input) => detect(input));
+    const resultsPerInput = inputs.map((input) => ({ input, results: detect(input) }));
 
     // Then
-    for (const results of resultsPerInput) {
+    for (const { input, results } of resultsPerInput) {
       expect(results.length).toBeLessThanOrEqual(5);
+      expect(new Set(results.map((result) => result.institution.id)).size).toBe(results.length);
 
-      for (let k = 1; k < results.length; k += 1) {
-        const prev = results[k - 1];
-        const curr = results[k];
-        if (!prev || !curr) {
-          continue;
-        }
-        expect(prev.score).toBeGreaterThanOrEqual(curr.score);
+      // Ordered by band, then evidence, then score.
+      const sortKeys = results.map((result) => [
+        SCORE_BAND_RANK[result.confidence],
+        hasEvidence(result, input) ? 1 : 0,
+        result.score,
+      ]);
+      for (let k = 1; k < sortKeys.length; k += 1) {
+        const [prevBand = 0, prevEvidence = 0, prevScore = 0] = sortKeys[k - 1] ?? [];
+        const [band = 0, evidence = 0, score = 0] = sortKeys[k] ?? [];
+        const isOrdered =
+          prevBand > band ||
+          (prevBand === band && prevEvidence > evidence) ||
+          (prevBand === band && prevEvidence === evidence && prevScore >= score);
+        expect(isOrdered).toBe(true);
       }
 
       // A high/medium top result narrows out low candidates.

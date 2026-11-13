@@ -22,7 +22,8 @@ import {
 import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
 import { resolveSubject } from "./normalize-subject";
-import { type BandMember, type RankableDetection, rankDetections } from "./rank";
+import { prevalence } from "./prevalence";
+import { type BandMember, type RankableCandidate, rankDetections, rankKey } from "./rank";
 import { mergeScoring, resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
 import { scoreInstitution } from "./score";
 
@@ -115,7 +116,7 @@ function buildDetector<TInstitution extends Institution>(
       return [];
     }
 
-    const candidates: RankableDetection<TInstitution>[] = [];
+    const candidates: RankableCandidate<TInstitution>[] = [];
     const bandMembers: BandMember[] = [];
 
     for (const candidate of lengthIndex.candidatesNear(digits.length)) {
@@ -156,27 +157,22 @@ function buildDetector<TInstitution extends Institution>(
           ? null
           : resolveSubject(match.subject, capabilities.allowsWithdrawal);
 
-      const { institution, kind } = branch;
-      const { matchedPattern } = match;
-      const formatted = formatAccount(digits, matchedPattern.template);
-      // Two fixed-shape literals: a conditional spread here made detect about 40% slower.
-      candidates.push(
-        subject === null
-          ? { institution, matchedPattern, kind, formatted, score, confidence, capabilities }
-          : {
-              institution,
-              matchedPattern,
-              kind,
-              subject,
-              formatted,
-              score,
-              confidence,
-              capabilities,
-            },
-      );
+      candidates.push({
+        institution: branch.institution,
+        matchedPattern: match.matchedPattern,
+        kind: branch.kind,
+        subject,
+        formatted: formatAccount(digits, match.matchedPattern.template),
+        score,
+        confidence,
+        capabilities,
+        rankKey: rankKey(confidence, branch.hasEvidence),
+        prior: prevalence(branch.institution),
+        isOwnPattern: branch.institution === candidate,
+      });
     }
 
-    return rankDetections(candidates, bandMembers).slice(0, limit);
+    return rankDetections(candidates, bandMembers, limit);
   };
 
   const extend = <TExtra extends Institution = never>(

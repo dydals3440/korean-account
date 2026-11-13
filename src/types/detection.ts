@@ -136,7 +136,8 @@ export interface DetectionResult<TInstitution extends Institution = Institution>
   readonly confidence: Confidence;
   /**
    * `true` when another institution matches the input with the same `confidence`, so the user
-   * should confirm. Institutions hidden by `DetectOptions` filters or `limit` still count.
+   * should confirm. Each institution counts once, at its strongest band; institutions hidden by
+   * `DetectOptions` filters or `limit` still count.
    */
   readonly ambiguous: boolean;
   /** Static capabilities of the matched format. */
@@ -222,8 +223,8 @@ export interface DetectOptions<TId extends string = string> {
   /** Drops results for these institution ids; wins over `include`. */
   readonly exclude?: readonly InstitutionIdInput<TId>[] | undefined;
   /**
-   * Maximum number of results, applied after ranking. A non-negative integer or `Infinity`;
-   * any other value makes `detect` throw a `RangeError`.
+   * Maximum number of results (one per institution), applied after ranking. A non-negative
+   * integer or `Infinity`; any other value makes `detect` throw a `RangeError`.
    *
    * @default 5
    */
@@ -343,8 +344,9 @@ export interface Detector<TInstitution extends Institution = Institution> {
    *
    * Characters other than digits are ignored and full-width digits count, so
    * `"110-436-387740"` and `"110 436 387740"` are equivalent. Each institution contributes its
-   * best pattern, though a branch reroute can list one institution twice. Results are ordered
-   * by confidence band, then score, then the `prevalence` prior, then kind.
+   * best pattern, and each institution appears at most once even when a branch rule reroutes
+   * several readings to it. Results are ordered by confidence band, then evidence, score, the
+   * `prevalence` prior and kind.
    *
    * @returns Up to `options.limit` results; empty when nothing matches or `input` has no digits.
    * @throws {RangeError} When `options.limit` or `options.minScore` is invalid.

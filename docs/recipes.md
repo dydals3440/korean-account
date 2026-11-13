@@ -38,12 +38,7 @@ export function suggestBank(input: string): BankSuggestion {
   const candidates = detect(input).filter((candidate) => candidate.confidence !== "low");
   const [top] = candidates;
   const isConfident = top !== undefined && top.confidence === "high" && !top.ambiguous;
-  // 분기 규칙 때문에 같은 기관이 두 번 나올 수 있습니다.
-  const options = [
-    ...new Map(
-      candidates.map((candidate) => [candidate.institution.id, candidate.institution]),
-    ).values(),
-  ];
+  const options = candidates.map((candidate) => candidate.institution);
 
   return { preselected: isConfident ? top.institution : null, options };
 }
@@ -279,9 +274,8 @@ export function AccountInput() {
     <>
       <input value={raw} onChange={(event) => setRaw(event.target.value)} inputMode="numeric" />
       <ul>
-        {candidates.map((candidate, index) => (
-          // 같은 기관이 두 번 나올 수 있어 index를 key에 섞습니다.
-          <li key={`${candidate.institution.id}:${index}`}>
+        {candidates.map((candidate) => (
+          <li key={candidate.institution.id}>
             {candidate.institution.nameKo} · {candidate.subject?.label ?? candidate.kind} ·{" "}
             {candidate.confidence}
             {candidate.ambiguous && " · 확인 필요"}

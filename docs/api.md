@@ -98,7 +98,7 @@ function detect(
 
 - 입력은 [`normalizeAccount`](#normalizeaccount)를 거칩니다. 하이픈·공백·전각 숫자를 그대로 넣어도 됩니다.
 - 입력 자릿수와 1자리 이내로 차이 나는 패턴이 있는 기관만 채점합니다. 그래서 후보는 번호를 거의 다 입력했을 때 나타납니다.
-- 기관마다 점수가 가장 높은 패턴 하나가 후보가 됩니다. 분기 규칙이 다른 기관으로 재배정하면 같은 기관이 두 번 나올 수 있습니다.
+- 결과에는 기관마다 후보가 하나만 나옵니다. 분기 규칙으로 다른 기관의 패턴이 같은 기관으로 재배정되면, 옵션으로 거른 뒤 남은 해석 중 순위가 가장 높은 것을 씁니다. 그래서 `limit`은 기관 수를 셉니다.
 - 정렬과 등급은 [신뢰도와 모호성](#신뢰도와-모호성)을 따릅니다.
 
 숫자가 없거나, 일치하는 패턴이 없거나, 옵션이 모두 걸러 내면 빈 배열입니다. `options.limit`·`options.minScore`가 잘못되면 입력과 관계없이 `RangeError`를 던집니다.
@@ -145,14 +145,14 @@ detectBest("12"); // => null
 
 `detect`, `detectBest`, `Detector.detect`의 두 번째 인자입니다.
 
-| 옵션         | 타입                             | 기본값      | 동작                                                                |
-| ------------ | -------------------------------- | ----------- | ------------------------------------------------------------------- |
-| `categories` | `readonly InstitutionCategory[]` | 거르지 않음 | 결과 기관의 분류가 목록에 있는 후보만 남김                          |
-| `kinds`      | `readonly AccountKind[]`         | 거르지 않음 | 결과 `kind`가 목록에 있는 후보만 남김                               |
-| `include`    | `readonly InstitutionIdInput[]`  | 거르지 않음 | 이 ID의 후보만 남김                                                 |
-| `exclude`    | `readonly InstitutionIdInput[]`  | 거르지 않음 | 이 ID의 후보를 뺌. `include`보다 우선                               |
-| `limit`      | `number`                         | `5`         | 정렬 후 최대 개수. 0 이상의 정수나 `Infinity`가 아니면 `RangeError` |
-| `minScore`   | `number`                         | `1`         | 이 점수 미만인 후보를 뺌. `NaN`이면 `RangeError`                    |
+| 옵션         | 타입                             | 기본값      | 동작                                                                         |
+| ------------ | -------------------------------- | ----------- | ---------------------------------------------------------------------------- |
+| `categories` | `readonly InstitutionCategory[]` | 거르지 않음 | 결과 기관의 분류가 목록에 있는 후보만 남김                                   |
+| `kinds`      | `readonly AccountKind[]`         | 거르지 않음 | 결과 `kind`가 목록에 있는 후보만 남김                                        |
+| `include`    | `readonly InstitutionIdInput[]`  | 거르지 않음 | 이 ID의 후보만 남김                                                          |
+| `exclude`    | `readonly InstitutionIdInput[]`  | 거르지 않음 | 이 ID의 후보를 뺌. `include`보다 우선                                        |
+| `limit`      | `number`                         | `5`         | 정렬 후 최대 개수(기관 수). 0 이상의 정수나 `Infinity`가 아니면 `RangeError` |
+| `minScore`   | `number`                         | `1`         | 이 점수 미만인 후보를 뺌. `NaN`이면 `RangeError`                             |
 
 - 필터는 분기 규칙이 기관과 종류를 바꾼 **뒤의** 결과에 적용합니다.
 - `undefined`는 기본값과 같습니다. 빈 배열(`categories: []`, `kinds: []`, `include: []`)은 아무 후보도 남기지 않습니다.
@@ -260,12 +260,12 @@ detectBest("110-436-387740");
 
 `DetectionResult.subject`의 타입입니다. 레지스트리의 [`Subject`](#definesubject)에 기본값을 채운 형태입니다.
 
-| 필드                                                    | 값                                                                                                      |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `code`, `category`, `services`, `effectiveFrom`, `note` | 선언한 값 그대로                                                                                        |
-| `label`                                                 | 선언한 `label`, 없으면 `subjectCategoryLabels[category]`                                                |
-| `allowsWithdrawal`                                      | 과목의 `allowsWithdrawal` → 과목의 `services.directDebit` → 패턴의 `services.directDebit` → 종류 기본값 |
-| `virtual`                                               | 과목의 `virtual`, 없으면 `false`                                                                        |
+| 필드                                                    | 값                                                               |
+| ------------------------------------------------------- | ---------------------------------------------------------------- |
+| `code`, `category`, `services`, `effectiveFrom`, `note` | 선언한 값 그대로                                                 |
+| `label`                                                 | 선언한 `label`, 없으면 `subjectCategoryLabels[category]`         |
+| `allowsWithdrawal`                                      | `capabilities.allowsWithdrawal`과 항상 같은 값(결정 순서는 아래) |
+| `virtual`                                               | 과목의 `virtual`, 없으면 `false`                                 |
 
 ### `DetectionCapabilities`
 
@@ -279,7 +279,7 @@ detectBest("110-436-387740");
 `allowsWithdrawal`은 다음 순서로 정합니다.
 
 1. 패턴에 `services`가 있으면(내장 패턴은 하나은행 구 외환 14자리를 빼고 모두 해당) 과목의 `allowsWithdrawal` → 과목의 `services.directDebit` → 패턴의 `services.directDebit` 순으로 처음 정의된 값을 씁니다. 가상계좌라도 PDF 출금이체 열이 ○면 `true`입니다.
-2. 패턴에 `services`가 없으면 종류로 판단합니다. 결과의 `subject.allowsWithdrawal`(과목이 있을 때)이 `false`가 아니고, `kind`가 `virtual`·`incoming-only`·`lifetime`이 아니고, `capabilities.virtual`이 `false`일 때만 `true`입니다.
+2. 패턴에 `services`가 없으면 종류가 상한입니다. 과목의 `allowsWithdrawal` → 과목의 `services.directDebit` → `true` 순으로 처음 정의된 값이 `true`이고, `kind`가 `virtual`·`incoming-only`·`lifetime`이 아니고, `capabilities.virtual`이 `false`일 때만 `true`입니다. 과목은 이 규칙을 좁힐 수만 있습니다.
 
 `services.virtualAccount`는 "이 형식으로 가상계좌를 발급할 수 있다"는 PDF 열이고, `capabilities.virtual`은 "이 계좌가 가상계좌다"라는 판단입니다. 둘은 다를 수 있습니다.
 
@@ -304,14 +304,18 @@ capability는 PDF 표의 정적 규칙입니다. 개별 계좌나 은행의 실�
 
 **근거**는 식별자 일치, 과목 코드 일치, `isFallback`이 아닌 분기 규칙 조정 중 하나입니다. 길이·`additionalRules`·`globalRules`만 맞은 후보는 점수가 높아도 `"low"`입니다. 1순위가 `"high"`나 `"medium"`이면 `"low"` 후보는 목록에서 빠집니다.
 
-`ambiguous`는 같은 `confidence` 등급에 **다른 기관**의 후보가 있으면 `true`입니다. 옵션(`categories`·`kinds`·`include`·`exclude`·`minScore`·`limit`)으로 숨긴 기관도 셉니다. 앱이 신한은행만 지원해도 `110-436-387740`이 우체국 계좌일 수 있다는 사실은 그대로이기 때문입니다.
+`ambiguous`는 **다른 기관**이 같은 `confidence` 등급으로 입력과 맞으면 `true`입니다. 기관마다 가장 높은 등급 하나로 셉니다. 옵션(`categories`·`kinds`·`include`·`exclude`·`minScore`·`limit`)으로 숨긴 기관도 셉니다. 앱이 신한은행만 지원해도 `110-436-387740`이 우체국 계좌일 수 있다는 사실은 그대로이기 때문입니다.
 
 후보는 다음 순서로 정렬합니다(모두 내림차순).
 
 1. 신뢰도 등급: 근거 없는 `"low"` 후보는 점수가 높아도 근거 있는 후보를 앞서지 못합니다.
-2. 점수
-3. 사전확률 [`prevalence`](#prevalence)
-4. 계좌 종류: `new` → `old` → `virtual` → `lifetime` → `incoming-only` → `merged-legacy`
+2. 근거 유무: 같은 `"low"`끼리는 식별자·과목·분기 조건이 맞은 후보가 길이만 맞은 후보보다 앞입니다(`"high"`·`"medium"`은 항상 근거가 있음).
+3. 점수
+4. 사전확률 [`prevalence`](#prevalence)
+5. 계좌 종류: `new` → `old` → `virtual` → `lifetime` → `incoming-only` → `merged-legacy`
+6. 같은 기관의 해석이 모든 키에서 같으면 다른 기관에서 재배정된 패턴보다 그 기관 자신의 패턴
+
+정렬 뒤 기관마다 첫 후보만 남깁니다.
 
 입력 중인 번호도 다른 기관의 형식과 맞을 수 있습니다. 예를 들어 카카오뱅크 번호를 12자리까지 입력한 `333312345678`은 농협은행 구계좌의 `"high"` 후보(모호하지 않음)가 1순위입니다. 다음 기준으로 UI를 정하고, 유료 실명조회는 사용자가 기관을 확정한 뒤에만 호출합니다.
 

@@ -13,9 +13,9 @@ describe("기관 필터는 최종 분기 결과에 적용한다", () => {
     [{ include: ["suhyup"] }, 0],
     [{ exclude: ["suhyup-coop"] }, 0],
     [{ categories: ["bank"] }, 0],
-    [{ include: ["suhyup-coop"] }, 2],
-    [{ exclude: ["suhyup"] }, 2],
-    [{ categories: ["non-bank"] }, 2],
+    [{ include: ["suhyup-coop"] }, 1],
+    [{ exclude: ["suhyup"] }, 1],
+    [{ categories: ["non-bank"] }, 1],
     [{ include: ["suhyup-coop"], exclude: ["suhyup-coop"] }, 0],
     [{ include: [] }, 0],
   ] satisfies readonly [DetectOptions, number][])(
@@ -38,17 +38,67 @@ describe("기관 필터는 최종 분기 결과에 적용한다", () => {
 
   test("최초 기관이 include 대상이 아니어도 최종 기관이 일치하면 유지한다", () => {
     // Given
-    const input = "112345678901";
+    const input = "123-43-456789";
 
     // When
-    const results = detector.detect(input, { include: ["suhyup"] });
+    const results = detector.detect(input, { include: ["suhyup-coop"] });
 
     // Then
-    const routedFromCoop = results.find(
-      (result) => result.matchedPattern === suhyupCoop.patterns[0],
-    );
-    expect(routedFromCoop?.institution.id).toBe("suhyup");
-    expect(results.every((result) => result.institution.id === "suhyup")).toBe(true);
+    expect(results).toHaveLength(1);
+    expect(results[0]?.institution.id).toBe("suhyup-coop");
+    expect(results[0]?.matchedPattern).toBe(suhyup.patterns[0]);
+    expect(results[0]?.confidence).toBe("medium");
+  });
+
+  describe("동점 중복이면 재배정된 후보보다 기관 자신의 패턴을 남긴다", () => {
+    const ownPattern = {
+      template: patternTemplate("XXXXXXXXXX"),
+      kind: "new",
+      identifierPosition: { start: 0, length: 3 },
+      identifiers: ["123"],
+      // Two rule bonuses match the router's branch bonus, so both candidates tie on every key.
+      additionalRules: [() => true, () => true],
+    } as const;
+    const owner = defineInstitution({
+      id: "owner",
+      code: "996",
+      nameKo: "소유 기관",
+      category: "bank",
+      aliases: [],
+      patterns: [ownPattern],
+    });
+    const router = defineInstitution({
+      id: "router",
+      code: "995",
+      nameKo: "재배정 기관",
+      category: "bank",
+      aliases: [],
+      patterns: [
+        {
+          template: patternTemplate("XXXXXXXXXX"),
+          kind: "new",
+          identifierPosition: { start: 0, length: 3 },
+          identifiers: ["123"],
+          branchRule: { describe: "to-owner", evaluate: () => ({ institutionId: "owner" }) },
+        },
+      ],
+    });
+
+    test.each([
+      ["재배정 기관 먼저", [router, owner]],
+      ["소유 기관 먼저", [owner, router]],
+    ] as const)("%s", (_, order) => {
+      // Given
+      const tiedDetector = createDetector(order);
+
+      // When
+      const results = tiedDetector.detect("1234567890");
+
+      // Then
+      expect(results).toHaveLength(1);
+      expect(results[0]?.institution.id).toBe("owner");
+      expect(results[0]?.matchedPattern).toBe(owner.patterns[0]);
+    });
   });
 
   test("대체 분기로만 라우팅된 후보는 근거가 없어 low 다", () => {
@@ -65,7 +115,7 @@ describe("기관 필터는 최종 분기 결과에 적용한다", () => {
     }
   });
 
-  test("필터 후 limit을 적용하고 같은 기관으로 분기한 후보를 합치지 않는다", () => {
+  test("같은 기관이 된 후보는 필터 뒤에 하나로 합치고 limit 은 기관 수를 센다", () => {
     // Given
     const input = "212345678901";
 
@@ -77,7 +127,8 @@ describe("기관 필터는 최종 분기 결과에 적용한다", () => {
     // Then
     expect(limitedResults).toHaveLength(1);
     expect(minScore8Results).toEqual([]);
-    expect(minScore5Results).toHaveLength(2);
+    expect(minScore5Results).toHaveLength(1);
+    expect(minScore5Results[0]?.score).toBe(7);
   });
 
   test("커스텀 분기는 최종 category와 kind로 검사하고 미등록 대상은 기존 기관을 유지한다", () => {

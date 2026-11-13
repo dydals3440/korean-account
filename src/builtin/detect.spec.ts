@@ -273,3 +273,51 @@ describe("detectBest", () => {
     });
   });
 });
+
+describe("기관당 후보 하나", () => {
+  test("분기로 같은 기관이 된 후보는 가장 높은 후보 하나만 남긴다", () => {
+    // Given
+    const input = "212-345678901";
+
+    // When
+    const coop = detect(input, { limit: Infinity }).filter(
+      (result) => result.institution.id === "suhyup-coop",
+    );
+
+    // Then
+    expect(coop.map((result) => [result.score, result.confidence, result.formatted])).toEqual([
+      [7, "high", "2-12345678901"],
+    ]);
+  });
+
+  test("지워진 하위 등급 중복은 다른 기관의 ambiguous 에 영향을 주지 않는다", () => {
+    // Given
+    const input = "222627308617";
+
+    // When
+    const results = detect(input, { limit: Infinity });
+
+    // Then
+    expect(
+      results.map((result) => [result.institution.id, result.confidence, result.ambiguous]),
+    ).toEqual([
+      ["suhyup-coop", "high", true],
+      ["mirae-asset", "high", true],
+      ["gyeongnam", "medium", false],
+    ]);
+  });
+
+  test("결과의 기관 ID 는 서로 다르다", () => {
+    // Given
+    const inputs = ["212-345678901", "731-321-98765-4", "112345678901", "110-436-387740"];
+
+    // When
+    const duplicated = inputs.filter((input) => {
+      const ids = detect(input, { limit: Infinity }).map((result) => result.institution.id);
+      return new Set(ids).size !== ids.length;
+    });
+
+    // Then
+    expect(duplicated).toEqual([]);
+  });
+});
