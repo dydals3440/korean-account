@@ -89,8 +89,10 @@ export function createDetectionSchema<const TId extends string>(
     directCredit: "boolean",
     additionalServices: "boolean",
   });
+  // The id check is typed over `string` so the object type stays concrete: arktype 2.1 cannot call
+  // `.pipe` on an object type that depends on the generic `TId`. The values checked are the same.
   const schema = type({
-    institutionId: createInstitutionIdSchema(ids, { message: messages.institution }),
+    institutionId: literalSchema<string>(ids, messages.institution),
     kind: literalSchema(ACCOUNT_KINDS, messages.accountKind),
     "subject?": [subject, "|", "undefined"],
     score: type("number").narrow(

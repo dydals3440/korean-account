@@ -76,7 +76,7 @@ export function createDetectionSchema<const TId extends string>(
     additionalServices: z.boolean(),
   });
 
-  return z.object({
+  const schema = z.object({
     institutionId: createInstitutionIdSchema(ids, { message: messages.institution }),
     kind: z.enum(ACCOUNT_KINDS, { message: messages.accountKind }),
     subject: z
@@ -97,6 +97,9 @@ export function createDetectionSchema<const TId extends string>(
       services: services.nullable().optional(),
     }),
   });
+  // zod 3 cannot relate its inferred object type over a generic id to the payload type, so this
+  // one boundary is asserted; the shared contract tests pin the runtime behaviour on zod 3 and 4.
+  return schema as unknown as ZodType<DetectionPayloadOf<TId>>;
 }
 
 /** Account number input with the default Korean messages. */
