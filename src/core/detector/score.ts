@@ -7,10 +7,8 @@ import type {
   Subject,
 } from "../../types";
 import { extractIdentifier } from "../account/extract-identifier";
-import { extractSubject } from "../account/extract-subject";
-import { formatAccount } from "../account/format-account";
-import { templateLength } from "../account/template-length";
 import { CONFIDENCE_RANK, scoreToConfidence } from "./confidence";
+import { getPatternLookup, type PatternLookup } from "./pattern-lookup";
 
 /** Scoring weights with every default applied. */
 export type ResolvedScoringWeights = {
@@ -33,7 +31,6 @@ export const DEFAULT_WEIGHTS: ResolvedScoringWeights = {
 export interface InstitutionScore {
   readonly score: number;
   readonly matchedPattern: AccountPattern | null;
-  readonly formatted: string;
   readonly subject: Subject | null;
   /** An identifier or subject code matched, not just length and rules. */
   readonly hasEvidence: boolean;
@@ -85,14 +82,13 @@ export function scoreInstitution(
   }
 
   if (bestPattern === null) {
-    return { score: 0, matchedPattern: null, formatted: digits, subject: null, hasEvidence: false };
+    return { score: 0, matchedPattern: null, subject: null, hasEvidence: false };
   }
 
   const passedGlobalRules = globalRules.filter((rule) => rule(digits, institution)).length;
   return {
     score: best.score + passedGlobalRules * weights.globalRule,
     matchedPattern: bestPattern,
-    formatted: formatAccount(digits, bestPattern.template),
     subject: best.subject,
     hasEvidence: best.hasEvidence,
   };
@@ -113,7 +109,8 @@ function scorePattern(
   pattern: AccountPattern,
   weights: ResolvedScoringWeights,
 ): PatternScore {
-  const fit = measureLengthFit(digits.length, templateLength(pattern.template));
+  const lookup = getPatternLookup(pattern);
+  const fit = measureLengthFit(digits.length, lookup.digitCount);
   const rules = pattern.additionalRules ?? [];
 
   // Shorter partial input cannot be judged by the rules yet, so they neither gate nor score it.
@@ -122,8 +119,8 @@ function scorePattern(
     return NO_PATTERN_MATCH;
   }
 
-  const identifierMatch = scoreIdentifier(digits, pattern, fit, weights);
-  const subjectMatch = scoreSubject(digits, pattern, fit, weights);
+  const identifierMatch = scoreIdentifier(digits, pattern, lookup, fit, weights);
+  const subjectMatch = scoreSubject(digits, pattern, lookup, fit, weights);
   const ruleBonus = isRuleCheckable ? rules.length * weights.additionalRule : 0;
   const score =
     scoreLength(fit, weights) +
@@ -179,6 +176,7 @@ function scoreLength(fit: LengthFit, weights: ResolvedScoringWeights): number {
 function scoreIdentifier(
   digits: string,
   pattern: AccountPattern,
+  lookup: PatternLookup,
   fit: LengthFit,
   weights: ResolvedScoringWeights,
 ): CodeMatch {
@@ -190,7 +188,7 @@ function scoreIdentifier(
   }
 
   const identifier = extractIdentifier(digits, pattern);
-  if (!isIdentifierMatch(identifier, pattern)) {
+  if (!isIdentifierMatch(identifier, pattern, lookup)) {
     return NO_CODE_MATCH;
   }
   return {
@@ -202,15 +200,19 @@ function scoreIdentifier(
 function scoreSubject(
   digits: string,
   pattern: AccountPattern,
+  lookup: PatternLookup,
   fit: LengthFit,
   weights: ResolvedScoringWeights,
 ): PatternScore {
-  if (!fit.isWithinTemplate) {
+  const position = pattern.subjectPosition;
+  if (!fit.isWithinTemplate || position === undefined) {
     return NO_PATTERN_MATCH;
   }
 
-  const subject = extractSubject(digits, pattern);
-  if (subject === null) {
+  const end = position.start + position.length;
+  const subject =
+    digits.length < end ? undefined : lookup.subjectsByCode.get(digits.slice(position.start, end));
+  if (subject === undefined) {
     return NO_PATTERN_MATCH;
   }
   return {
@@ -220,12 +222,16 @@ function scoreSubject(
   };
 }
 
-function isIdentifierMatch(identifier: string, pattern: AccountPattern): boolean {
+function isIdentifierMatch(
+  identifier: string,
+  pattern: AccountPattern,
+  lookup: PatternLookup,
+): boolean {
   const expectedLength = pattern.identifierPosition?.length ?? 0;
   if (identifier.length === 0 || identifier.length < expectedLength) {
     return false;
   }
-  if (pattern.identifiers?.includes(identifier)) {
+  if (lookup.identifiers.has(identifier)) {
     return true;
   }
   if (pattern.identifierRange === undefined) {

@@ -10,6 +10,7 @@ import type {
   InstitutionIdInput,
   ScoringWeights,
 } from "../../types";
+import { formatAccount } from "../account/format-account";
 import { normalizeAccount } from "../account/normalize-account";
 import { applyBranchRule } from "./apply-branch-rule";
 import {
@@ -122,7 +123,7 @@ function buildDetector<TInstitution extends Institution>(
         matchedPattern: match.matchedPattern,
         kind: branch.kind,
         ...(subject !== null && { subject }),
-        formatted: match.formatted,
+        formatted: formatAccount(digits, match.matchedPattern.template),
         score,
         confidence,
         capabilities,
