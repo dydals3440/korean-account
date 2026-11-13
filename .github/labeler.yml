@@ -1,5 +1,4 @@
-# actions/labeler v7: 파일 경로로 area/의존성 라벨만 동기화합니다.
-# 목적(type)과 비호환 표시는 workflow의 제목 분류 단계가 관리합니다.
+# Path-based area labels only; type and breaking-change labels come from the PR title.
 "area: registry":
   - changed-files:
       - any-glob-to-any-file: ["src/registry/**"]
@@ -16,14 +15,14 @@
   - changed-files:
       - any-glob-to-any-file:
           [
-            "tsdown.config.ts",
+            "*.config.ts",
+            ".editorconfig",
             "scripts/**",
             "package.json",
             "pnpm-lock.yaml",
             "pnpm-workspace.yaml",
             ".nvmrc",
             "tsconfig.json",
-            "vitest.config.ts",
             ".size-limit.json",
           ]
 "area: ci":
@@ -48,8 +47,11 @@
             "README.md",
             "README.en.md",
             "DOCS.md",
+            "docs/**",
+            "CHANGELOG.md",
             "CONTRIBUTING.md",
             "SECURITY.md",
             "CODE_OF_CONDUCT.md",
+            "THIRD_PARTY_NOTICES.md",
             ".github/MAINTAINING.md",
           ]

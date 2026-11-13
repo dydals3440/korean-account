@@ -33,7 +33,7 @@ body:
       label: 검증
       description: 최소 재현 코드·명령·오류 메시지와 패키지·Node·TypeScript·peer 버전을 적어 주세요.
       placeholder: |
-        korean-account: 0.3.1 / Node: 22.12.0 / TypeScript: 5.9.3 / zod: 3.23.0
+        korean-account: 0.4.1 / Node: 26.13.1 / TypeScript: 5.9.3 / zod: 4.6.7
         import { detect } from "korean-account";
         detect("합성 입력");
     validations:

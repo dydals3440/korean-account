@@ -1,6 +1,6 @@
 name: Metadata
 
-# Base 리포의 워크플로만 실행합니다. PR 코드를 checkout하거나 실행하지 않습니다.
+# Runs the base repository's workflow only; PR code is never checked out or executed.
 on:
   pull_request_target:
     types: [opened, edited, synchronize, reopened]
@@ -11,15 +11,17 @@ concurrency:
   group: metadata-${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   metadata:
     name: Metadata labels
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Label changed areas
         if: github.event_name == 'pull_request_target'
@@ -33,6 +35,7 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
           TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           AUTHOR: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
           IS_PR: ${{ github.event_name == 'pull_request_target' }}
         shell: bash
@@ -58,7 +61,8 @@ jobs:
               refactor) purpose='refactor' ;; test) purpose='test' ;; *) purpose='maintenance' ;;
             esac
           fi
-          if [[ "$HEAD_REF" == changeset-release/* ]]; then purpose='release'; fi
+          # Forks can name a branch changeset-release/* too; only trust same-repo branches.
+          if [[ "$HEAD_REF" == changeset-release/* && "$HEAD_REPO" == "$GITHUB_REPOSITORY" ]]; then purpose='release'; fi
           if [[ -z "$purpose" ]]; then
             echo '제목에 분류 가능한 type이 없습니다. 메인테이너가 분류합니다.'
             exit 0
