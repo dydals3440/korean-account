@@ -2,7 +2,7 @@
 
 ## 언어
 
-이 저장소는 한국 금융기관과 한국어 CMS 자료를 다루므로 이슈·PR·changeset·릴리스 설명은 한국어를 기본으로 합니다. 기술 이름·API·명령은 원문을 유지합니다. 영어 기여도 환영하며 번역을 기여 조건으로 요구하지 않습니다. 영어 빠른 시작은 docs/README.en.md에서 유지하고 루트 README.en.md는 기존 링크용 안내로 남깁니다. 영어 소스 주석은 유지합니다.
+이 저장소는 한국 금융기관과 한국어 CMS 자료를 다루므로 이슈·PR·changeset·릴리스 설명은 한국어를 기본으로 합니다. 기술 이름·API·명령은 원문을 유지합니다. 영어 기여도 환영하며 번역을 기여 조건으로 요구하지 않습니다. 영어 개요는 `docs/README.en.md`에서 유지하고 루트 `README.en.md`는 기존 링크용 안내로 남깁니다. 소스의 JSDoc·주석은 영어로 씁니다.
 
 Dependabot·Changesets가 관리하는 생성 본문은 자동화 원문을 유지합니다. 과거 기록을 정리할 때는 한국어 요약을 앞에 두고 당시의 상세 원문·버전·검증 결과를 보존합니다. 과거에 실행하지 않은 검사를 새로 통과했다고 쓰지 않습니다.
 
@@ -14,9 +14,9 @@ Dependabot·Changesets가 관리하는 생성 본문은 자동화 원문을 유�
 - `feat(registry): CMS 근거에 따라 기관 패턴 추가`
 - `docs: 확장 API 사용 예제 보완`
 - `chore(repo): 이슈·PR 운영 기준 정리`
-- `chore(release): 0.3.1 릴리스 준비`
+- `chore(release): X.Y.Z 릴리스 준비`
 
-본문 순서는 **요약 → 변경 및 영향 → 검증 → 관련 항목**입니다. 이슈의 검증에는 재현 방법·완료 조건, PR의 검증에는 실행한 명령·실제 결과를 씁니다. 문서만 고칠 때까지 테스트 파일이나 changeset을 요구하지 않습니다.
+본문 순서는 **요약 → 변경 및 영향 → 검증 → 관련 항목**입니다. 이슈의 검증에는 재현 방법·완료 조건, PR의 검증에는 실행한 명령·실제 결과를 씁니다. 문서만 고칠 때는 테스트 파일이나 changeset을 요구하지 않습니다.
 
 완료하는 이슈에는 `Closes #번호`, 일부 작업에는 `Refs #번호`, 대체 PR에는 `Supersedes #번호`를 사용합니다. 닫힌 PR을 머지된 것으로 쓰거나, 버전 PR이 머지됐다는 이유만으로 npm 게시를 완료 처리하지 않습니다.
 
@@ -33,9 +33,20 @@ Dependabot·Changesets가 관리하는 생성 본문은 자동화 원문을 유�
 
 진행 상태·작성자·버전은 라벨에 중복 저장하지 않습니다. 상태는 이슈/PR 및 Projects, 작성자는 GitHub author, 버전은 Git 태그·Release를 사용합니다. 쓰이지 않는 분류를 미리 늘리지 않습니다.
 
-Metadata workflow는 제목에서 type과 비호환 표시를 분류하고 PR 파일에서 area를 동기화합니다. Dependabot·deps scope·lockfile 변경에는 의존성 표시를 추가합니다. 수동 의존성 표시를 자동 제거하지 않으므로 철회된 업데이트는 리뷰에서 해제합니다. 이슈의 area는 트리아지 때 지정합니다. PR 코드는 이 workflow에서 checkout하거나 실행하지 않습니다.
+Metadata workflow(`.github/workflows/labeler.yml`)는 제목에서 type과 비호환 표시(`!`)를 분류하고, PR이 바꾼 파일에서 area를 [labeler.yml](./labeler.yml) 기준으로 동기화합니다. Dependabot·deps scope·lockfile 변경에는 의존성 표시를 추가합니다. 수동 의존성 표시를 자동 제거하지 않으므로 철회된 업데이트는 리뷰에서 해제합니다. 이슈의 area는 트리아지 때 지정합니다. 이 workflow는 `pull_request_target`으로 기본 브랜치의 정의만 실행하며 PR 코드를 checkout하거나 실행하지 않습니다. GitHub의 Generate release notes는 [release.yml](./release.yml)의 라벨 분류를 씁니다.
 
 라벨 개편 순서: 기준 파일·템플릿·자동화 수정 → 새 라벨 생성 → 기존 이슈/PR 이관 → 이전 라벨의 사용·설정 참조가 0인지 확인 → 이전 라벨 삭제. 기존 이력의 백업을 먼저 보관합니다.
+
+## 쌓인 PR
+
+큰 변경은 `gh stack`으로 쌓은 PR로 받습니다. 절차는 [기여 안내](../CONTRIBUTING.md#쌓인-prstacked-pr)에 있습니다.
+
+- CI는 base 브랜치와 관계없이 모든 PR에서 실행되므로 각 층이 자기 base 기준으로 검증됩니다. 제목 검사와 Metadata 라벨도 PR마다 따로 적용됩니다.
+- 아래 층부터 squash merge합니다. `gh stack merge --squash --yes`로 머지 방식을 항상 명시합니다(생략하면 마지막에 쓴 방식을 재사용합니다). `gh pr merge`는 쌓인 PR에 쓰지 않습니다.
+- 스택 머지는 원자적이지 않습니다. 중간에 멈추면 아래 PR만 머지되고 위 PR은 열린 채로 남을 수 있고, merge queue를 쓰면 여러 묶음으로 나뉘어 처리될 수 있습니다. 재시도하기 전에 `gh stack view --json`으로 어떤 PR까지 머지됐는지 확인합니다.
+- 스택의 모든 PR은 main의 규칙(ruleset)으로 평가되고, 스택 머지에서는 규칙을 우회할 수 없습니다. 혼자 충족할 수 없는 규칙(승인 수, CODEOWNERS 승인, 리뷰 스레드 해결 필수)을 main에 두지 않습니다.
+- 층마다 changeset을 둘 수 있습니다. main에 들어오면 Changesets 버전 PR이 모두 모읍니다.
+- 머지 후에는 `gh stack sync --prune`으로 남은 층을 main 위로 다시 쌓습니다.
 
 ## 작성자·담당자·검토자
 
@@ -54,6 +65,16 @@ Metadata workflow는 제목에서 type과 비호환 표시를 분류하고 PR �
 
 ## 버전·태그·릴리스
 
-Git 태그는 `vX.Y.Z`, GitHub Release 제목도 `vX.Y.Z`로 통일합니다. Changesets가 버전과 릴리스 노트를 관리하고, 사람이 작성하는 changeset 본문은 한국어로 씁니다. 자동 생성 PR 제목은 `chore(release): 패키지 버전 갱신`, 버전 확정 시 `chore(release): X.Y.Z 릴리스 준비`를 사용할 수 있습니다.
+Git 태그는 `vX.Y.Z`, GitHub Release 제목도 `vX.Y.Z`로 통일합니다. Changesets가 버전과 릴리스 노트를 관리하고, 사람이 작성하는 changeset 본문은 한국어로 씁니다. 0.x에서 비호환 변경은 다음 minor로, 1.0 이후에는 major로 분리하며 변경 규모를 라벨만으로 결정하지 않습니다.
 
-게시된 태그는 삭제·이동·재사용하지 않습니다. 소비자 영향·마이그레이션·관련 PR을 기록하고, npm latest·실제 설치·provenance·GitHub Release를 확인한 뒤 완료합니다. 0.x에서 비호환 변경은 다음 minor로, 1.0 이후에는 major로 분리하며 변경 규모를 라벨만으로 결정하지 않습니다.
+[Release workflow](./workflows/release.yml)는 main에 push될 때 두 job으로 실행됩니다.
+
+| job       | 권한                                                         | 하는 일                                                                                                                                      |
+| --------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify`  | `contents: read`만, 자격 증명 저장 안 함                     | `pnpm check`, `test:coverage`, `build`, `check:dist`, `check:consumer`. 외부 패키지 설치와 검사를 모두 여기서 실행                           |
+| `release` | `verify` 성공 후. `contents`·`pull-requests`·`id-token` 쓰기 | lockfile 설치 후 Changesets 실행: 대기 중인 changeset이 있으면 `chore(release): 패키지 버전 갱신` PR을 만들고, 버전 PR이 머지되면 npm에 게시 |
+
+- 게시는 npm Trusted Publishing(OIDC)과 provenance를 씁니다. npm의 `korean-account`에 GitHub `dydals3440/korean-account`와 workflow `release.yml`이 연결되어 있어 `NPM_TOKEN`이 필요 없습니다. workflow 파일 이름을 바꾸면 npm 설정도 함께 바꿉니다.
+- 릴리스 도구는 `.nvmrc`의 Node, `packageManager`의 pnpm, npm 12.2.2입니다. `prepublishOnly`가 게시 직전에 `build`와 `check:dist`를 다시 실행합니다.
+- concurrency 그룹은 진행 중인 게시를 취소하지 않습니다(부분 게시는 되돌릴 수 없음). 실패하면 원인을 고친 뒤 main에서 workflow를 수동 실행(`workflow_dispatch`)합니다. 재시도 전 npm에 같은 버전이 이미 있는지 확인하고, 게시된 버전은 덮어쓰지 않습니다.
+- 게시된 태그는 삭제·이동·재사용하지 않습니다. npm `latest`, 실제 설치, provenance, GitHub Release까지 확인한 뒤 완료로 기록하고, 소비자 영향·마이그레이션·관련 PR을 남깁니다. 버전 PR이 머지됐다는 이유만으로 게시를 완료 처리하지 않습니다.

@@ -140,18 +140,26 @@ try {
 
     const adapter = peer === "none" ? null : peer.split("@")[0];
     const entries = ["", "/standard-schema", ...(adapter ? [`/${adapter}`] : [])];
+    // A subpath added after the baseline has nothing to be compatible with.
+    const baselineExports = JSON.parse(
+      readFileSync(join(cwd, "node_modules/korean-account-baseline/package.json"), "utf8"),
+    ).exports;
+    const baselineEntries = entries.filter((entry) => `.${entry}` in baselineExports);
     const checks = `
       import assert from "node:assert/strict";
       import { createRequire } from "node:module";
       const require = createRequire(import.meta.url);
       const entries = ${JSON.stringify(entries)};
+      const baselineEntries = ${JSON.stringify(baselineEntries)};
       const adapter = ${JSON.stringify(adapter)};
       const account = "110-436-387740";
       for (const mode of ["import", "require"]) {
         const load = name => mode === "import" ? import(name) : require(name);
         for (const entry of entries) {
           const current = await load("korean-account" + entry);
-          const baseline = await load("korean-account-baseline" + entry);
+          const baseline = baselineEntries.includes(entry)
+            ? await load("korean-account-baseline" + entry)
+            : current;
           const keys = value => Object.keys(value).filter(key => key !== "__esModule").sort();
           for (const key of keys(baseline)) {
             assert(keys(current).includes(key), mode + entry + " removed export " + key);
@@ -215,8 +223,18 @@ try {
       }
       const currentPackage = require("korean-account/package.json");
       const previousPackage = require("korean-account-baseline/package.json");
+      // Every baseline entry must survive unchanged; new keys (subpaths, optional peers) are allowed.
+      const assertPreserved = (current, previous, path) => {
+        if (previous === null || typeof previous !== "object" || Array.isArray(previous)) {
+          assert.deepEqual(current, previous, path);
+          return;
+        }
+        for (const key of Object.keys(previous)) {
+          assertPreserved(current?.[key], previous[key], path + "." + key);
+        }
+      };
       for (const field of ["exports", "typesVersions", "engines", "peerDependencies", "peerDependenciesMeta", "sideEffects"]) {
-        assert.deepEqual(currentPackage[field], previousPackage[field], field);
+        assertPreserved(currentPackage[field], previousPackage[field], field);
       }
       assert.equal(Object.keys(currentPackage.dependencies ?? {}).length, 0);
       for (const other of ["zod", "valibot", "yup", "arktype"].filter(name => name !== adapter)) {
@@ -232,7 +250,7 @@ try {
     }
 
     const types =
-      entries
+      baselineEntries
         .map(
           (entry, index) => `
           import * as current${index} from "korean-account${entry}";

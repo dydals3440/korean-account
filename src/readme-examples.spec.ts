@@ -1,115 +1,85 @@
 import { type } from "arktype";
 import * as v from "valibot";
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 
-import {
-  accountKindLabels,
-  createDetector,
-  detectBest,
-  kb,
-  shinhan,
-  toss,
-  getInstitution,
-  institutions,
-  normalizeAccount,
-  scoreToConfidence,
-} from ".";
+import { createDetector, detect, detectBest, institutions, kb, shinhan, toss } from ".";
 import { accountSchema as arktypeAccount } from "./adapters/arktype";
 import { accountSchema as standardAccount } from "./adapters/standard-schema";
 import { accountSchema as valibotAccount } from "./adapters/valibot";
 import { accountSchema as yupAccount } from "./adapters/yup";
-import { accountSchema as zodAccount } from "./adapters/zod";
+import { accountSchema as zodAccount, createAccountSchema } from "./adapters/zod";
 
-// The README ships in the tarball, so every value its examples claim is asserted verbatim here.
+// README.md and docs/README.en.md ship claims about real outputs; each one is asserted here.
 describe("README 코드 예제가 주장하는 값", () => {
-  test("빠른 시작 — detectBest 는 우리은행 신계좌를 high 로 판별한다", () => {
+  test("첫 예제 — 카카오뱅크 번호는 단독 high 후보다", () => {
     // Given
-    const input = "1002-123-456789";
+    const input = "3333-12-3456789";
 
     // When
     const result = detectBest(input);
 
     // Then
-    expect(result?.institution.nameKo).toBe("우리은행");
-    expect(result?.institution.nameEn).toBe("Woori Bank");
-    expect(result?.kind).toBe("new");
+    expect(result?.institution.id).toBe("kakao");
+    expect(result?.institution.nameKo).toBe("카카오뱅크");
+    expect(result?.institution.nameEn).toBe("KakaoBank");
     expect(result?.confidence).toBe("high");
+    expect(result?.ambiguous).toBe(false);
   });
 
-  test("첫 화면 예제 — detectBest('110-436-387740') 는 신한 신계좌 결과를 반환한다", () => {
+  test("빠른 시작 — 110-436-387740 은 신한·우체국·신협이 high 로 모호하다", () => {
     // Given
     const input = "110-436-387740";
 
     // When
-    const result = detectBest(input);
+    const candidates = detect(input, { limit: 3 });
 
     // Then
-    expect(result?.institution.id).toBe("shinhan");
-    expect(result?.institution.code).toBe("088");
-    expect(result?.kind).toBe("new");
-    expect(result?.subject?.code).toBe("110");
-    expect(result?.subject?.category).toBe("savings");
-    expect(result?.formatted).toBe("110-436-387740");
-    expect(result?.score).toBe(9);
-    expect(result?.confidence).toBe("high");
-    expect(result?.capabilities).toEqual({
-      allowsWithdrawal: true,
-      virtual: false,
-      validatedCheckDigit: null,
-      services: {
-        virtualAccount: false,
-        directDebit: true,
-        directCredit: true,
-        additionalServices: true,
-      },
-    });
+    expect(
+      candidates.map((candidate) => [
+        candidate.institution.nameKo,
+        candidate.institution.nameEn,
+        candidate.confidence,
+        candidate.ambiguous,
+      ]),
+    ).toEqual([
+      ["신한은행", "Shinhan Bank", "high", true],
+      ["우체국", "Korea Post", "high", true],
+      ["신협중앙회", "Credit Union Central", "high", true],
+    ]);
   });
 
-  test("detectBest 는 매칭이 없으면 null 을 반환한다", () => {
+  test.each([
+    ["301-0123-4567-11", "nh"],
+    ["302-0123-4567-12", "nh"],
+    ["351-0123-4567-13", "nh-coop"],
+    ["356-0123-4567-15", "nh-coop"],
+  ])("농협 표 — %s 는 %s 단독 high 다", (input, expectedId) => {
     // Given
-    const input = "1";
+    const account = input;
 
     // When
-    const result = detectBest(input);
+    const candidates = detect(account);
 
     // Then
-    expect(result).toBeNull();
+    expect(candidates.map((candidate) => [candidate.institution.id, candidate.confidence])).toEqual(
+      [[expectedId, "high"]],
+    );
+    expect(candidates[0]?.ambiguous).toBe(false);
   });
 
-  test("조회 — getInstitution 은 id 와 기관 코드로 기관을 찾는다", () => {
+  test("번들 줄이기 — 고른 기관만으로도 신한이 1순위이고 타입이 좁혀진다", () => {
     // Given
-    const shinhanId = "shinhan";
-    const shinhanCode = "088";
-    const hanaId = "hana";
+    const detector = createDetector([kb, shinhan, toss]);
 
     // When
-    const byId = getInstitution(shinhanId);
-    const byCode = getInstitution(shinhanCode);
-    const hana = getInstitution(hanaId);
+    const id = detector.detect("110-436-387740")[0]?.institution.id;
 
     // Then
-    expect(byId?.code).toBe("088");
-    expect(byCode?.id).toBe("shinhan");
-    // Preserve the library's historical Hana code representation.
-    expect(hana?.code).toBe("005");
-    expect(hana?.commonCode).toBe("081");
+    expect(id).toBe("shinhan");
+    expectTypeOf(id).toEqualTypeOf<"kb" | "shinhan" | "toss" | undefined>();
   });
 
-  test("정규화·포맷팅 — 숫자만 남기고 score 9 를 high 로 변환한다", () => {
-    // Given
-    const account = "110-436-387740";
-    const score = 9;
-
-    // When
-    const normalized = normalizeAccount(account);
-    const confidence = scoreToConfidence(score);
-
-    // Then
-    expect(normalized).toBe("110436387740");
-    expect(confidence).toBe("high");
-  });
-
-  test("레지스트리 규모 — 기관 수가 README 에 적힌 57곳과 같다", () => {
+  test("기관 목록 — 레지스트리 기관 수가 README 에 적힌 57곳과 같다", () => {
     // Given
     const registry = institutions;
 
@@ -120,46 +90,31 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(count).toBe(57);
   });
 
-  test("라벨 — virtual 의 한글 라벨은 '가상계좌' 다", () => {
+  test("한계 — 입력이 패턴 길이에 가깝지 않으면 후보가 없다", () => {
     // Given
-    const kind = "virtual";
+    const prefixOnly = "3333";
 
     // When
-    const label = accountKindLabels[kind];
+    const candidates = detect(prefixOnly);
 
     // Then
-    expect(label).toBe("가상계좌");
+    expect(candidates).toEqual([]);
   });
 
-  test("필요한 은행만 — createDetector([kb, shinhan, toss]) 도 신한을 1순위로 낸다", () => {
+  test("검증 어댑터 — 메시지를 키별로 바꾸고 전각 입력도 받는다", () => {
     // Given
-    const scoped = createDetector([kb, shinhan, toss]);
+    const schema = createAccountSchema({ messages: { required: "계좌번호를 입력하세요." } });
 
     // When
-    const results = scoped.detect("110-436-387740");
+    const empty = schema.safeParse("");
+    const fullWidth = schema.safeParse("１１０-４３６-３８７７４０");
 
     // Then
-    expect(results[0]?.institution.id).toBe("shinhan");
-  });
-
-  // The README states this augmentation explicitly — if the behavior changes, the README must change too.
-  test("실세계 보강 — 카카오뱅크 3333/7979 프리픽스를 카카오뱅크로 판별한다", () => {
-    // Given
-    const personalInput = "3333-12-3456789";
-    const groupInput = "7979-01-2345678";
-
-    // When
-    const personal = detectBest(personalInput);
-    const group = detectBest(groupInput);
-
-    // Then
-    expect(personal?.institution.nameKo).toBe("카카오뱅크");
-    expect(personal?.confidence).toBe("high");
-    expect(group?.institution.id).toBe("kakao");
+    expect(empty.error?.issues[0]?.message).toBe("계좌번호를 입력하세요.");
+    expect(fullWidth.success).toBe(true);
   });
 });
 
-// README claims all five adapters expose behaviorally identical schemas.
 describe("README — 검증 어댑터 5종 동작 동일", () => {
   const accepts = {
     zod: (input: unknown) => zodAccount.safeParse(input).success,
