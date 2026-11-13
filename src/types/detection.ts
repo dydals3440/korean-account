@@ -134,8 +134,8 @@ export interface DetectionResult<TInstitution extends Institution = Institution>
    */
   readonly confidence: Confidence;
   /**
-   * `true` when another institution in the list has the same `confidence`, so the user should
-   * confirm. Computed after the `DetectOptions` filters and before `limit` cuts the list.
+   * `true` when another institution matches the input with the same `confidence`, so the user
+   * should confirm. Institutions hidden by `DetectOptions` filters or `limit` still count.
    */
   readonly ambiguous: boolean;
   /** Static capabilities of the matched format. */
@@ -203,13 +203,13 @@ export interface DetectionPayload<TId extends string = string> {
  * Filters and limits for one `detect` call.
  *
  * Filters apply to the final result, after a branch rule reroutes the institution or replaces
- * the kind, and before ranking sets `ambiguous`. A filter left `undefined` keeps every result;
- * an empty `categories`, `kinds` or `include` array keeps none.
+ * the kind. They never change `ambiguous`, which looks at every match. A filter left
+ * `undefined` keeps every result; an empty `categories`, `kinds` or `include` array keeps none.
  *
  * @typeParam TId - Institution ids that `include` and `exclude` autocomplete.
  * @example
  * detect("110-436-387740"); // shinhan, post and shinhyup, each ambiguous
- * detect("110-436-387740", { categories: ["bank"] }); // shinhan only, not ambiguous
+ * detect("110-436-387740", { categories: ["bank"] }); // shinhan only, still ambiguous
  */
 export interface DetectOptions<TId extends string = string> {
   /** Keeps results whose institution is in one of these categories. */
@@ -343,7 +343,7 @@ export interface Detector<TInstitution extends Institution = Institution> {
    * Characters other than digits are ignored and full-width digits count, so
    * `"110-436-387740"` and `"110 436 387740"` are equivalent. Each institution contributes its
    * best pattern, though a branch reroute can list one institution twice. Results are ordered
-   * by score, then the `prevalence` prior, then kind.
+   * by confidence band, then score, then the `prevalence` prior, then kind.
    *
    * @returns Up to `options.limit` results; empty when nothing matches or `input` has no digits.
    * @throws {RangeError} When `options.limit` or `options.minScore` is invalid.

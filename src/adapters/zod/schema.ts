@@ -38,14 +38,16 @@ export type {
 /**
  * Creates an account-number schema with custom messages.
  *
- * Accepts a string of ASCII digits, whitespace and hyphens, at most 40 characters long, that
+ * Accepts a string of digits, whitespace and hyphens (ASCII or full-width, as typed with a
+ * Korean IME), at most 40 characters long, that
  * holds 6–20 digits. A valid value is returned unchanged, separators included; call
  * `normalizeAccount` from `korean-account` when you need digits only. Passing is a format check:
  * it does not prove that the account exists.
  *
  * Every failing rule is reported, in rule order, so `issues[0]` names the earliest one. A
- * non-string value fails with zod's own type message. The result is a `ZodString`, so string
- * methods stay available and `z.input` and `z.infer` are both `string` on zod 3 and 4.
+ * non-string value, `null` and `undefined` included, fails with `required`. The result is a
+ * `ZodString`, so string methods stay available and `z.input` and `z.infer` are both `string`
+ * on zod 3 and 4.
  *
  * @param options - `messages` replaces the Korean default per rule; an omitted or `undefined`
  *   key keeps the default.

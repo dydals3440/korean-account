@@ -41,15 +41,16 @@ export type {
 /**
  * Creates an account-number schema with custom messages.
  *
- * Accepts a string of ASCII digits, whitespace and hyphens, at most 40 characters long, that
+ * Accepts a string of digits, whitespace and hyphens (ASCII or full-width, as typed with a
+ * Korean IME), at most 40 characters long, that
  * holds 6–20 digits. A valid value is returned unchanged, separators included; call
  * `normalizeAccount` from `korean-account` when you need digits only. Passing is a format check:
  * it does not prove that the account exists.
  *
  * The schema is `.strict(true)`: values are never cast, so the number `1104363877` is rejected
  * rather than turned into a string, and a `.transform()` added on top does not run during
- * validation. `null` and `undefined` fail with `required`; any other non-string fails with
- * yup's own type message. Validation stops at the first failing rule, in rule order, unless
+ * validation. Any non-string value, `null` and `undefined` included, fails with `required`.
+ * Validation stops at the first failing rule, in rule order, unless
  * `abortEarly: false` is passed.
  *
  * @param options - `messages` replaces the Korean default per rule; an omitted or `undefined`

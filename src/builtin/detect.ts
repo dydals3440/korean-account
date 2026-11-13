@@ -11,7 +11,8 @@ const builtinDetector = createDetector(institutions);
  * Input goes through {@link normalizeAccount}, so hyphens, spaces and full-width digits are
  * accepted as typed or pasted. An institution is scored only when one of its patterns is within
  * one digit of the input length, so candidates appear once the number is nearly complete.
- * Candidates are ordered by score, then by the {@link prevalence} prior, then by account kind.
+ * Candidates are ordered by confidence band, then score, then the {@link prevalence} prior, then
+ * account kind, so an unevidenced `"low"` match never outranks an evidenced one.
  *
  * Results are hints, not proof that an account exists. `confidence` is `"high"` at score ≥ 7,
  * `"medium"` at ≥ 4 and `"low"` otherwise, and always `"low"` when no identifier, subject code
@@ -28,10 +29,10 @@ const builtinDetector = createDetector(institutions);
  *   `categories`, `kinds`, `include` and `exclude` apply to the institution and kind after
  *   branch routing; `exclude` wins over `include`, and an empty array matches nothing.
  *   `limit` (default 5) caps the result count; `minScore` (default 1) drops weaker candidates.
- *   `ambiguous` is decided after filtering but before `limit`.
+ *   `ambiguous` counts every match, including institutions these options hide.
  * @returns The candidates, or an empty array when the input has no digits or nothing matches.
  * @throws {RangeError} When `options.limit` is not a non-negative integer or `Infinity`, or
- *   `options.minScore` is `NaN` (not checked for input without digits).
+ *   `options.minScore` is `NaN`, whatever the input.
  * @example
  * detect("110-436-387740").map((result) => result.institution.id);
  * // => ["shinhan", "post", "shinhyup"] (equal scores, all "high" and ambiguous)

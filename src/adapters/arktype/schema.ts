@@ -44,16 +44,15 @@ export type {
 /**
  * Creates an account-number schema with custom messages.
  *
- * Accepts a string of ASCII digits, whitespace and hyphens, at most 40 characters long, that
+ * Accepts a string of digits, whitespace and hyphens (ASCII or full-width, as typed with a
+ * Korean IME), at most 40 characters long, that
  * holds 6–20 digits. A valid value is returned unchanged, separators included; call
  * `normalizeAccount` from `korean-account` when you need digits only. Passing is a format check:
  * it does not prove that the account exists.
  *
  * Rules run in order and only the first failure is reported. Messages are raised with
- * `ctx.reject({ problem })`, the way to replace arktype's English text from a narrow. Nested in
- * an object, arktype prefixes them with the key (`account 계좌번호 자릿수가 부족합니다.`);
- * `ArkError.problem` holds the message alone. A non-string value fails with arktype's own type
- * message.
+ * `ctx.reject({ message })`, so they read the same when the schema is nested in an object (no
+ * key prefix). A non-string value, `null` and `undefined` included, fails with `required`.
  *
  * @param options - `messages` replaces the Korean default per rule; an omitted or `undefined`
  *   key keeps the default.

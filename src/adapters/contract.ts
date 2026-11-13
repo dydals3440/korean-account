@@ -34,7 +34,7 @@ export const ACCOUNT_MAX_DIGITS_REGEX = new RegExp(
  * fails.
  */
 export interface AccountMessages {
-  /** The input is empty. @default "계좌번호를 입력해주세요." */
+  /** The input is empty or not a string. @default "계좌번호를 입력해주세요." */
   readonly required: string;
   /**
    * The input is longer than 40 characters, separators included.
@@ -42,8 +42,8 @@ export interface AccountMessages {
    */
   readonly tooLong: string;
   /**
-   * The input holds a character other than an ASCII digit, whitespace or a hyphen; full-width
-   * digits such as `１` fail here.
+   * The input holds a character other than a digit, whitespace or a hyphen (ASCII or
+   * full-width).
    * @default "숫자, 공백, 하이픈만 입력해주세요."
    */
   readonly charset: string;

@@ -75,7 +75,8 @@ function isBoolean(value: unknown): value is boolean {
 /**
  * Creates an account-number schema with custom messages.
  *
- * Accepts a string of ASCII digits, whitespace and hyphens, at most 40 characters long, that
+ * Accepts a string of digits, whitespace and hyphens (ASCII or full-width, as typed with a
+ * Korean IME), at most 40 characters long, that
  * holds 6–20 digits. A valid value is returned unchanged, separators included; call
  * `normalizeAccount` from `korean-account` when you need digits only. Passing is a format check:
  * it does not prove that the account exists.
