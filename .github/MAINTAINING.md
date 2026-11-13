@@ -67,14 +67,35 @@ Metadata workflow(`.github/workflows/labeler.yml`)는 제목에서 type과 비�
 
 Git 태그는 `vX.Y.Z`, GitHub Release 제목도 `vX.Y.Z`로 통일합니다. Changesets가 버전과 릴리스 노트를 관리하고, 사람이 작성하는 changeset 본문은 한국어로 씁니다. 0.x에서 비호환 변경은 다음 minor로, 1.0 이후에는 major로 분리하며 변경 규모를 라벨만으로 결정하지 않습니다.
 
-[Release workflow](./workflows/release.yml)는 main에 push될 때 두 job으로 실행됩니다.
+[Release workflow](./workflows/release.yml)는 main에 push될 때 네 job으로 실행됩니다. 게시 권한은 사람이 승인해야 하는 `npm` environment 안에만 있습니다.
 
-| job       | 권한                                                         | 하는 일                                                                                                                                      |
-| --------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify`  | `contents: read`만, 자격 증명 저장 안 함                     | `pnpm check`, `test:coverage`, `build`, `check:dist`, `check:consumer`. 외부 패키지 설치와 검사를 모두 여기서 실행                           |
-| `release` | `verify` 성공 후. `contents`·`pull-requests`·`id-token` 쓰기 | lockfile 설치 후 Changesets 실행: 대기 중인 changeset이 있으면 `chore(release): 패키지 버전 갱신` PR을 만들고, 버전 PR이 머지되면 npm에 게시 |
+| job           | 실행 조건                      | 권한                                                      | 하는 일                                                                                                            |
+| ------------- | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `verify`      | main                           | `contents: read`만, 자격 증명 저장 안 함                  | `pnpm check`, `test:coverage`, `build`, `check:dist`, `check:consumer`. 외부 패키지 설치와 검사를 모두 여기서 실행 |
+| `select-mode` | main                           | `contents: read`                                          | 대기 중인 changeset이 있으면 `version`, `package.json` 버전이 npm에 없으면 `publish`, 둘 다 아니면 `none`          |
+| `version`     | `verify` 성공 + mode `version` | `contents`·`pull-requests` 쓰기                           | `chore(release): 패키지 버전 갱신` PR을 만들거나 갱신. 게시하지 않음                                               |
+| `publish`     | `verify` 성공 + mode `publish` | `environment: npm`(승인 필요), `contents`·`id-token` 쓰기 | 승인 후 `pnpm changeset publish`로 게시하고, 태그 `vX.Y.Z`와 GitHub Release를 API로 만듦                           |
 
-- 게시는 npm Trusted Publishing(OIDC)과 provenance를 씁니다. npm의 `korean-account`에 GitHub `dydals3440/korean-account`와 workflow `release.yml`이 연결되어 있어 `NPM_TOKEN`이 필요 없습니다. workflow 파일 이름을 바꾸면 npm 설정도 함께 바꿉니다.
+**릴리스 절차**
+
+1. 기능 PR이 main에 들어가면 `version` job이 버전 PR을 만듭니다. 봇(`GITHUB_TOKEN`)이 연 PR에는 CI가 돌지 않으므로 `gh pr close <번호> && gh pr reopen <번호>`로 다시 열어 CI를 돌린 뒤 squash merge합니다.
+2. 버전 PR이 머지되면 `select-mode`가 `publish`를 고르고 `publish` job이 승인을 기다립니다. 로그에서 게시 대상(`korean-account@X.Y.Z`)을 확인한 뒤 Actions 화면이나 `gh api`로 승인합니다. 대기 중에도 다른 main push는 막히지 않습니다(job 단위 concurrency).
+3. 게시 후 npm `latest`, provenance(attestations), 실제 설치, 태그, GitHub Release를 확인한 뒤 완료로 기록합니다.
+
+- 게시는 npm Trusted Publishing(OIDC)과 provenance를 씁니다. npm의 `korean-account`에 GitHub `dydals3440/korean-account`와 workflow `release.yml`이 연결되어 있어 `NPM_TOKEN`이 필요 없습니다. workflow 파일 이름을 바꾸면 npm 설정도 함께 바꿉니다. npm의 trusted publisher에 environment `npm`을 지정하면 승인 없이는 게시할 수 없게 됩니다(이 workflow가 main에 들어간 뒤 지정).
 - 릴리스 도구는 `.nvmrc`의 Node, `packageManager`의 pnpm, npm 12.2.2입니다. `prepublishOnly`가 게시 직전에 `build`와 `check:dist`를 다시 실행합니다.
-- concurrency 그룹은 진행 중인 게시를 취소하지 않습니다(부분 게시는 되돌릴 수 없음). 실패하면 원인을 고친 뒤 main에서 workflow를 수동 실행(`workflow_dispatch`)합니다. 재시도 전 npm에 같은 버전이 이미 있는지 확인하고, 게시된 버전은 덮어쓰지 않습니다.
+- `publish` job은 취소하지 않습니다(부분 게시는 되돌릴 수 없음). 실패하면 원인을 고친 뒤 main에서 workflow를 수동 실행(`workflow_dispatch`)합니다. 재시도 전 npm에 같은 버전이 이미 있는지 확인하고, 게시된 버전은 덮어쓰지 않습니다.
+- npm 게시는 성공했는데 태그나 Release 생성만 실패하면, 재실행해도 `select-mode`가 `none`을 고르므로 다시 시도하지 않습니다. `gh release create vX.Y.Z --target <커밋 SHA> --notes-file <CHANGELOG 발췌>`로 직접 만듭니다.
+
+**저장소 규칙(ruleset)**
+
+- `main 보호`(활성): 삭제·force push 금지, 선형 이력, PR 필수(승인 0, squash·rebase만). 관리자 우회는 PR 머지에서만 가능합니다.
+- `릴리스 태그 보호`(활성): `refs/tags/v*`의 삭제·이동 금지. 생성은 허용해 `publish` job이 태그를 만들 수 있습니다.
+- `main 필수 검사`: `CI result` 체크를 요구합니다. 쌓인 PR을 머지하는 동안에는 이 체크가 없는 아래 층이 막히므로 비활성으로 두었다가, 머지 후 다음으로 켭니다.
+
+  ```sh
+  id=$(gh api repos/dydals3440/korean-account/rulesets --jq '.[] | select(.name == "main 필수 검사") | .id')
+  gh api -X PUT "repos/dydals3440/korean-account/rulesets/$id" -f enforcement=active
+  ```
+
 - 게시된 태그는 삭제·이동·재사용하지 않습니다. npm `latest`, 실제 설치, provenance, GitHub Release까지 확인한 뒤 완료로 기록하고, 소비자 영향·마이그레이션·관련 PR을 남깁니다. 버전 PR이 머지됐다는 이유만으로 게시를 완료 처리하지 않습니다.

@@ -253,3 +253,24 @@ jobs:
       # vitest.config.ts thresholds act as a ratchet.
       - name: Test with coverage
         run: pnpm test:coverage
+
+  # One stable name for the required status check, independent of matrix entries.
+  # A skipped required check counts as passing, so anything but success fails here.
+  ci-result:
+    name: CI result
+    needs: [test, runtime, adapter-compat, consumer-types, coverage]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require every job to succeed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required CI job finished as '$result'."
+              exit 1
+            fi
+          done
