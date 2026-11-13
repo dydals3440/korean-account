@@ -5,21 +5,62 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# 배포 잡은 cancel-in-progress 를 켜지 않는다 — 중간에 끊기면 npm 에 반쯤 올라간다.
+# Never cancel a publish midway: a partial npm release cannot be rolled back.
 concurrency:
   group: release-${{ github.ref }}
 
 permissions: {}
 
 jobs:
-  release:
-    name: Release
+  # Runs every check and third-party install without any write credentials.
+  verify:
+    name: Verify
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Coverage
+        run: pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      - name: Check distribution
+        run: pnpm check:dist
+
+      - name: Check packed consumers
+        run: pnpm check:consumer
+
+  # Holds publish rights; only installs the lockfile and runs changesets.
+  release:
+    name: Release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
       pull-requests: write
-      # npm trusts this repository's release.yml; no stored npm token is needed.
+      # npm trusted publishing (OIDC): no stored npm token.
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,37 +78,12 @@ jobs:
       - name: Setup npm
         run: npm install --global npm@12.2.2
 
-      - name: Report tool versions
-        run: |
-          node --version
-          npm --version
-          pnpm --version
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check
-        run: pnpm check
-
-      - name: Coverage
-        run: pnpm test:coverage
-
-      # `prepublishOnly` 도 build 를 돌리지만 여기서도 돌린다. dist 는 gitignore 되어
-      # 있어서, 어떤 이유로든 prepublishOnly 가 실행되지 않으면 dist 없는 패키지가
-      # npm 에 올라간다. 중복 2초를 지불하고 그 사고를 막는다.
-      - name: Build
-        run: pnpm build
-
-      - name: Check distribution
-        run: pnpm check:dist
-
-      - name: Check packed consumers
-        run: pnpm check:consumer
-
-      # `version` / `publish` 에 반드시 `changeset` 을 명시해야 한다. `pnpm version` 은
-      # pnpm 내장 명령에 가려져 package.json 의 스크립트가 실행되지 않는다 (88fd0b8).
-      - name: Create Release Pull Request or Publish
-        id: changesets
+      # `pnpm version`/`pnpm publish` are pnpm built-ins, so call changeset explicitly.
+      # `prepublishOnly` rebuilds and re-checks dist right before publishing.
+      - name: Create release pull request or publish
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

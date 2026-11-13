@@ -8,7 +8,7 @@ body:
       value: |
         제목은 `feat(scope): 기대하는 기능` 형식입니다. 한국어 기본, English welcome.
         개별 서비스의 계좌 체계는 `createDetector(...).extend(...)`로 보강할 수 있습니다.
-        [확장 가이드](https://github.com/dydals3440/korean-account/blob/main/DOCS.md)를 함께 확인해 주세요.
+        [확장 가이드](https://github.com/dydals3440/korean-account/blob/main/docs/customization.md)를 함께 확인해 주세요.
   - type: textarea
     id: summary
     attributes:

@@ -1,16 +1,14 @@
-// Verifies the published dist actually runs on the `engines.node` floor.
-//
-// Build tooling (tsdown) may require a newer Node than the artifact does, so
-// CI builds on .nvmrc and then executes this script on every supported Node
-// (currently 22 and 24). This prevents lowering `engines` without verifying it.
+// Runs the built dist on the current Node so CI can prove every `engines.node`
+// version in its matrix executes the artifact, not just the build toolchain.
 
 import { globSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 const root = fileURLToPath(new URL("..", import.meta.url));
+const importDist = (path) => import(pathToFileURL(`${root}${path}`).href);
 const pkg = JSON.parse(readFileSync(`${root}package.json`, "utf8"));
 
 const failures = [];
@@ -36,7 +34,7 @@ if (major < reqMajor || (major === reqMajor && minor < (reqMinor ?? 0))) {
 
 console.log(`Node ${process.versions.node} · engines ${pkg.engines.node}\n`);
 
-const esm = await import(`${root}dist/index.js`);
+const esm = await importDist("dist/index.js");
 const cjs = require(`${root}dist/index.cjs`);
 
 check("ESM detectBest", () => {
@@ -112,7 +110,7 @@ check("standard-schema adapter imports no external module", () => {
   }
 });
 
-const stdEsm = await import(`${root}dist/adapters/standard-schema/index.js`);
+const stdEsm = await importDist("dist/adapters/standard-schema/index.js");
 const stdCjs = require(`${root}dist/adapters/standard-schema/index.cjs`);
 
 check("standard-schema adapter validates (ESM+CJS)", () => {

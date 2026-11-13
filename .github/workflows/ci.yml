@@ -9,18 +9,19 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Cancel superseded PR runs only; every main commit keeps its full result.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
-# Jobs below never push, so checkout must not persist GITHUB_TOKEN in
-# .git/config. release.yml keeps credentials because changesets pushes.
+# No job pushes, so checkout never persists GITHUB_TOKEN.
 
 jobs:
   test:
     name: Node ${{ matrix.node }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -56,12 +57,11 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # `pnpm build` gates on attw (strict) + publint. Without attw, broken
-      # type layouts (e.g. missing d.ts chunks) pass publint silently.
+      # Gated by attw --profile strict + publint.
       - name: Build
         run: pnpm build
 
-      # Tree-shaking regressions are caught as byte budgets (.size-limit.json).
+      # Tree-shaking regressions surface as byte budgets (.size-limit.json).
       - name: Size limit
         run: pnpm size
 
@@ -72,10 +72,11 @@ jobs:
         if: runner.os == 'Windows'
         run: pnpm check:consumer none
 
-  # Verifies `engines.node` actually holds by executing dist on the floor version.
+  # Builds on .nvmrc, then executes dist on every supported Node, floor included.
   runtime:
     name: Runtime Node ${{ matrix.node }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -104,7 +105,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # Executes dist directly — vitest tests src, so it cannot cover this.
       - name: Run dist on Node ${{ matrix.node }}
         run: node scripts/check-runtime.mjs
 
@@ -114,12 +114,16 @@ jobs:
         env:
           CONSUMER_RUNTIME_ONLY: "true"
 
-  # Test the published tarball and source contracts with exact peer floors and
-  # latest supported majors. The none case proves core and standard-schema
-  # import/require/types work without installing any validator peers.
+  # Packed tarball + adapter sources against exact peer floors and latest majors.
+  # The zero-dependency case proves core and standard-schema need no peers.
   adapter-compat:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PEER_INSTALL: ${{ matrix.install }}
+      ADAPTER_DIR: ${{ matrix.dir }}
+      FORBIDDEN_TYPES: ${{ matrix.forbid }}
     strategy:
       fail-fast: false
       matrix:
@@ -176,37 +180,37 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Build exactly the artifact we release, before changing consumer peers.
+      # Build the exact release artifact before swapping consumer peers.
       - name: Build
         run: pnpm build
 
       - name: Check packed consumer
-        run: pnpm check:consumer "${{ matrix.install || 'none' }}"
+        run: pnpm check:consumer "${PEER_INSTALL:-none}"
 
       - name: Install ${{ matrix.install }}
         if: matrix.install != ''
-        run: pnpm add -D ${{ matrix.install }}
+        run: pnpm add -D "$PEER_INSTALL"
 
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Test adapter
-        run: pnpm vitest run src/adapters/${{ matrix.dir }}
+        run: pnpm vitest run "src/adapters/$ADAPTER_DIR"
 
-      # Generated d.ts must not pin the adapter to a validator release —
-      # public annotations (ZodType<T>, v.GenericSchema<T>, Schema<T>, ...)
-      # keep the declaration surface version-neutral.
+      # Public annotations (ZodType<T>, v.GenericSchema<T>, Schema<T>, ...) must
+      # keep the declaration surface free of version-pinned validator internals.
       - name: Assert d.ts is version-neutral
         if: matrix.forbid != ''
         run: |
-          if grep -Eq "${{ matrix.forbid }}" "dist/${{ matrix.dir }}.d.ts" "dist/${{ matrix.dir }}.d.cts"; then
-            echo "::error::dist/${{ matrix.dir }}.d.ts leaks version-pinned internal types."
+          if grep -Eq "$FORBIDDEN_TYPES" "dist/$ADAPTER_DIR.d.ts" "dist/$ADAPTER_DIR.d.cts"; then
+            echo "::error::dist/$ADAPTER_DIR.d.ts leaks version-pinned validator types."
             exit 1
           fi
 
   consumer-types:
     name: Consumer TypeScript ${{ matrix.typescript }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -229,6 +233,7 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -245,6 +250,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # thresholds in vitest.config.ts act as the ratchet — fails here on drop.
+      # vitest.config.ts thresholds act as a ratchet.
       - name: Test with coverage
         run: pnpm test:coverage
