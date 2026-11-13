@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import spawn from "cross-spawn";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+
+import spawn from "cross-spawn";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const result = spawn.sync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { FIXTURES, type Fixture } from "./detect.fixtures";
+
 import { detect } from "./detect";
+import { FIXTURES, type Fixture } from "./detect.fixtures";
 
 describe("detect", () => {
   describe("fixture 자동 매칭", () => {

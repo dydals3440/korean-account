@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { institutions } from "../registry";
 import { searchInstitutions } from "./search-institutions";
 

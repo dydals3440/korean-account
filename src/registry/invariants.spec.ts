@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { templateLength } from "../core/template-length";
 import { institutions } from "./index";
 

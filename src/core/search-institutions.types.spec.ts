@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, test } from "vitest";
+
 import {
   getInstitution,
   type InstitutionIdByCategory,

@@ -1,6 +1,7 @@
 import { type } from "arktype";
 import * as v from "valibot";
 import { describe, expect, test } from "vitest";
+
 import { accountSchema as arktypeAccount } from "./adapters/arktype";
 import { accountSchema as standardAccount } from "./adapters/standard-schema";
 import { accountSchema as valibotAccount } from "./adapters/valibot";

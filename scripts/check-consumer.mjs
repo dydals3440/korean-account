@@ -1,12 +1,14 @@
 // Test the shipped artifact, not a rebuild against each consumer's peers.
 // An npm alias provides the last public release for API/type/behavior comparison.
 import assert from "node:assert/strict";
-import { applyRegistryChanges } from "./compatibility.mjs";
-import spawn from "cross-spawn";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import spawn from "cross-spawn";
+
+import { applyRegistryChanges } from "./compatibility.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const registryChanges = JSON.parse(

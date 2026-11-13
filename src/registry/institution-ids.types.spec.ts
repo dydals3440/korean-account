@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
+
 import { type InstitutionId, institutions } from "./index";
 import { INSTITUTION_IDS } from "./institution-ids";
 

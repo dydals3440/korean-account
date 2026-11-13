@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { ValidationError } from "yup";
+
 import { type ContractSchemaName, describeAdapterContract } from "../adapter-contract.fixtures";
 import { MESSAGES } from "../shared";
 import {

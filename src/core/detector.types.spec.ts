@@ -1,6 +1,7 @@
 import { describe, expectTypeOf, test } from "vitest";
-import { institutions, kb, shinhan, toss } from "../registry";
+
 import type { DetectionResult, RegisteredInstitution } from "../index";
+import { institutions, kb, shinhan, toss } from "../registry";
 import { createDetector } from "./detector";
 
 describe("createDetector generic narrowing", () => {

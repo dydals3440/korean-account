@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { type InstitutionId, institutions } from "../registry";
 import { detect } from "./detect";
 

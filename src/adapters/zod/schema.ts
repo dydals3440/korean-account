@@ -1,6 +1,7 @@
 import { type ZodType, z } from "zod";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+
 import type { InstitutionId } from "../../registry";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,

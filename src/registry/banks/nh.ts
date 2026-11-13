@@ -1,7 +1,7 @@
+import { defineInstitution } from "../../core/define-institution";
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
 import type { Subject } from "../../types";
-import { defineInstitution } from "../../core/define-institution";
 
 const nhBankSubjectsOld: Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),

@@ -12,14 +12,14 @@ export { forest } from "./forest";
 export { post } from "./post";
 export { kftc } from "./kftc";
 
-import { suhyupCoop } from "./suhyup-coop";
-import { nhCoop } from "./nh-coop";
-import { kfcc } from "./kfcc";
-import { shinhyup } from "./shinhyup";
-import { savingsBank } from "./savings-bank";
 import { forest } from "./forest";
-import { post } from "./post";
+import { kfcc } from "./kfcc";
 import { kftc } from "./kftc";
+import { nhCoop } from "./nh-coop";
+import { post } from "./post";
+import { savingsBank } from "./savings-bank";
+import { shinhyup } from "./shinhyup";
+import { suhyupCoop } from "./suhyup-coop";
 
 /** All nonBanks institutions, in KFTC CMS registry order. */
 export const nonBanks = [

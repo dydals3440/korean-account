@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { detect } from "./detect";
 import { FIXTURES } from "./detect.fixtures";
 

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { institutions } from "../registry";
 import type { CheckDigitVerifier } from "../types";
 import { createDetector } from "./detector";

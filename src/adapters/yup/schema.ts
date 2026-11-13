@@ -1,7 +1,8 @@
 import { boolean, number, object, type Schema, string } from "yup";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+
 import type { InstitutionId } from "../../registry";
 import { INSTITUTION_IDS } from "../../registry/institution-ids";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
 import type { AccountKind, Confidence, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,

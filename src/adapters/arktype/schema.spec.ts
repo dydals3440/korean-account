@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { describe, expect, test } from "vitest";
+
 import { type ContractSchemaName, describeAdapterContract } from "../adapter-contract.fixtures";
 import { MESSAGES } from "../shared";
 import {
