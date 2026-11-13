@@ -1,8 +1,8 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution } from "../../core/define/define-institution";
+import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineSubject } from "../../core/define/define-subject";
 import type { Subject } from "../../types";
-import { kb11FirstDigit } from "../rules";
+import { kb11FirstDigit } from "../branch-rules";
 
 const kbSubjectsOld12: Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),

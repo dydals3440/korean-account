@@ -2,7 +2,7 @@ import { type } from "arktype";
 
 import type { InstitutionId } from "../../registry";
 import { INSTITUTION_IDS } from "../../registry/institution-ids";
-import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../constants";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -13,14 +13,14 @@ import {
   digitCount,
   isFiniteNumber,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 
 // ArkType is ESM-only. CJS declarations must resolve its types as imports,
 // including consumers using TypeScript's frozen Node16 module model.
 // The inline query preserves resolution-mode in tsdown's TS7 declarations.
 type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type<T>;
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 
 // Exports are annotated `Type<T>` (stable across arktype 2.x; its `out t`
 // variance makes narrowed results assignable). All account rules live in one

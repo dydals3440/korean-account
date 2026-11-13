@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 import type { InstitutionId } from "../../registry";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -13,9 +13,9 @@ import {
   isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 
 // Every export is annotated `v.GenericSchema<T>` — valibot's documented alias
 // for explicit annotations. Without it, the generated d.ts inlines

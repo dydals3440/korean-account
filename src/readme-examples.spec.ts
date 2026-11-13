@@ -18,7 +18,7 @@ import {
   institutions,
   normalizeAccount,
   scoreToConfidence,
-} from "./index";
+} from ".";
 
 // The README ships in the tarball, so it is a contract. From v0.0.3 through
 // 0.1.1 it claimed `detectBest("3333-12-3456789")` returns KakaoBank / "high"

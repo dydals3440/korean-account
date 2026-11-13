@@ -1,6 +1,6 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
+import { defineInstitution } from "../../core/define/define-institution";
+import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineSubject } from "../../core/define/define-subject";
 
 export const hanaSec = defineInstitution({
   id: "hana-sec",

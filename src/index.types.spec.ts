@@ -30,7 +30,7 @@ import type {
   ScoringWeights,
   Subject,
   SubjectCategory,
-} from "./index";
+} from ".";
 
 // Removing or renaming a type export breaks compilation of this file. Value
 // exports are guarded by the snapshot in `index.spec.ts`; together they cover

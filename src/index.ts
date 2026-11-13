@@ -8,35 +8,35 @@ export {
   suhyup14BranchToCoop,
   suhyupCoop12BranchToBank,
   toss12First1719,
-} from "./registry/rules";
-export { scoreToConfidence } from "./core/confidence";
-export { prevalence } from "./core/prevalence";
-export type { CreateDetectorOptions } from "./core/detector";
-export { createDetector } from "./core/detector";
-export { patternTemplate } from "./core/pattern-template";
-export { detect, detectBest } from "./core/detect";
-export { extractIdentifier } from "./core/extract-identifier";
-export { extractSubject } from "./core/extract-subject";
-export { formatAccount } from "./core/format-account";
-export { normalizeAccount } from "./core/normalize-account";
-export type { SearchInstitutionsFilter } from "./core/search-institutions";
-export { searchInstitutions } from "./core/search-institutions";
-export type { PickPatternFilter } from "./core/pick-pattern";
-export { pickPattern } from "./core/pick-pattern";
-export { defineInstitution } from "./core/define-institution";
+} from "./registry/branch-rules";
+export { scoreToConfidence } from "./core/detector/confidence";
+export { prevalence } from "./core/detector/prevalence";
+export type { CreateDetectorOptions } from "./core/detector/create-detector";
+export { createDetector } from "./core/detector/create-detector";
+export { patternTemplate } from "./core/define/pattern-template";
+export { detect, detectBest } from "./builtin/detect";
+export { extractIdentifier } from "./core/account/extract-identifier";
+export { extractSubject } from "./core/account/extract-subject";
+export { formatAccount } from "./core/account/format-account";
+export { normalizeAccount } from "./core/account/normalize-account";
+export type { SearchInstitutionsFilter } from "./builtin/search-institutions";
+export { searchInstitutions } from "./builtin/search-institutions";
+export type { PickPatternFilter } from "./builtin/pick-pattern";
+export { pickPattern } from "./builtin/pick-pattern";
+export { defineInstitution } from "./core/define/define-institution";
 export {
   accountKindLabels,
   defineSubject,
   normalizeSubject,
   subjectCategoryLabels,
-} from "./core/subjects";
+} from "./core/define/define-subject";
 export * from "./registry";
 export {
   ACCOUNT_KINDS,
   CONFIDENCE_LEVELS,
   INSTITUTION_CATEGORIES,
   SUBJECT_CATEGORIES,
-} from "./shared/constants";
+} from "./constants";
 
 export type {
   AccountKind,

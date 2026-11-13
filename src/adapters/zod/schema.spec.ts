@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { type ContractSchemaName, describeAdapterContract } from "../adapter-contract.fixtures";
+import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,

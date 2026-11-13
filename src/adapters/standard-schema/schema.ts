@@ -1,5 +1,5 @@
 import type { InstitutionId } from "../../registry";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -11,10 +11,10 @@ import {
   isFiniteNumber,
   isRegisteredInstitutionId,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 import type { StandardSchemaV1 } from "./spec";
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 export type { StandardSchemaV1 } from "./spec";
 
 // The dependency-free adapter: implements the Standard Schema interface by

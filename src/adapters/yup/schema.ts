@@ -2,7 +2,7 @@ import { boolean, number, object, type Schema, string } from "yup";
 
 import type { InstitutionId } from "../../registry";
 import { INSTITUTION_IDS } from "../../registry/institution-ids";
-import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../shared/constants";
+import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
 import type { AccountKind, Confidence, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
@@ -13,9 +13,9 @@ import {
   digitCount,
   isFiniteNumber,
   MESSAGES,
-} from "../shared";
+} from "../contract";
 
-export type { DetectionPayload } from "../shared";
+export type { DetectionPayload } from "../contract";
 
 // Exports are annotated with yup's stable `Schema<T>` base — `ObjectSchema`'s
 // extra TContext/TDefault/TFlags generics are exactly the churny surface the

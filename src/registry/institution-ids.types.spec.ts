@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 
-import { type InstitutionId, institutions } from "./index";
+import { type InstitutionId, institutions } from ".";
 import { INSTITUTION_IDS } from "./institution-ids";
 
 describe("INSTITUTION_IDS ↔ institutions 동기화", () => {

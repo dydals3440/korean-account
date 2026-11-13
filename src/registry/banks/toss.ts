@@ -1,7 +1,7 @@
-import { defineInstitution } from "../../core/define-institution";
-import { patternTemplate as T } from "../../core/pattern-template";
-import { defineSubject } from "../../core/subjects";
-import { toss12First1719 } from "../rules";
+import { defineInstitution } from "../../core/define/define-institution";
+import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineSubject } from "../../core/define/define-subject";
+import { toss12First1719 } from "../branch-rules";
 
 export const toss = defineInstitution({
   id: "toss",
