@@ -6,8 +6,10 @@ on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
 
+# The event name keeps this run apart from a pull_request_target copy on an older base,
+# so the two never cancel each other while this file changes.
 concurrency:
-  group: pr-title-${{ github.event.pull_request.number }}
+  group: pr-title-${{ github.event_name }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions: {}
