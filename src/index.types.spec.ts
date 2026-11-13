@@ -13,6 +13,7 @@ import type {
   DetectionResult,
   DetectOptions,
   Detector,
+  ExtendDetectorOptions,
   GlobalRule,
   Institution,
   InstitutionCategory,
@@ -46,6 +47,7 @@ type PublicTypeSurface = [
   DetectionCapabilities,
   DetectionResult,
   Detector,
+  ExtendDetectorOptions,
   GlobalRule,
   Institution,
   InstitutionCategory,
@@ -66,7 +68,7 @@ type PublicTypeSurface = [
   DetectionPayload,
 ];
 
-test("공개 타입 export 29개가 모두 존재한다", () => {
+test("공개 타입 export 30개가 모두 존재한다", () => {
   // Given
   type Surface = PublicTypeSurface;
 
@@ -74,5 +76,5 @@ test("공개 타입 export 29개가 모두 존재한다", () => {
   type ExportCount = Surface["length"];
 
   // Then
-  expectTypeOf<ExportCount>().toEqualTypeOf<29>();
+  expectTypeOf<ExportCount>().toEqualTypeOf<30>();
 });
