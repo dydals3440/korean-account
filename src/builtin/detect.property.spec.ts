@@ -2,39 +2,23 @@ import { describe, expect, test } from "vitest";
 
 import { type InstitutionId, institutions } from "../registry";
 import { detect } from "./detect";
+import { createSeededRandom, randomDigits } from "./evaluation.fixtures";
 
-/**
- * Property-based style checks.
- *
- * Random digits come from a deterministic seed — no external generator
- * (fast-check etc.). Only detect's invariants are verified, lightly.
- */
+const SCORE_BAND_RANK = { low: 0, medium: 1, high: 2 } as const;
 
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function randomDigits(rng: () => number, length: number): string {
-  let out = "";
-  for (let i = 0; i < length; i += 1) {
-    out += Math.floor(rng() * 10).toString();
+function scoreBand(score: number): keyof typeof SCORE_BAND_RANK {
+  if (score >= 7) {
+    return "high";
   }
-  return out;
+  return score >= 4 ? "medium" : "low";
 }
 
 const ID_SET = new Set<string>(institutions.map((institution) => institution.id));
 
 describe("detect property-based invariants", () => {
-  test("임의 14자리 digits 1000건: limit·정렬·confidence 일관", () => {
+  test("임의 14자리 digits 1000건이면 limit·정렬·confidence 상한을 지킨다", () => {
     // Given
-    const rng = mulberry32(0xc0ffee);
+    const rng = createSeededRandom(0xc0ffee);
     const inputs = Array.from({ length: 1000 }, () => randomDigits(rng, 14));
 
     // When
@@ -59,14 +43,11 @@ describe("detect property-based invariants", () => {
         expect(results.every((result) => result.confidence !== "low")).toBe(true);
       }
 
+      // Confidence never exceeds the score band; missing evidence lowers it to low.
       for (const result of results) {
-        if (result.score >= 7) {
-          expect(result.confidence).toBe("high");
-        } else if (result.score >= 4) {
-          expect(result.confidence).toBe("medium");
-        } else {
-          expect(result.confidence).toBe("low");
-        }
+        expect(SCORE_BAND_RANK[result.confidence]).toBeLessThanOrEqual(
+          SCORE_BAND_RANK[scoreBand(result.score)],
+        );
       }
 
       for (const result of results) {
@@ -78,7 +59,7 @@ describe("detect property-based invariants", () => {
 
   test("임의 길이 5~16자리 500건: 모든 결과가 institution·matchedPattern·capabilities 를 갖는다", () => {
     // Given
-    const rng = mulberry32(0xbeef);
+    const rng = createSeededRandom(0xbeef);
     const inputs = Array.from({ length: 500 }, () => {
       const length = 5 + Math.floor(rng() * 12);
       return randomDigits(rng, length);

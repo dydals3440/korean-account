@@ -47,8 +47,8 @@ describe("ranking quality (corpus ratchet)", () => {
     expect(highRatio).toBeGreaterThanOrEqual(0.95);
   });
 
-  // Measured 2.55 (40 multi-candidate inputs); the margin keeps rank 1 stable as institutions join.
-  test("1·2순위 평균 점수 마진 래칫 (≥ 2.0)", () => {
+  // Measured 1.375 after shared identifier/subject spans stopped counting twice (0.5.0).
+  test("1·2순위 평균 점수 마진 래칫 (≥ 1.3)", () => {
     // Given
     const multiCandidateHits = evaluations.filter(
       (evaluation) => evaluation.rank === 0 && evaluation.results.length > 1,
@@ -61,6 +61,6 @@ describe("ranking quality (corpus ratchet)", () => {
     const averageMargin = margins.reduce((sum, margin) => sum + margin, 0) / margins.length;
 
     // Then
-    expect(averageMargin).toBeGreaterThanOrEqual(2.0);
+    expect(averageMargin).toBeGreaterThanOrEqual(1.3);
   });
 });

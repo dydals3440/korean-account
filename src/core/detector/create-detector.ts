@@ -16,11 +16,9 @@ import { resolveCapabilities, toVerifierMap, verifyCheckDigit } from "./capabili
 import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
 import { normalizeSubject } from "./normalize-subject";
-import { rankDetections } from "./rank";
-import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
-
-const DEFAULT_LIMIT = 5;
-const DEFAULT_MIN_SCORE = 1;
+import { type RankableDetection, rankDetections } from "./rank";
+import { resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
+import { scoreInstitution } from "./score";
 
 /** Options resolved once per detector; `extend` merges these instead of raw options. */
 interface DetectorConfig {
@@ -33,6 +31,7 @@ interface DetectorConfig {
  * Creates an immutable detector over the given institutions.
  * Results narrow `institution.id` to the ids you pass in.
  *
+ * @throws {RangeError} When a `scoring` weight is not a finite number ≥ 0.
  * @example Only the institutions you ship
  * const detector = createDetector([kb, shinhan, toss]);
  * detector.detect("110-436-387740")[0]?.institution.id; // "shinhan"
@@ -56,7 +55,7 @@ function buildDetector<TInstitution extends Institution>(
   institutions: readonly TInstitution[],
   config: DetectorConfig,
 ): Detector<TInstitution> {
-  const weights = { ...DEFAULT_WEIGHTS, ...config.scoring };
+  const weights = resolveWeights(config.scoring);
   const institutionById = new Map(institutions.map((institution) => [institution.id, institution]));
   const lengthIndex = createLengthIndex(institutions);
 
@@ -69,9 +68,10 @@ function buildDetector<TInstitution extends Institution>(
       return [];
     }
 
-    const minScore = options.minScore ?? DEFAULT_MIN_SCORE;
+    const limit = resolveLimit(options.limit);
+    const minScore = resolveMinScore(options.minScore);
     const isRequested = createInstitutionFilter<TInstitution>(options);
-    const results: DetectionResult<TInstitution>[] = [];
+    const candidates: RankableDetection<TInstitution>[] = [];
 
     for (const candidate of lengthIndex.candidatesNear(digits.length)) {
       const match = scoreInstitution(digits, candidate, config.globalRules, weights);
@@ -82,6 +82,7 @@ function buildDetector<TInstitution extends Institution>(
       const branch = applyBranchRule(digits, match.matchedPattern, candidate, {
         institutionById,
         bonus: weights.branchRuleMatch,
+        hasPatternEvidence: match.hasEvidence,
       });
       const score = match.score + branch.bonus;
       const isWantedKind = options.kinds?.includes(branch.kind) ?? true;
@@ -97,14 +98,14 @@ function buildDetector<TInstitution extends Institution>(
         config.verifiers,
       );
 
-      results.push({
+      candidates.push({
         institution: branch.institution,
         matchedPattern: match.matchedPattern,
         kind: branch.kind,
         ...(subject && { subject }),
         formatted: match.formatted,
         score,
-        confidence: scoreToConfidence(score),
+        confidence: branch.hasEvidence ? scoreToConfidence(score) : "low",
         capabilities: resolveCapabilities({
           kind: branch.kind,
           subject,
@@ -114,7 +115,7 @@ function buildDetector<TInstitution extends Institution>(
       });
     }
 
-    return rankDetections(results).slice(0, options.limit ?? DEFAULT_LIMIT);
+    return rankDetections(candidates).slice(0, limit);
   };
 
   const extend = <TExtra extends Institution>(

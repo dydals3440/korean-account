@@ -32,48 +32,53 @@ export interface DetectionResult<TInstitution extends Institution = Institution>
   /** Input digits grouped by the matched template. */
   readonly formatted: string;
   readonly score: number;
+  /** `low` unless an identifier, subject code or non-fallback branch rule backs the match. */
   readonly confidence: Confidence;
+  /** Another institution is in the same confidence band, so ask the user to confirm. */
+  readonly ambiguous: boolean;
   readonly capabilities: DetectionCapabilities;
 }
 
 /** Filters and limits for `detect`. Institution filters apply after branch routing; `exclude` wins. */
 export interface DetectOptions<TId extends string = string> {
-  readonly categories?: readonly InstitutionCategory[];
-  readonly kinds?: readonly AccountKind[];
-  readonly include?: readonly InstitutionIdInput<TId>[];
-  readonly exclude?: readonly InstitutionIdInput<TId>[];
-  /** @default 5 */
-  readonly limit?: number;
+  readonly categories?: readonly InstitutionCategory[] | undefined;
+  readonly kinds?: readonly AccountKind[] | undefined;
+  readonly include?: readonly InstitutionIdInput<TId>[] | undefined;
+  readonly exclude?: readonly InstitutionIdInput<TId>[] | undefined;
+  /** Non-negative integer or `Infinity`. @default 5 */
+  readonly limit?: number | undefined;
   /** @default 1 */
-  readonly minScore?: number;
+  readonly minScore?: number | undefined;
 }
 
-/** Score added per matching signal. Omitted keys keep their defaults. */
+/** Non-negative score added per matching signal. Omitted or `undefined` keys keep their defaults. */
 export interface ScoringWeights {
   /** Digit count equals the template length. @default 3 */
-  readonly lengthExact?: number;
+  readonly lengthExact?: number | undefined;
   /** Digit count is one off the template length. @default 1 */
-  readonly lengthNear?: number;
+  readonly lengthNear?: number | undefined;
   /** Identifier digits match. Partial input earns half. @default 4 */
-  readonly identifierMatch?: number;
+  readonly identifierMatch?: number | undefined;
   /** Subject code matches. Partial input earns half. @default 3 */
-  readonly subjectMatch?: number;
+  readonly subjectMatch?: number | undefined;
   /** Per passing `additionalRules` entry. @default 1 */
-  readonly additionalRule?: number;
+  readonly additionalRule?: number | undefined;
   /** Per passing detector-level `globalRules` entry. @default 1 */
-  readonly globalRule?: number;
-  /** The pattern's `branchRule` produced an adjustment. @default 2 */
-  readonly branchRuleMatch?: number;
+  readonly globalRule?: number | undefined;
+  /** The pattern's `branchRule` fired on an evidenced match (see `BranchRuleResult.isFallback`). @default 2 */
+  readonly branchRuleMatch?: number | undefined;
   /** The matched pattern's kind is `"new"`. @default 0 */
-  readonly kindNewBonus?: number;
+  readonly kindNewBonus?: number | undefined;
 }
 
 /** Options for `createDetector`. */
 export interface CreateDetectorOptions<TInstitution extends Institution = Institution> {
-  readonly globalRules?: readonly GlobalRule[];
-  readonly scoring?: ScoringWeights;
+  readonly globalRules?: readonly GlobalRule[] | undefined;
+  readonly scoring?: ScoringWeights | undefined;
   /** Check-digit verifiers keyed by institution id. */
-  readonly checkDigitVerifiers?: Readonly<Partial<Record<TInstitution["id"], CheckDigitVerifier>>>;
+  readonly checkDigitVerifiers?:
+    | Readonly<Partial<Record<TInstitution["id"], CheckDigitVerifier>>>
+    | undefined;
 }
 
 /** Options for `Detector.extend`. Each field merges over the current detector's value. */
@@ -82,7 +87,7 @@ export interface ExtendDetectorOptions<
   TExtra extends Institution = Institution,
 > extends CreateDetectorOptions<TInstitution | TExtra> {
   /** Institutions to add. An existing id is replaced. */
-  readonly institutions?: readonly TExtra[];
+  readonly institutions?: readonly TExtra[] | undefined;
 }
 
 /**

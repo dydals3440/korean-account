@@ -90,7 +90,7 @@ describe("제주 — PDF p.8의 열거 식별자", () => {
     774, 775, 776, 777, 778, 779,
   ]);
   test.each(Array.from({ length: 80 }, (_, i) => 700 + i))(
-    "접두어 %i 는 열거되었으면 14점과 과목을, 아니면 3점을 받는다",
+    "접두어 %i 는 열거되었으면 9점과 과목을, 아니면 3점을 받는다",
     (prefix) => {
       // Given
       const digits = String(prefix) + "111111111";
@@ -100,7 +100,7 @@ describe("제주 — PDF p.8의 열거 식별자", () => {
       const result = scoped("jeju", digits);
 
       // Then
-      expect(result?.score).toBe(isListed ? 14 : 3);
+      expect(result?.score).toBe(isListed ? 9 : 3);
       expect(result?.subject !== undefined).toBe(isListed);
     },
   );
@@ -174,7 +174,7 @@ test("산업 010 — PDF p.1의 저축성 과목이며 기존 출금 flag는 유
   expect(result?.subject?.category).toBe("savings");
   expect(result?.subject?.label).toBe("저축예금");
   expect(result?.capabilities.allowsWithdrawal).toBe(true);
-  expect(result?.score).toBe(14);
+  expect(result?.score).toBe(9);
 });
 
 test("광주 — PDF p.8의 109는 13자리 보통예금·12자리 국고로 구분한다", () => {
@@ -222,7 +222,7 @@ test.each([
   expect(result?.subject?.allowsWithdrawal).toBe(false);
   expect(result?.capabilities.allowsWithdrawal).toBe(false);
   expect(result?.capabilities.virtual).toBe(false);
-  expect(result?.score).toBe(14);
+  expect(result?.score).toBe(9);
 });
 
 test("케이뱅크 13자리 — PDF p.13의 전화번호 연결 형식과 입금전용", () => {

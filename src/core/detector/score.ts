@@ -4,8 +4,13 @@ import { extractSubject } from "../account/extract-subject";
 import { formatAccount } from "../account/format-account";
 import { templateLength } from "../account/template-length";
 
+/** Scoring weights with every default applied. */
+export type ResolvedScoringWeights = {
+  readonly [TKey in keyof ScoringWeights]-?: NonNullable<ScoringWeights[TKey]>;
+};
+
 /** Default scoring weights; see `ScoringWeights` for what each one rewards. */
-export const DEFAULT_WEIGHTS: Required<ScoringWeights> = {
+export const DEFAULT_WEIGHTS: ResolvedScoringWeights = {
   lengthExact: 3,
   lengthNear: 1,
   identifierMatch: 4,
@@ -22,11 +27,19 @@ export interface InstitutionScore {
   readonly matchedPattern: AccountPattern | null;
   readonly formatted: string;
   readonly subject: Subject | null;
+  /** An identifier or subject code matched, not just length and rules. */
+  readonly hasEvidence: boolean;
 }
 
 interface PatternScore {
   readonly score: number;
   readonly subject: Subject | null;
+  readonly hasEvidence: boolean;
+}
+
+interface CodeMatch {
+  readonly score: number;
+  readonly isMatched: boolean;
 }
 
 interface LengthFit {
@@ -36,7 +49,8 @@ interface LengthFit {
   readonly isWithinTemplate: boolean;
 }
 
-const NO_PATTERN_MATCH: PatternScore = { score: 0, subject: null };
+const NO_PATTERN_MATCH: PatternScore = { score: 0, subject: null, hasEvidence: false };
+const NO_CODE_MATCH: CodeMatch = { score: 0, isMatched: false };
 
 /**
  * Scores every pattern of an institution and keeps the best one (first wins ties).
@@ -46,7 +60,7 @@ export function scoreInstitution(
   digits: string,
   institution: Institution,
   globalRules: readonly GlobalRule[],
-  weights: Required<ScoringWeights> = DEFAULT_WEIGHTS,
+  weights: ResolvedScoringWeights = DEFAULT_WEIGHTS,
 ): InstitutionScore {
   let bestPattern: AccountPattern | null = null;
   let best = NO_PATTERN_MATCH;
@@ -62,7 +76,7 @@ export function scoreInstitution(
   }
 
   if (bestPattern === null) {
-    return { score: 0, matchedPattern: null, formatted: digits, subject: null };
+    return { score: 0, matchedPattern: null, formatted: digits, subject: null, hasEvidence: false };
   }
 
   const passedGlobalRules = globalRules.filter((rule) => rule(digits, institution)).length;
@@ -71,13 +85,14 @@ export function scoreInstitution(
     matchedPattern: bestPattern,
     formatted: formatAccount(digits, bestPattern.template),
     subject: best.subject,
+    hasEvidence: best.hasEvidence,
   };
 }
 
 function scorePattern(
   digits: string,
   pattern: AccountPattern,
-  weights: Required<ScoringWeights>,
+  weights: ResolvedScoringWeights,
 ): PatternScore {
   const fit = measureLengthFit(digits.length, templateLength(pattern.template));
   const rules = pattern.additionalRules ?? [];
@@ -88,16 +103,37 @@ function scorePattern(
     return NO_PATTERN_MATCH;
   }
 
+  const identifierMatch = scoreIdentifier(digits, pattern, fit, weights);
   const subjectMatch = scoreSubject(digits, pattern, fit, weights);
   const ruleBonus = isRuleCheckable ? rules.length * weights.additionalRule : 0;
   const score =
     scoreLength(fit, weights) +
-    scoreIdentifier(digits, pattern, fit, weights) +
-    subjectMatch.score +
+    combineCodeScores(pattern, identifierMatch.score, subjectMatch.score) +
     ruleBonus;
 
   const newKindBonus = score > 0 && pattern.kind === "new" ? weights.kindNewBonus : 0;
-  return { score: score + newKindBonus, subject: subjectMatch.subject };
+  return {
+    score: score + newKindBonus,
+    subject: subjectMatch.subject,
+    hasEvidence: identifierMatch.isMatched || subjectMatch.subject !== null,
+  };
+}
+
+/** The same digits count once: when identifier and subject share a span, only the larger score counts. */
+function combineCodeScores(
+  pattern: AccountPattern,
+  identifierScore: number,
+  subjectScore: number,
+): number {
+  const identifierSpan = pattern.identifierPosition;
+  const subjectSpan = pattern.subjectPosition;
+  const isSharedSpan =
+    identifierSpan !== undefined &&
+    subjectSpan !== undefined &&
+    identifierSpan.start === subjectSpan.start &&
+    identifierSpan.length === subjectSpan.length;
+
+  return isSharedSpan ? Math.max(identifierScore, subjectScore) : identifierScore + subjectScore;
 }
 
 function measureLengthFit(digitCount: number, templateDigits: number): LengthFit {
@@ -108,7 +144,7 @@ function measureLengthFit(digitCount: number, templateDigits: number): LengthFit
   };
 }
 
-function scoreLength(fit: LengthFit, weights: Required<ScoringWeights>): number {
+function scoreLength(fit: LengthFit, weights: ResolvedScoringWeights): number {
   if (fit.isExact) {
     return weights.lengthExact;
   }
@@ -122,26 +158,30 @@ function scoreIdentifier(
   digits: string,
   pattern: AccountPattern,
   fit: LengthFit,
-  weights: Required<ScoringWeights>,
-): number {
+  weights: ResolvedScoringWeights,
+): CodeMatch {
   const hasIdentifierRule =
     pattern.identifierPosition !== undefined &&
     (pattern.identifiers !== undefined || pattern.identifierRange !== undefined);
   if (!fit.isWithinTemplate || !hasIdentifierRule) {
-    return 0;
+    return NO_CODE_MATCH;
   }
 
   const identifier = extractIdentifier(digits, pattern);
-  return isIdentifierMatch(identifier, pattern)
-    ? scoreCodeMatch(weights.identifierMatch, identifier.length, fit)
-    : 0;
+  if (!isIdentifierMatch(identifier, pattern)) {
+    return NO_CODE_MATCH;
+  }
+  return {
+    score: scoreCodeMatch(weights.identifierMatch, identifier.length, fit),
+    isMatched: true,
+  };
 }
 
 function scoreSubject(
   digits: string,
   pattern: AccountPattern,
   fit: LengthFit,
-  weights: Required<ScoringWeights>,
+  weights: ResolvedScoringWeights,
 ): PatternScore {
   if (!fit.isWithinTemplate) {
     return NO_PATTERN_MATCH;
@@ -151,7 +191,11 @@ function scoreSubject(
   if (subject === null) {
     return NO_PATTERN_MATCH;
   }
-  return { score: scoreCodeMatch(weights.subjectMatch, subject.code.length, fit), subject };
+  return {
+    score: scoreCodeMatch(weights.subjectMatch, subject.code.length, fit),
+    subject,
+    hasEvidence: true,
+  };
 }
 
 function isIdentifierMatch(identifier: string, pattern: AccountPattern): boolean {

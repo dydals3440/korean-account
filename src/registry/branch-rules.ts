@@ -81,7 +81,7 @@ export const suhyupCoop12BranchToBank: BranchRule = {
     if (staysWithCoop) {
       return null;
     }
-    return { institutionId: "suhyup" };
+    return { institutionId: "suhyup", isFallback: true };
   },
 };
 
@@ -124,7 +124,7 @@ export const kbank14First79: BranchRule = {
     if (digits[0] === "7" || digits[0] === "9") {
       return { kindOverride: "virtual", virtualOverride: true };
     }
-    return { kindOverride: "incoming-only" };
+    return { kindOverride: "incoming-only", isFallback: true };
   },
 };
 

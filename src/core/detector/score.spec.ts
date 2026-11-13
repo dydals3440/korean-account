@@ -16,7 +16,7 @@ function makeInstitution(patterns: Institution["patterns"]): Institution {
   };
 }
 
-const W = DEFAULT_WEIGHTS;
+const weights = DEFAULT_WEIGHTS;
 
 /** Identifier/subject length bonus on an exact-length match — `len - 1`. */
 function lengthBonus(len: number): number {
@@ -65,7 +65,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then
-      expect(result.score).toBe(W.lengthExact);
+      expect(result.score).toBe(weights.lengthExact);
     });
 
     test("자릿수 정확 — kind=new 도 동일 점수 (kindNewBonus 기본 0)", () => {
@@ -79,7 +79,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then
-      expect(result.score).toBe(W.lengthExact + W.kindNewBonus);
+      expect(result.score).toBe(weights.lengthExact + weights.kindNewBonus);
     });
 
     test("자릿수가 -1이면 lengthNear 가중치만 부여한다", () => {
@@ -93,7 +93,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then
-      expect(result.score).toBe(W.lengthNear);
+      expect(result.score).toBe(weights.lengthNear);
     });
 
     test("자릿수가 +1이면 lengthNear 가중치만 부여한다", () => {
@@ -107,7 +107,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then
-      expect(result.score).toBe(W.lengthNear);
+      expect(result.score).toBe(weights.lengthNear);
     });
 
     test("자릿수 차이가 2 이상이면 0점", () => {
@@ -143,7 +143,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then — 3-digit identifier → bonus +2
-      expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(3));
+      expect(result.score).toBe(weights.lengthExact + weights.identifierMatch + lengthBonus(3));
     });
 
     test("중간 식별 매칭 — KB 14자리 과목 위치", () => {
@@ -162,7 +162,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then — 2-digit identifier → bonus +1
-      expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(2));
+      expect(result.score).toBe(weights.lengthExact + weights.identifierMatch + lengthBonus(2));
     });
 
     test("identifierRange 범위 안이면 매칭으로 인정한다", () => {
@@ -181,7 +181,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then — 3-digit identifierRange → bonus +2
-      expect(result.score).toBe(W.lengthExact + W.identifierMatch + lengthBonus(3));
+      expect(result.score).toBe(weights.lengthExact + weights.identifierMatch + lengthBonus(3));
     });
 
     test("identifier 부분 입력은 절반 점수만 부여한다", () => {
@@ -200,7 +200,9 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then — partial input: half the base score + half the length bonus (3 digits = 2)
-      expect(result.score).toBe(Math.floor(W.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2));
+      expect(result.score).toBe(
+        Math.floor(weights.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2),
+      );
     });
   });
 
@@ -222,7 +224,7 @@ describe("scoreInstitution", () => {
 
       // Then — 2-digit subject → bonus +1
       expect(result.subject?.code).toBe("04");
-      expect(result.score).toBe(W.lengthExact + W.subjectMatch + lengthBonus(2));
+      expect(result.score).toBe(weights.lengthExact + weights.subjectMatch + lengthBonus(2));
     });
 
     test("subject 코드 불일치 시 subject는 null, 가산 없음", () => {
@@ -242,7 +244,7 @@ describe("scoreInstitution", () => {
 
       // Then
       expect(result.subject).toBeNull();
-      expect(result.score).toBe(W.lengthExact);
+      expect(result.score).toBe(weights.lengthExact);
     });
 
     test("subject 부분 입력은 절반 점수만 부여한다", () => {
@@ -262,7 +264,9 @@ describe("scoreInstitution", () => {
 
       // Then — partial input: half the base score + half the length bonus (2 digits = 1)
       expect(result.subject?.code).toBe("04");
-      expect(result.score).toBe(Math.floor(W.subjectMatch / 2) + Math.floor(lengthBonus(2) / 2));
+      expect(result.score).toBe(
+        Math.floor(weights.subjectMatch / 2) + Math.floor(lengthBonus(2) / 2),
+      );
     });
   });
 
@@ -302,7 +306,9 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then — partial input: half the base score + half the length bonus (3 digits = 2)
-      expect(result.score).toBe(Math.floor(W.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2));
+      expect(result.score).toBe(
+        Math.floor(weights.identifierMatch / 2) + Math.floor(lengthBonus(3) / 2),
+      );
     });
   });
 
@@ -326,7 +332,7 @@ describe("scoreInstitution", () => {
       const result = scoreInstitution(digits, institution, []);
 
       // Then
-      expect(result.score).toBe(W.lengthExact + 3 * W.additionalRule);
+      expect(result.score).toBe(weights.lengthExact + 3 * weights.additionalRule);
     });
 
     test("자릿수가 일치하는 입력에 대해 가드가 실패하면 패턴이 매칭되지 않는다", () => {
@@ -389,7 +395,7 @@ describe("scoreInstitution", () => {
       // Then — includes the 3-digit identifier bonus +2
       expect(noMatch.score).toBe(0);
       expect(matched.score).toBe(
-        W.lengthExact + W.identifierMatch + lengthBonus(3) + 2 * W.globalRule,
+        weights.lengthExact + weights.identifierMatch + lengthBonus(3) + 2 * weights.globalRule,
       );
     });
   });
@@ -404,15 +410,15 @@ describe("scoreInstitution", () => {
       const oldInstitution = makeInstitution([
         { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
       ]);
-      const weights = { ...W, kindNewBonus: 2 };
+      const boostedWeights = { ...weights, kindNewBonus: 2 };
 
       // When
-      const newResult = scoreInstitution(digits, newInstitution, [], weights);
-      const oldResult = scoreInstitution(digits, oldInstitution, [], weights);
+      const newResult = scoreInstitution(digits, newInstitution, [], boostedWeights);
+      const oldResult = scoreInstitution(digits, oldInstitution, [], boostedWeights);
 
       // Then
-      expect(newResult.score).toBe(W.lengthExact + 2);
-      expect(oldResult.score).toBe(W.lengthExact);
+      expect(newResult.score).toBe(weights.lengthExact + 2);
+      expect(oldResult.score).toBe(weights.lengthExact);
     });
   });
 });

@@ -184,7 +184,7 @@ describe("suhyupCoop12BranchToBank", () => {
     const result = suhyupCoop12BranchToBank.evaluate(digits);
 
     // Then
-    expect(result).toEqual({ institutionId: "suhyup" });
+    expect(result).toEqual({ institutionId: "suhyup", isFallback: true });
   });
 });
 
@@ -311,7 +311,7 @@ describe("kbank14First79", () => {
     const result = kbank14First79.evaluate(digits);
 
     // Then
-    expect(result).toEqual({ kindOverride: "incoming-only" });
+    expect(result).toEqual({ kindOverride: "incoming-only", isFallback: true });
   });
 });
 

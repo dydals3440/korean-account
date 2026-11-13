@@ -55,6 +55,11 @@ export interface BranchRuleResult {
   readonly kindOverride?: AccountKind;
   /** Replaces `capabilities.virtual`. */
   readonly virtualOverride?: boolean;
+  /**
+   * Marks an "otherwise" branch. Its condition proves nothing, so it neither counts as
+   * evidence nor earns the branch bonus.
+   */
+  readonly isFallback?: boolean;
 }
 
 /** Digit-based rule that reroutes or reclassifies a match, e.g. the Suhyup bank/coop split. */

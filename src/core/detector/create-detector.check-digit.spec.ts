@@ -52,10 +52,8 @@ describe("createDetector — checkDigitVerifiers framework", () => {
       checkDigitVerifiers: { suhyup: alwaysTrue },
     });
 
-    // When — same-length Shinhan/Shinhyup rank higher, so Suhyup is looked up among the candidates
-    const suhyup = detector
-      .detect("131-234567890")
-      .find((result) => result.institution.id === "suhyup");
+    // When
+    const [suhyup] = detector.detect("131-234567890", { include: ["suhyup"] });
 
     // Then
     expect(suhyup, "수협 12d 신계좌가 후보에 있어야 한다").toBeDefined();
