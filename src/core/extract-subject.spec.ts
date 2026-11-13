@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { defineSubject } from "./subjects";
+
 import type { AccountPattern, Subject } from "../types";
 import { extractSubject } from "./extract-subject";
+import { defineSubject } from "./subjects";
 
 type SubjectPattern = Pick<AccountPattern, "subjectPosition" | "subjects">;
 

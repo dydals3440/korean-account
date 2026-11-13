@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, test } from "vitest";
+
 import { getInstitution } from "../registry";
-import { normalizeAccount } from "./normalize-account";
 import type { AccountPattern } from "../types";
 import { extractIdentifier } from "./extract-identifier";
+import { normalizeAccount } from "./normalize-account";
 
 // 0.1.0 deleted `identifierPosition` as a "dead field" because `identifiers`
 // was absent. It is indeed unused for scoring, but the public API

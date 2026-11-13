@@ -1,9 +1,3 @@
-import { buildDetectorIndex } from "./detector-index";
-import { scoreToConfidence } from "./confidence";
-import { normalizeAccount } from "./normalize-account";
-import { prevalence } from "./prevalence";
-import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
-import { normalizeSubject } from "./subjects";
 import type {
   AccountKind,
   AccountPattern,
@@ -17,6 +11,12 @@ import type {
   ScoringWeights,
   Subject,
 } from "../types";
+import { scoreToConfidence } from "./confidence";
+import { buildDetectorIndex } from "./detector-index";
+import { normalizeAccount } from "./normalize-account";
+import { prevalence } from "./prevalence";
+import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
+import { normalizeSubject } from "./subjects";
 
 /** Optional knobs for {@link createDetector}. */
 export interface CreateDetectorOptions<I extends Institution = Institution> {

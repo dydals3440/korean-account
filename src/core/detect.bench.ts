@@ -1,4 +1,5 @@
 import { test } from "vitest";
+
 import { detect } from "./detect";
 
 // Vitest 5 는 최상위 `bench()` 를 걷어내고 테스트 컨텍스트의 `bench` 픽스처로 옮겼다.

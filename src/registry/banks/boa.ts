@@ -1,5 +1,5 @@
-import { patternTemplate as T } from "../../core/pattern-template";
 import { defineInstitution } from "../../core/define-institution";
+import { patternTemplate as T } from "../../core/pattern-template";
 
 export const boa = defineInstitution({
   id: "boa",

@@ -1,6 +1,6 @@
-import { createDetector } from "./detector";
 import { type InstitutionId, institutions, type RegisteredInstitution } from "../registry";
 import type { DetectionResult, DetectOptions } from "../types";
+import { createDetector } from "./detector";
 
 /**
  * Detector over the full built-in registry, shared by {@link detect} and

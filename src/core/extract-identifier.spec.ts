@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import type { DigitSpan } from "../types";
 import { extractIdentifier } from "./extract-identifier";
 

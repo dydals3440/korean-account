@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { templateLength } from "./template-length";
+
 import { pickPattern } from "./pick-pattern";
+import { templateLength } from "./template-length";
 
 describe("pickPattern", () => {
   describe("institution 조회 실패", () => {

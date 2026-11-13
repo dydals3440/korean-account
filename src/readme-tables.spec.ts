@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
-import { institutions } from "./registry";
+
 import { templateLength } from "./core/template-length";
+import { institutions } from "./registry";
 
 /**
  * The registry documentation tables are shipped documentation. This spec pins

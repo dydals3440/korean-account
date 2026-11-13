@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { patternTemplate } from "./pattern-template";
+
 import type { Institution } from "../types";
+import { patternTemplate } from "./pattern-template";
 import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
 
 function makeInstitution(patterns: Institution["patterns"]): Institution {

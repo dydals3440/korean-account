@@ -1,6 +1,6 @@
+import { defineInstitution } from "../../core/define-institution";
 import { patternTemplate as T } from "../../core/pattern-template";
 import { defineSubject } from "../../core/subjects";
-import { defineInstitution } from "../../core/define-institution";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 export const imBank = defineInstitution({

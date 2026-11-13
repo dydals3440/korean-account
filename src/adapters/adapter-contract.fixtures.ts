@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../shared/constants";
 import type { DetectionPayload } from "./shared";
 

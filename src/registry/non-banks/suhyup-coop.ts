@@ -1,6 +1,6 @@
+import { defineInstitution } from "../../core/define-institution";
 import { patternTemplate as T } from "../../core/pattern-template";
 import { suhyupCoop12BranchToBank } from "../rules";
-import { defineInstitution } from "../../core/define-institution";
 
 export const suhyupCoop = defineInstitution({
   id: "suhyup-coop",

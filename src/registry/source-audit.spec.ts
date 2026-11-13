@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
+
+import { detect } from "../core/detect";
 import { createDetector } from "../core/detector";
 import { templateLength } from "../core/template-length";
-import { detect } from "../core/detect";
 import { getInstitution, institutions, type InstitutionId } from "./index";
 import { HSBC_SOURCE_RANGES, SOURCE_FORMATS } from "./source-audit.fixtures";
 

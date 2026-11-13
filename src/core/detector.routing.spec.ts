@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { suhyup, suhyupCoop } from "../registry";
 import type { DetectOptions } from "../types";
 import { defineInstitution } from "./define-institution";

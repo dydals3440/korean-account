@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { patternTemplate } from "./pattern-template";
+
 import { formatAccount } from "./format-account";
+import { patternTemplate } from "./pattern-template";
 
 describe("formatAccount", () => {
   describe("기본 그루핑", () => {

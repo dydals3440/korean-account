@@ -1,7 +1,7 @@
+import type { AccountPattern, GlobalRule, Institution, ScoringWeights, Subject } from "../types";
 import { extractIdentifier } from "./extract-identifier";
 import { extractSubject } from "./extract-subject";
 import { formatAccount } from "./format-account";
-import type { AccountPattern, GlobalRule, Institution, ScoringWeights, Subject } from "../types";
 import { templateLength } from "./template-length";
 
 /** Scoring outcome for a single institution. */

@@ -1,11 +1,12 @@
 import { describe, expectTypeOf, test } from "vitest";
+
+import type { AccountKind, Confidence, InstitutionCategory, SubjectCategory } from "../types";
 import type {
   ACCOUNT_KINDS,
   CONFIDENCE_LEVELS,
   INSTITUTION_CATEGORIES,
   SUBJECT_CATEGORIES,
 } from "./constants";
-import type { AccountKind, Confidence, InstitutionCategory, SubjectCategory } from "../types";
 
 // `as const satisfies readonly X[]` only guarantees "every array element is
 // an X". It cannot catch the reverse — a union member added but missing from

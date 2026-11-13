@@ -1,4 +1,6 @@
 import { expectTypeOf, test } from "vitest";
+
+import type { DetectionPayload } from "./adapters/zod";
 import type {
   AccountKind,
   AccountPattern,
@@ -29,7 +31,6 @@ import type {
   Subject,
   SubjectCategory,
 } from "./index";
-import type { DetectionPayload } from "./adapters/zod";
 
 // Removing or renaming a type export breaks compilation of this file. Value
 // exports are guarded by the snapshot in `index.spec.ts`; together they cover

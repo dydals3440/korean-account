@@ -1,6 +1,6 @@
-import { templateLength } from "./template-length";
 import { getInstitution } from "../registry";
 import type { AccountKind, AccountPattern } from "../types";
+import { templateLength } from "./template-length";
 
 export interface PickPatternFilter {
   readonly kind?: AccountKind;

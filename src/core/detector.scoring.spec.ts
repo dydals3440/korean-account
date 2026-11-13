@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
+
 import { institutions } from "../registry";
-import { normalizeSubject } from "./subjects";
 import type { Subject } from "../types";
 import { createDetector } from "./detector";
+import { normalizeSubject } from "./subjects";
 
 describe("branchRule 보너스는 minScore 컷오프보다 먼저 적용된다", () => {
   // Previously the cut happened on baseScore before bonuses were applied, so

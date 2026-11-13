@@ -53,8 +53,8 @@ function canRegisterAutoDebit(input: string) {
 ## C.3 React 디바운싱 + 자동완성
 
 ```tsx
-import { useDeferredValue, useMemo, useState } from "react";
 import { detect, type DetectionResult } from "korean-account";
+import { useDeferredValue, useMemo, useState } from "react";
 
 function AccountInput() {
   const [raw, setRaw] = useState("");
@@ -125,11 +125,11 @@ export const myDetector = createDetector(institutions).extend({
 `accountSchema` 로 형식을 검증하고, 입력을 지켜보며 감지 결과를 폼 옆에 보여준다.
 
 ```tsx
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { accountSchema } from "korean-account/zod";
 import { accountKindLabels, detectBest } from "korean-account";
+import { accountSchema } from "korean-account/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const transferSchema = z.object({
   account: accountSchema,
@@ -163,9 +163,9 @@ zod 스키마를 validator 로 그대로 물리고, 필드 값으로 감지한�
 
 ```tsx
 import { useForm } from "@tanstack/react-form";
-import { z } from "zod";
-import { accountSchema } from "korean-account/zod";
 import { detectBest } from "korean-account";
+import { accountSchema } from "korean-account/zod";
+import { z } from "zod";
 
 const form = useForm({
   defaultValues: { account: "" },
@@ -185,6 +185,8 @@ const form = useForm({
 계좌번호를 먼저 받고 은행 Select 를 감지 결과로 채운다. 수동 변경은 항상 감지를 이긴다.
 
 ```tsx
+import { banks, createDetector } from "korean-account";
+
 import {
   Select,
   SelectContent,
@@ -192,7 +194,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { banks, createDetector } from "korean-account";
 
 const detector = createDetector(banks); // 은행만 취급하는 서비스 — 증권·비은행은 번들에서 제외
 

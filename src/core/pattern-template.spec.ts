@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { patternTemplate } from "./pattern-template";
 
 describe("patternTemplate", () => {

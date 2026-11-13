@@ -1,6 +1,6 @@
+import { defineInstitution } from "../../core/define-institution";
 import { patternTemplate as T } from "../../core/pattern-template";
 import { kbank10First9, kbank14First79 } from "../rules";
-import { defineInstitution } from "../../core/define-institution";
 
 export const kbank = defineInstitution({
   id: "kbank",
