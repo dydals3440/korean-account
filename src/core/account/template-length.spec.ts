@@ -39,20 +39,6 @@ describe("templateLength", () => {
       expect(sparseResult).toBe(5);
       expect(denseResult).toBe(5);
     });
-
-    test("선행/후행 하이픈도 토큰 수에 영향을 주지 않는다", () => {
-      // Given
-      const leadingDash = patternTemplate("-XXXX");
-      const trailingDash = patternTemplate("XXXX-");
-
-      // When
-      const leadingResult = templateLength(leadingDash);
-      const trailingResult = templateLength(trailingDash);
-
-      // Then
-      expect(leadingResult).toBe(4);
-      expect(trailingResult).toBe(4);
-    });
   });
 
   describe("매우 긴 입력", () => {

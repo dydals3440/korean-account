@@ -61,6 +61,16 @@ export interface Subject {
   readonly note?: string | undefined;
 }
 
+/** A {@link Subject} as it appears in a detection result, with every default filled in. */
+export interface ResolvedSubject extends Subject {
+  /** The subject label, or the category label when the registry gives none. */
+  readonly label: string;
+  /** Whether direct debit is allowed for this subject. */
+  readonly allowsWithdrawal: boolean;
+  /** Whether this subject marks a virtual account. */
+  readonly virtual: boolean;
+}
+
 /** Gate-and-score predicate over normalized digits. */
 export type AdditionalRule = (digits: string) => boolean;
 

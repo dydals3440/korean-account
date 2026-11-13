@@ -1,4 +1,4 @@
-import type { AccountKind, Subject } from "../../types";
+import type { AccountKind, ResolvedSubject, Subject } from "../../types";
 import { subjectCategoryLabels } from "../labels";
 
 const NON_DEBITABLE_KINDS: ReadonlySet<AccountKind> = new Set([
@@ -12,11 +12,8 @@ export function isDebitableKind(kind: AccountKind): boolean {
   return !NON_DEBITABLE_KINDS.has(kind);
 }
 
-/** Subject with withdrawal and label defaults resolved. */
-export type NormalizedSubject = Subject & {
-  readonly allowsWithdrawal: boolean;
-  readonly label: string;
-};
+/** Subject with withdrawal, virtual and label defaults resolved. */
+export type NormalizedSubject = ResolvedSubject;
 
 /**
  * Fills a subject's label and virtual defaults; withdrawal follows the kind unless the subject

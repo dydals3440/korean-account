@@ -65,6 +65,23 @@ describe("patternTemplate", () => {
     });
   });
 
+  describe("하이픈은 X 묶음 사이에 하나씩만 둘 수 있다", () => {
+    test.each(["-", "---", "-XXXX", "XXXX-", "XXX--XX", "--X--"])(
+      "'%s' 이면 TypeError 를 던진다",
+      (template) => {
+        // Given
+        const input = template;
+
+        // When
+        const act = () => patternTemplate(input);
+
+        // Then
+        expect(act).toThrow(TypeError);
+        expect(act).toThrow(/invalid pattern template/);
+      },
+    );
+  });
+
   describe("브랜드 타입", () => {
     test("런타임 값은 입력과 같은 길이의 string 이다", () => {
       // Given
