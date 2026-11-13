@@ -25,6 +25,7 @@ import {
 export type {
   AccountMessages,
   AccountSchemaOptions,
+  DetectionMessages,
   DetectionPayload,
   DetectionSchemaOptions,
   InstitutionIdSchemaOptions,
@@ -46,6 +47,7 @@ export function createAccountSchema(options: AccountSchemaOptions = {}): Schema<
   const messages = resolveMessages(options.messages);
   return string()
     .strict(true)
+    .typeError(messages.required)
     .required(messages.required)
     .max(ACCOUNT_MAX_INPUT_LENGTH, messages.tooLong)
     .matches(ACCOUNT_INPUT_REGEX, messages.charset)

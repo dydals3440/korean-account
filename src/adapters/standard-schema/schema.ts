@@ -25,6 +25,7 @@ import type { StandardSchemaV1 } from "./spec";
 export type {
   AccountMessages,
   AccountSchemaOptions,
+  DetectionMessages,
   DetectionPayload,
   DetectionSchemaOptions,
   InstitutionIdSchemaOptions,

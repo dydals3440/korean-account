@@ -9,5 +9,8 @@
 - `toDetectionPayload(result)`(루트): `DetectionResult`를 JSON으로 보낼 수 있는 `DetectionPayload`로 바꿉니다. 모든 어댑터의 `detectionSchema`가 이 결과를 그대로 통과시킵니다.
 - `detectionSchema`가 `ambiguous`와 `capabilities.services`를 선택 필드로 받습니다. 기존 payload도 그대로 통과합니다.
 - 메시지는 한 곳(`MESSAGES`)에서 관리해 다섯 어댑터의 기본 메시지가 같습니다. standard-schema 어댑터에 흩어져 있던 문구도 이 목록으로 옮겼습니다.
+- `accountSchema`가 전각 숫자(`０–９`)와 전각 하이픈을 받습니다. `detect`가 받는 입력과 같습니다.
+- 문자열이 아닌 입력(`null`, 숫자 등)은 다섯 어댑터 모두 `required` 메시지로 거부합니다.
+- arktype 어댑터를 객체 스키마 안에 넣어도 메시지 앞에 필드 경로가 붙지 않습니다.
 - zod `accountSchema`는 `ZodString`이라 zod 3·4 모두에서 `z.input`·`z.infer`가 `string`입니다. 각 어댑터의 추론 타입은 peer 하한 버전에서도 소비자 검사로 확인합니다.
 - yup·arktype 어댑터의 크기 예산을 1.25 kB에서 1.5 kB로 맞췄습니다(실측 1.42 kB·1.44 kB).

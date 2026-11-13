@@ -25,6 +25,7 @@ import {
 export type {
   AccountMessages,
   AccountSchemaOptions,
+  DetectionMessages,
   DetectionPayload,
   DetectionSchemaOptions,
   InstitutionIdSchemaOptions,
@@ -43,7 +44,7 @@ export type {
 export function createAccountSchema(options: AccountSchemaOptions = {}): v.GenericSchema<string> {
   const messages = resolveMessages(options.messages);
   return v.pipe(
-    v.string(messages.charset),
+    v.string(messages.required),
     v.minLength(1, messages.required),
     v.maxLength(ACCOUNT_MAX_INPUT_LENGTH, messages.tooLong),
     v.regex(ACCOUNT_INPUT_REGEX, messages.charset),

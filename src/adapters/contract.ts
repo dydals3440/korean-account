@@ -3,16 +3,22 @@ import type { DetectionPayload as DetectionPayloadOf } from "../types";
 
 // Rules and messages shared by every adapter so the five schema families cannot drift.
 
-/** Characters accepted by `accountSchema` before normalization. */
-export const ACCOUNT_INPUT_REGEX = /^[\d\-\s]+$/;
+// ASCII and full-width digits (U+FF10–FF19), matching what `normalizeAccount` keeps.
+const DIGIT = "[0-9\uFF10-\uFF19]";
+const NON_DIGIT = "[^0-9\uFF10-\uFF19]";
+
+/** Characters accepted by `accountSchema`: digits, whitespace and (full-width) hyphens. */
+export const ACCOUNT_INPUT_REGEX = new RegExp(String.raw`^(?:${DIGIT}|[\s\-\uFF0D])+$`);
 export const ACCOUNT_MAX_INPUT_LENGTH = 40;
 export const ACCOUNT_MIN_DIGITS = 6;
 export const ACCOUNT_MAX_DIGITS = 20;
 /** Matches input with at least `ACCOUNT_MIN_DIGITS` digits. */
-export const ACCOUNT_MIN_DIGITS_REGEX = new RegExp(String.raw`(?:\D*\d){${ACCOUNT_MIN_DIGITS}}`);
+export const ACCOUNT_MIN_DIGITS_REGEX = new RegExp(
+  String.raw`(?:${NON_DIGIT}*${DIGIT}){${ACCOUNT_MIN_DIGITS}}`,
+);
 /** Matches input with at most `ACCOUNT_MAX_DIGITS` digits. */
 export const ACCOUNT_MAX_DIGITS_REGEX = new RegExp(
-  String.raw`^\D*(?:\d\D*){0,${ACCOUNT_MAX_DIGITS}}$`,
+  String.raw`^${NON_DIGIT}*(?:${DIGIT}${NON_DIGIT}*){0,${ACCOUNT_MAX_DIGITS}}$`,
 );
 
 /** Messages for the account-number rules. */
@@ -24,8 +30,8 @@ export interface AccountMessages {
   readonly maxDigits: string;
 }
 
-/** Messages for every adapter rule. */
-export interface ValidationMessages extends AccountMessages {
+/** Messages for the detection payload rules. */
+export interface DetectionMessages {
   readonly institution: string;
   readonly accountKind: string;
   readonly subjectCategory: string;
@@ -36,6 +42,9 @@ export interface ValidationMessages extends AccountMessages {
   /** Used by the standard-schema adapter for a field of the wrong primitive type. */
   readonly invalidValue: string;
 }
+
+/** Messages for every adapter rule. */
+export interface ValidationMessages extends AccountMessages, DetectionMessages {}
 
 /** Default Korean messages. */
 export const MESSAGES: ValidationMessages = {
@@ -70,7 +79,7 @@ export interface InstitutionIdSchemaOptions {
 
 /** Options for `createDetectionSchema`. */
 export interface DetectionSchemaOptions {
-  readonly messages?: MessageOverrides<ValidationMessages> | undefined;
+  readonly messages?: MessageOverrides<DetectionMessages> | undefined;
 }
 
 /** Built-in institution payload validated by the default `detectionSchema`. */
@@ -84,9 +93,11 @@ export function resolveMessages(
   return { ...MESSAGES, ...Object.fromEntries(defined) };
 }
 
-/** Number of ASCII digits in the input. */
+const DIGIT_PATTERN = new RegExp(DIGIT, "g");
+
+/** Number of ASCII and full-width digits in the input. */
 export function digitCount(value: string): number {
-  return value.replace(/\D/g, "").length;
+  return value.match(DIGIT_PATTERN)?.length ?? 0;
 }
 
 /** Type guard for one of the given string literals. */

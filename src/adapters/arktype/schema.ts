@@ -29,6 +29,7 @@ type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type
 export type {
   AccountMessages,
   AccountSchemaOptions,
+  DetectionMessages,
   DetectionPayload,
   DetectionSchemaOptions,
   InstitutionIdSchemaOptions,
@@ -37,7 +38,7 @@ export type {
 } from "../contract";
 
 // `Type<T>` annotations keep d.ts stable across arktype 2.x. Rules use `.narrow` with
-// `ctx.reject({ problem })`, the only way to replace arktype's English messages.
+// `ctx.reject({ message })`, which replaces arktype's English text without a path prefix.
 
 /**
  * Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged.
@@ -47,15 +48,17 @@ export type {
  */
 export function createAccountSchema(options: AccountSchemaOptions = {}): Type<string> {
   const messages = resolveMessages(options.messages);
-  return type("string").narrow((value, ctx) => {
-    if (value.length === 0) return ctx.reject({ problem: messages.required });
-    if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return ctx.reject({ problem: messages.tooLong });
-    if (!ACCOUNT_INPUT_REGEX.test(value)) return ctx.reject({ problem: messages.charset });
-    const digits = digitCount(value);
-    if (digits < ACCOUNT_MIN_DIGITS) return ctx.reject({ problem: messages.minDigits });
-    if (digits > ACCOUNT_MAX_DIGITS) return ctx.reject({ problem: messages.maxDigits });
-    return true;
-  });
+  return type("string")
+    .configure({ message: messages.required })
+    .narrow((value, ctx) => {
+      if (value.length === 0) return ctx.reject({ message: messages.required });
+      if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return ctx.reject({ message: messages.tooLong });
+      if (!ACCOUNT_INPUT_REGEX.test(value)) return ctx.reject({ message: messages.charset });
+      const digits = digitCount(value);
+      if (digits < ACCOUNT_MIN_DIGITS) return ctx.reject({ message: messages.minDigits });
+      if (digits > ACCOUNT_MAX_DIGITS) return ctx.reject({ message: messages.maxDigits });
+      return true;
+    });
 }
 
 /** Institution id from the given list, e.g. the ids of a custom detector. */
@@ -84,7 +87,7 @@ export function createDetectionSchema<const TId extends string>(
     },
     score: type("number").narrow(
       (value, ctx) =>
-        isNonNegativeFiniteNumber(value) || ctx.reject({ problem: messages.finiteScore }),
+        isNonNegativeFiniteNumber(value) || ctx.reject({ message: messages.finiteScore }),
     ),
     confidence: literalSchema(CONFIDENCE_LEVELS, messages.confidence),
     "ambiguous?": "boolean",

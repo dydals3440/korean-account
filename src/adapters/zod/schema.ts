@@ -25,6 +25,7 @@ import {
 export type {
   AccountMessages,
   AccountSchemaOptions,
+  DetectionMessages,
   DetectionPayload,
   DetectionSchemaOptions,
   InstitutionIdSchemaOptions,
@@ -44,7 +45,7 @@ export type {
 export function createAccountSchema(options: AccountSchemaOptions = {}): ZodString {
   const messages = resolveMessages(options.messages);
   return z
-    .string()
+    .string({ message: messages.required })
     .min(1, messages.required)
     .max(ACCOUNT_MAX_INPUT_LENGTH, messages.tooLong)
     .regex(ACCOUNT_INPUT_REGEX, messages.charset)

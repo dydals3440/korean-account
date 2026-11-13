@@ -1,5 +1,7 @@
 import { type } from "arktype";
+import { describe, expect, test } from "vitest";
 
+import { MESSAGES } from "../contract";
 import { describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
@@ -27,4 +29,17 @@ describeAdapterContract<(value: unknown) => unknown>("arktype", {
     const result = schema(value);
     return result instanceof type.errors ? (result[0]?.message ?? "") : null;
   },
+});
+
+describe("arktype 중첩 메시지", () => {
+  test("객체 안에 넣어도 메시지 앞에 경로를 붙이지 않는다", () => {
+    // Given
+    const form = type({ account: accountSchema });
+
+    // When
+    const result = form({ account: "12345" });
+
+    // Then
+    expect(result instanceof type.errors ? result[0]?.message : null).toBe(MESSAGES.minDigits);
+  });
 });

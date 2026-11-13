@@ -7,6 +7,7 @@ import {
   type AccountMessages,
   type AccountSchemaOptions,
   type DetectionPayload,
+  type DetectionSchemaOptions,
   MESSAGES,
 } from "./contract";
 
@@ -43,6 +44,9 @@ export const ADAPTER_CONTRACT = {
       "100 001 1234567",
       "123456",
       "1".repeat(20),
+      "１１０-４３６-３８７７４０",
+      "110－436－387740",
+      "110\u3000436 387740",
     ],
     invalid: [
       "",
@@ -142,7 +146,10 @@ export interface AdapterHarness<TSchema> {
   readonly schemas: Readonly<Record<ContractSchemaName, TSchema>>;
   readonly createAccountSchema: (options: AccountSchemaOptions) => TSchema;
   readonly createInstitutionIdSchema: (ids: readonly string[]) => TSchema;
-  readonly createDetectionSchema: (ids: readonly string[]) => TSchema;
+  readonly createDetectionSchema: (
+    ids: readonly string[],
+    options?: DetectionSchemaOptions,
+  ) => TSchema;
   /** First issue message, or `null` when the value passes. */
   readonly firstIssue: (schema: TSchema, value: unknown) => string | null;
 }
@@ -233,6 +240,44 @@ export function describeAdapterContract<TSchema>(
 
       // Then
       expect(issue).toBe(MESSAGES.charset);
+    });
+
+    test.each([1104363877, null, undefined, {}])(
+      "accountSchema 는 문자열이 아닌 %j 에 required 메시지를 낸다",
+      (value) => {
+        // Given
+        const schema = schemas.account;
+
+        // When
+        const issue = firstIssue(schema, value);
+
+        // Then
+        expect(issue).toBe(MESSAGES.required);
+      },
+    );
+
+    test("createAccountSchema 의 required 덮어쓰기는 문자열이 아닌 입력에도 쓰인다", () => {
+      // Given
+      const schema = harness.createAccountSchema({ messages: CUSTOM_MESSAGES });
+
+      // When
+      const issue = firstIssue(schema, 1104363877);
+
+      // Then
+      expect(issue).toBe(CUSTOM_MESSAGES.required);
+    });
+
+    test("createDetectionSchema 는 덮어쓴 점수 메시지를 그대로 낸다", () => {
+      // Given
+      const schema = harness.createDetectionSchema(CUSTOM_IDS, {
+        messages: { finiteScore: "Score must be a finite number." },
+      });
+
+      // When
+      const issue = firstIssue(schema, { ...baseDetection, institutionId: "my-bank", score: -1 });
+
+      // Then
+      expect(issue).toBe("Score must be a finite number.");
     });
 
     test("createInstitutionIdSchema 는 넘긴 ID 만 받는다", () => {
