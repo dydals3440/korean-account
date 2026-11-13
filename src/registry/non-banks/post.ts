@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 import { expandTwoDigitRange } from "../expand-range";
 
 export const post = defineInstitution({
@@ -13,7 +14,8 @@ export const post = defineInstitution({
   patterns: [
     {
       template: patternTemplate("XXX-XXXXXXXX-X"),
-      kind: "old",
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["100", "530", "190", "110", "120"],
       subjectPosition: { start: 0, length: 3 },
@@ -24,27 +26,26 @@ export const post = defineInstitution({
         defineSubject({ code: "110", category: "savings" }),
         defineSubject({ code: "120", category: "savings" }),
       ],
-      // PDF p.21 changelog: added 2023.05.03 with the next-gen system.
       effectiveFrom: "2023-05-03",
     },
-    // PDF p.11: regular 13d 지점번호(6)-일련번호(6)-검증번호(1). The virtual
-    // 13d below stays distinguishable via its 8/9 leading identifier.
     {
       template: patternTemplate("XXXXXX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       note: "지점번호-일련번호-검증번호",
     },
     {
       template: patternTemplate("X-XXXXXXXXXXX-X"),
       kind: "virtual",
+      services: cmsServices("virtualAccount", "directCredit"),
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["8", "9"],
-      // PDF p.21 changelog: added 2023.05.03 with the next-gen system.
       effectiveFrom: "2023-05-03",
     },
     {
       template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 6, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -57,29 +58,10 @@ export const post = defineInstitution({
         defineSubject({ code: "02", category: "savings" }),
         defineSubject({ code: "52", category: "savings" }),
         defineSubject({ code: "06", category: "free-savings" }),
-      ],
-    },
-    // 14d incoming-only "other" — PDF lists: preferential savings (05), 31-33, 49, 40-48, 80-88.
-    {
-      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
-      kind: "incoming-only",
-      subjectPosition: { start: 6, length: 2 },
-      subjects: [
-        defineSubject({
-          code: "05",
-          category: "savings",
-          label: "듬뿍우대저축",
-          allowsWithdrawal: false,
-        }),
-        ...["31", "32", "33", "49"].map((code) =>
-          defineSubject({ code, category: "other", allowsWithdrawal: false }),
-        ),
-        ...expandTwoDigitRange(40, 48).map((code) =>
-          defineSubject({ code, category: "other", allowsWithdrawal: false }),
-        ),
-        ...expandTwoDigitRange(80, 88).map((code) =>
-          defineSubject({ code, category: "other", allowsWithdrawal: false }),
-        ),
+        defineSubject({ code: "05", category: "savings", label: "듬뿍우대저축예금" }),
+        ...["31", "32", "33", "49"].map((code) => defineSubject({ code, category: "other" })),
+        ...expandTwoDigitRange(40, 48).map((code) => defineSubject({ code, category: "other" })),
+        ...expandTwoDigitRange(80, 88).map((code) => defineSubject({ code, category: "other" })),
       ],
     },
   ],

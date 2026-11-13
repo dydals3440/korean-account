@@ -1,6 +1,6 @@
 import type { CONFIDENCE_LEVELS } from "../constants";
 import type { Institution, InstitutionCategory, InstitutionIdInput } from "./institution";
-import type { AccountKind, AccountPattern, Subject } from "./pattern";
+import type { AccountKind, AccountPattern, CmsServices, Subject } from "./pattern";
 
 /** Confidence band derived from the score. */
 export type Confidence = (typeof CONFIDENCE_LEVELS)[number];
@@ -21,6 +21,8 @@ export interface DetectionCapabilities {
   readonly virtual: boolean;
   /** Verifier outcome, or `null` when no verifier ran. */
   readonly validatedCheckDigit: boolean | null;
+  /** PDF service columns for the matched format, or `null` when the pattern declares none. */
+  readonly services: CmsServices | null;
 }
 
 /** One ranked detection candidate. */

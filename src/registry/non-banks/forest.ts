@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const forest = defineInstitution({
   id: "forest",
@@ -12,6 +13,8 @@ export const forest = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-11-09",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "11", category: "ordinary" }),
@@ -24,6 +27,7 @@ export const forest = defineInstitution({
     {
       template: patternTemplate("XXXXX-XX-XXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 5, length: 2 },
       subjects: [
         defineSubject({ code: "21", category: "ordinary" }),

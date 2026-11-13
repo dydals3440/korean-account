@@ -1,4 +1,4 @@
-import { defineInstitution, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, patternTemplate } from "../../core/define";
 
 export const kakaopaySec = defineInstitution({
   id: "kakaopay-sec",
@@ -9,6 +9,11 @@ export const kakaopaySec = defineInstitution({
   aliases: ["카카오페이증권", "카카오페이"],
   userBaseMillions: 8.6,
   patterns: [
-    { template: patternTemplate("XXXXXXXXXXX"), kind: "new", effectiveFrom: "2021-12-16" },
+    {
+      template: patternTemplate("XXXXXXXXXXX"),
+      kind: "new",
+      services: cmsServices("directDebit", "directCredit"),
+      effectiveFrom: "2021-12-16",
+    },
   ],
 });

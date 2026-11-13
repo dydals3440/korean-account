@@ -99,7 +99,9 @@ try {
           const current = await load("korean-account" + entry);
           const baseline = await load("korean-account-baseline" + entry);
           const keys = value => Object.keys(value).filter(key => key !== "__esModule").sort();
-          assert.deepEqual(keys(current), keys(baseline), mode + entry + " exports");
+          for (const key of keys(baseline)) {
+            assert(keys(current).includes(key), mode + entry + " removed export " + key);
+          }
           if (!entry) {
             assert.deepEqual(
               current.institutions.map(institution => institution.id),

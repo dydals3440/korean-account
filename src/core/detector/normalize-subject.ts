@@ -19,7 +19,8 @@ export type NormalizedSubject = Subject & {
 };
 
 /**
- * Fills a subject's defaults for the matched kind.
+ * Fills a subject's label and virtual defaults; withdrawal follows the kind unless the subject
+ * sets it. Detection resolves withdrawal with the pattern's services instead (`resolveSubject`).
  *
  * @example
  * normalizeSubject({ code: "01", category: "ordinary" }, "new");
@@ -27,7 +28,12 @@ export type NormalizedSubject = Subject & {
  */
 export function normalizeSubject(subject: Subject, kind: AccountKind): NormalizedSubject {
   const virtual = subject.virtual ?? false;
-  const allowsWithdrawal = subject.allowsWithdrawal ?? (!virtual && isDebitableKind(kind));
+  return resolveSubject(subject, subject.allowsWithdrawal ?? (!virtual && isDebitableKind(kind)));
+}
+
+/** Fills a subject's label and virtual defaults with an already resolved withdrawal value. */
+export function resolveSubject(subject: Subject, allowsWithdrawal: boolean): NormalizedSubject {
+  const virtual = subject.virtual ?? false;
   const label = subject.label ?? subjectCategoryLabels[subject.category];
   return { ...subject, allowsWithdrawal, virtual, label };
 }

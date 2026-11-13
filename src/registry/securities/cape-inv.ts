@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const capeInv = defineInstitution({
   id: "cape-inv",
@@ -13,11 +14,11 @@ export const capeInv = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
         defineSubject({ code: "11", category: "ordinary" }),
-        // PDF p.21 changelog: 2021.12.27 중개형 ISA (24) added.
         defineSubject({
           code: "24",
           category: "isa",
@@ -36,6 +37,7 @@ export const capeInv = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX-XXX"),
       kind: "new",
+      services: cmsServices("directCredit", "additionalServices"),
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({

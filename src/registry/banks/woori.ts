@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const woori = defineInstitution({
   id: "woori",
@@ -14,8 +15,9 @@ export const woori = defineInstitution({
     {
       template: patternTemplate("XXXX-XXX-XXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 4 },
-      identifiers: ["1002", "1005", "1006"],
+      identifiers: ["1002", "1003", "1004", "1005", "1006", "1007"],
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "006", category: "ordinary" }),
@@ -26,20 +28,20 @@ export const woori = defineInstitution({
         defineSubject({ code: "005", category: "corporate-free" }),
       ],
     },
-    // PDF p.5: 14 digits = branch(3)-customer(5)-check1(1)-subject(2)-serial(2)-check2(1).
-    // The printed box glyphs omit the check1 box; the digit-count column (14) is authoritative.
     {
       template: patternTemplate("XXX-XXXXX-X-XX-XX-X"),
       kind: "new",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       subjectPosition: { start: 9, length: 2 },
       subjects: [
-        defineSubject({ code: "18", category: "linked", virtual: true }),
-        defineSubject({ code: "92", category: "linked", virtual: true }),
+        defineSubject({ code: "18", category: "ordinary", label: "가상보통예금", virtual: true }),
+        defineSubject({ code: "92", category: "current", label: "가상당좌예금", virtual: true }),
       ],
     },
     {
       template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "05", category: "ordinary" }),
@@ -55,6 +57,7 @@ export const woori = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXXX-XX-XX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 9, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -70,6 +73,7 @@ export const woori = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "merged-legacy",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),

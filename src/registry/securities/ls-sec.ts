@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const lsSec = defineInstitution({
   id: "ls-sec",
@@ -6,13 +7,14 @@ export const lsSec = defineInstitution({
   nameKo: "엘에스투자증권",
   nameEn: "LS Securities",
   category: "securities",
-  aliases: ["엘에스투자증권", "LS투자증권", "이베스트투자증권", "이베스트"],
+  aliases: ["엘에스투자증권", "LS투자증권", "이베스트투자증권", "이베스트", "엘에스증권"],
   userBaseMillions: 3,
   successorOf: ["ebest-legacy"],
   patterns: [
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -20,18 +22,28 @@ export const lsSec = defineInstitution({
         defineSubject({ code: "45", category: "savings" }),
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "55", category: "savings" }),
-        defineSubject({ code: "56", category: "savings" }),
-        // Deposit-only: no withdrawal transfers
+        defineSubject({ code: "56", effectiveFrom: "2010-09-17", category: "savings" }),
         ...["65", "77", "78"].map((code) =>
           defineSubject({
             code,
             category: "savings",
             allowsWithdrawal: false,
+            services: cmsServices("directCredit", "additionalServices"),
           }),
         ),
       ],
     },
-    { template: patternTemplate("XXXXXXXXX"), kind: "new", effectiveFrom: "2012-07-09" },
-    { template: patternTemplate("XXXXXXXXXXX"), kind: "new" },
+    {
+      template: patternTemplate("XXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2012-07-09",
+    },
+    {
+      template: patternTemplate("XXXXXXXXXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2012-07-09",
+    },
   ],
 });

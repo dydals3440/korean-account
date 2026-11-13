@@ -1,4 +1,4 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 // CMS lists this CMA under bank code 081, separate from Hana Securities (270).
@@ -12,14 +12,11 @@ export const hanaSecuritiesCma = defineInstitution({
   aliases: ["하나증권 CMA", "하나증권CMA"],
   userBaseMillions: 1,
   patterns: [
-    // An identifier here would absorb valid Hana foreign-exchange 14d inputs
-    // and break their match, so two additionalRules instead: (1) serial's
-    // first digit fixed to "9" (per the PDF), (2) branch number not in Hana's
-    // merged foreign-exchange prefix set → hana-cma score 8 vs
-    // foreign-exchange score 7 → foreign-exchange wins.
+    /** Rules instead of identifiers keep Hana's merged foreign-exchange 14d prefixes winning. */
     {
       template: patternTemplate("XXX-XXXXXXXX-X-XX"),
       kind: "new",
+      services: cmsServices("virtualAccount", "directDebit", "directCredit", "additionalServices"),
       additionalRules: [(d) => d.length === 14 && d[3] === "9", isNotHanaForeignLegacy14],
       subjectPosition: { start: 12, length: 2 },
       subjects: [
@@ -31,19 +28,24 @@ export const hanaSecuritiesCma = defineInstitution({
         defineSubject({ code: "04", category: "corporate-free" }),
         defineSubject({
           code: "94",
-          category: "ordinary",
+          category: "linked",
           virtual: true,
-          label: "증권가상",
+          label: "증권가상계좌",
         }),
-        // PDF p.11: withdrawal transfer excluded for 37 and 60 (출금이체 37,60불가).
         defineSubject({
           code: "37",
+          services: { directDebit: false, additionalServices: false },
           category: "ordinary",
           virtual: true,
           allowsWithdrawal: false,
-          label: "일반가상",
+          label: "일반가상계좌",
         }),
-        defineSubject({ code: "60", category: "isa", allowsWithdrawal: false }),
+        defineSubject({
+          code: "60",
+          services: { directDebit: false },
+          category: "isa",
+          allowsWithdrawal: false,
+        }),
       ],
       note: "CMA 계좌만 가능, 평생계좌 자동이체 등록 불가",
     },

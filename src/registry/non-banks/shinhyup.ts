@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const shinhyup = defineInstitution({
   id: "shinhyup",
@@ -10,11 +11,23 @@ export const shinhyup = defineInstitution({
   aliases: ["신협", "신용협동조합", "CU"],
   userBaseMillions: 12,
   patterns: [
-    { template: patternTemplate("XXX-XXX-XXXX"), kind: "new" },
-    { template: patternTemplate("XXX-XXXX-XXXX"), kind: "new" },
+    {
+      template: patternTemplate("XXX-XXX-XXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-12",
+    },
+    {
+      template: patternTemplate("XXX-XXXX-XXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-12",
+    },
     {
       template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-12",
       identifierPosition: { start: 0, length: 3 },
       identifiers: [
         "110",
@@ -31,7 +44,6 @@ export const shinhyup = defineInstitution({
         "133",
         "136",
         "135",
-        // Virtual-account prefix in the same 12d scheme (PDF p.9).
         "910",
       ],
       subjectPosition: { start: 0, length: 3 },
@@ -68,16 +80,23 @@ export const shinhyup = defineInstitution({
         defineSubject({ code: "135", category: "corporate-free" }),
         defineSubject({
           code: "910",
+          services: cmsServices(
+            "virtualAccount",
+            "directDebit",
+            "directCredit",
+            "additionalServices",
+          ),
           category: "ordinary",
           virtual: true,
           effectiveFrom: "2011-02-28",
         }),
       ],
     },
-    // 12d installment savings (incoming only) — 6 codes listed in the PDF.
     {
       template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "incoming-only",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-01-12",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["170", "171", "172", "173", "174", "178"],
       subjectPosition: { start: 0, length: 3 },
@@ -92,6 +111,7 @@ export const shinhyup = defineInstitution({
     {
       template: patternTemplate("XXXXX-XX-XXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 5, length: 2 },
       subjects: [
         defineSubject({ code: "12", category: "ordinary" }),
@@ -101,8 +121,8 @@ export const shinhyup = defineInstitution({
     {
       template: patternTemplate("XXXXX-XX-XXXXXX-X"),
       kind: "old",
+      services: cmsServices("directCredit"),
       subjectPosition: { start: 5, length: 2 },
-      // PDF p.9 marks 14 as deposit-only (××○×).
       subjects: [defineSubject({ code: "14", category: "ordinary", allowsWithdrawal: false })],
     },
   ],

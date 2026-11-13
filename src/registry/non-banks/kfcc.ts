@@ -1,4 +1,5 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const kfcc = defineInstitution({
   id: "kfcc",
@@ -13,6 +14,7 @@ export const kfcc = defineInstitution({
     {
       template: patternTemplate("XXXX-XX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 4, length: 2 },
       subjects: [
         defineSubject({ code: "09", category: "ordinary" }),
@@ -23,9 +25,10 @@ export const kfcc = defineInstitution({
     {
       template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+      effectiveFrom: "2009-09-21",
       identifierPosition: { start: 0, length: 4 },
-      // PDF p.9: "9" + 과목(3) with 002~004, 005, plus virtual account 037 —
-      // no 001 row exists.
+      /** p.9 "9" + 과목(3): 002~005 and virtual 037 (no 001). */
       identifiers: ["9002", "9003", "9004", "9005", "9037"],
       subjectPosition: { start: 1, length: 3 },
       subjects: [
@@ -35,16 +38,18 @@ export const kfcc = defineInstitution({
         defineSubject({ code: "005", category: "corporate-free" }),
         defineSubject({
           code: "037",
+          services: cmsServices("virtualAccount", "directCredit", "additionalServices"),
           category: "ordinary",
           virtual: true,
           effectiveFrom: "2009-09-21",
         }),
       ],
     },
-    // 13d new savings (incoming only) — PDF marks X (no withdrawal transfer).
     {
       template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "incoming-only",
+      services: cmsServices("directCredit", "additionalServices"),
+      effectiveFrom: "2009-09-21",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["9206", "9207", "9210"],
       subjectPosition: { start: 1, length: 3 },
@@ -52,10 +57,11 @@ export const kfcc = defineInstitution({
         defineSubject({ code, category: "savings", allowsWithdrawal: false }),
       ),
     },
-    // 13d new installment savings (incoming only) — PDF: other, deposit only.
     {
       template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "incoming-only",
+      services: cmsServices("directCredit", "additionalServices"),
+      effectiveFrom: "2009-09-21",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["9200", "9202", "9205", "9208", "9209", "9212"],
       subjectPosition: { start: 1, length: 3 },

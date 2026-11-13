@@ -7,6 +7,8 @@ import type {
   BranchRule,
   BranchRuleResult,
   CheckDigitVerifier,
+  CmsService,
+  CmsServices,
   Confidence,
   CreateDetectorOptions,
   DetectionCapabilities,
@@ -41,6 +43,8 @@ type PublicTypeSurface = [
   BranchRule,
   BranchRuleResult,
   CheckDigitVerifier,
+  CmsService,
+  CmsServices,
   Confidence,
   CreateDetectorOptions,
   DetectOptions,
@@ -68,7 +72,7 @@ type PublicTypeSurface = [
   DetectionPayload,
 ];
 
-test("공개 타입 export 30개가 모두 존재한다", () => {
+test("공개 타입 export 32개가 모두 존재한다", () => {
   // Given
   type Surface = PublicTypeSurface;
 
@@ -76,5 +80,5 @@ test("공개 타입 export 30개가 모두 존재한다", () => {
   type ExportCount = Surface["length"];
 
   // Then
-  expectTypeOf<ExportCount>().toEqualTypeOf<30>();
+  expectTypeOf<ExportCount>().toEqualTypeOf<32>();
 });

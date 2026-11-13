@@ -1,4 +1,5 @@
 import { defineInstitution, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const kis = defineInstitution({
   id: "kis",
@@ -9,8 +10,12 @@ export const kis = defineInstitution({
   aliases: ["한국투자증권", "한투", "KIS"],
   userBaseMillions: 11,
   patterns: [
-    { template: patternTemplate("XXXXXXXX-XX"), kind: "new" },
-    { template: patternTemplate("XXXXXXXX-XXXX"), kind: "new" },
-    { template: patternTemplate("XXXXXXXX-XX-XXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXX-XX"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },
+    { template: patternTemplate("XXXXXXXX-XXXX"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },
+    {
+      template: patternTemplate("XXXXXXXX-XX-XXXX"),
+      kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
+    },
   ],
 });

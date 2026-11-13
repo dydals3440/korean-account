@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 
 export const jeonbuk = defineInstitution({
   id: "jeonbuk",
@@ -9,11 +10,10 @@ export const jeonbuk = defineInstitution({
   aliases: ["전북", "JB전북"],
   userBaseMillions: 1.2,
   patterns: [
-    // PDF p.8: digit-count 12 (branch 3 - subject 2 - serial 6 - check 1);
-    // the printed boxes omit the trailing check-digit box.
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "02", category: "ordinary" }),
@@ -34,6 +34,7 @@ export const jeonbuk = defineInstitution({
     {
       template: patternTemplate("X-XXX-XX-XXXXXX-X"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 1, length: 3 },
       identifiers: ["013", "021", "012", "011", "023"],
       subjectPosition: { start: 1, length: 3 },

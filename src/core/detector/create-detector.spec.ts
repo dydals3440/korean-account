@@ -91,6 +91,7 @@ describe("createDetector", () => {
         allowsWithdrawal: true,
         virtual: false,
         validatedCheckDigit: null,
+        services: null,
       });
     });
   });

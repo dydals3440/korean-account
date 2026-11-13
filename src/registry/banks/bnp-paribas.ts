@@ -1,4 +1,4 @@
-import { defineInstitution, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, patternTemplate } from "../../core/define";
 
 export const bnpParibas = defineInstitution({
   id: "bnp-paribas",
@@ -12,6 +12,7 @@ export const bnpParibas = defineInstitution({
     {
       template: patternTemplate("XXXXX-XXXXXX-XXX"),
       kind: "new",
+      services: cmsServices("directDebit", "directCredit"),
       effectiveFrom: "2019-01-21",
       note: "서비스 미참가",
     },

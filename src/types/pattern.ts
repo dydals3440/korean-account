@@ -28,6 +28,21 @@ export type AccountKind = (typeof ACCOUNT_KINDS)[number];
  */
 export type SubjectCategory = (typeof SUBJECT_CATEGORIES)[number];
 
+/** KFTC CMS service availability printed for an account format. */
+export interface CmsServices {
+  /** The format can be issued as a virtual account (가상계좌 가능여부). */
+  readonly virtualAccount: boolean;
+  /** CMS direct debit (출금이체). */
+  readonly directDebit: boolean;
+  /** CMS credit transfer (입금이체). */
+  readonly directCredit: boolean;
+  /** CMS additional services (부가서비스). */
+  readonly additionalServices: boolean;
+}
+
+/** Name of one KFTC CMS service column. */
+export type CmsService = keyof CmsServices;
+
 /** Ledger subject code of an account pattern. */
 export interface Subject {
   /** Zero-padded code matching the subject span width, e.g. `"01"` or `"611"`. */
@@ -37,6 +52,8 @@ export interface Subject {
   readonly label?: string;
   /** Overrides whether direct debit is allowed for this subject. */
   readonly allowsWithdrawal?: boolean;
+  /** Per-code exceptions to the pattern's `services`, e.g. "(91,92 불가)". */
+  readonly services?: Partial<CmsServices>;
   /** Marks a virtual-account subject. */
   readonly virtual?: boolean;
   /** ISO date the subject took effect. */
@@ -81,6 +98,8 @@ export interface AccountPattern {
   readonly subjects?: readonly Subject[];
   /** @deprecated Unused. A registered `CheckDigitVerifier` knows its own digit positions. */
   readonly checkDigitPosition?: DigitSpan;
+  /** Service availability printed for this format; drives `capabilities.allowsWithdrawal`. */
+  readonly services?: CmsServices;
   /** `false` skips any registered check-digit verifier for this pattern. */
   readonly validatesCheckDigit?: boolean;
   readonly branchRule?: BranchRule;

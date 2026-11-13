@@ -284,3 +284,84 @@ describe("HSBC — PDF p.10의 과목과 부가서비스", () => {
     expect(result?.score).toBe(3);
   });
 });
+
+describe("PDF 서비스 열 — 출금이체는 원문 표기를 따른다", () => {
+  // Patterns added from history, not from any PDF row.
+  const AUGMENTED_PATTERNS = new Set(["hana#2"]);
+
+  test("PDF 에 행이 있는 모든 내장 패턴은 services 를 선언한다", () => {
+    // Given
+    const patterns = institutions.flatMap((institution) =>
+      institution.patterns.map((pattern, index) => ({
+        key: `${institution.id}#${index}`,
+        pattern,
+      })),
+    );
+
+    // When
+    const missing = patterns
+      .filter(({ key, pattern }) => pattern.services === undefined && !AUGMENTED_PATTERNS.has(key))
+      .map(({ key }) => key);
+
+    // Then
+    expect(missing).toEqual([]);
+  });
+
+  test.each([
+    { input: "123456-64-123456", id: "nh", allowsWithdrawal: true, page: "p.4 구가상계좌 ○○××" },
+    { input: "790-1234-5678-12-3", id: "nh", allowsWithdrawal: true, page: "p.4 신가상계좌 ○○××" },
+    {
+      input: "123456-66-123456",
+      id: "nh-coop",
+      allowsWithdrawal: true,
+      page: "p.4 구가상계좌 ○○××",
+    },
+    {
+      input: "792-1234-5678-12-3",
+      id: "nh-coop",
+      allowsWithdrawal: true,
+      page: "p.4 신가상계좌 ○○××",
+    },
+    {
+      input: "1234-90-1234567-8",
+      id: "kb",
+      allowsWithdrawal: true,
+      page: "p.2 (구)주택 연계 90 ○○○○",
+    },
+    { input: "1234-92-1234567-8", id: "kb", allowsWithdrawal: false, page: "p.1 수납전용 92 ○×○○" },
+    { input: "012-3456-7890", id: "kb", allowsWithdrawal: false, page: "p.1 11자리 0- ××○×" },
+    { input: "912-3456-7890", id: "kb", allowsWithdrawal: true, page: "p.1 11자리 9- ×○○○" },
+    { input: "123456-05-12345-6", id: "post", allowsWithdrawal: true, page: "p.11 14자리 ×○○○" },
+    { input: "1712-3456-7890", id: "toss", allowsWithdrawal: false, page: "p.13 가상계좌 ○×○×" },
+  ])(
+    "$page: $input 의 $id 출금 가능 여부는 $allowsWithdrawal 이다",
+    ({ input, id, allowsWithdrawal }) => {
+      // Given
+      const institutionId = id as InstitutionId;
+
+      // When
+      const result = scoped(institutionId, input);
+
+      // Then
+      expect(result?.institution.id).toBe(id);
+      expect(result?.capabilities.allowsWithdrawal).toBe(allowsWithdrawal);
+      expect(result?.capabilities.services?.directDebit).toBe(allowsWithdrawal);
+    },
+  );
+
+  test.each([
+    { input: "123-45678-91-1", id: "citi", code: "91", page: "p.6 ○(91,92불가)" },
+    { input: "1234-1234-50", id: "kiwoom", code: "50", page: "p.16 ○(50∼59불가)" },
+  ])("$page: $id 과목 $code 은 행 표기와 달리 출금이체가 불가하다", ({ input, id, code }) => {
+    // Given
+    const institutionId = id as InstitutionId;
+
+    // When
+    const result = scoped(institutionId, input);
+
+    // Then
+    expect(result?.subject?.code).toBe(code);
+    expect(result?.capabilities.services?.directDebit).toBe(false);
+    expect(result?.capabilities.allowsWithdrawal).toBe(false);
+  });
+});

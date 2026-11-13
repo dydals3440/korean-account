@@ -14,6 +14,7 @@ exports[`korean-account 의 공개 export 1`] = `
   "busan",
   "capeInv",
   "citi",
+  "cmsServices",
   "createDetector",
   "daishin",
   "dbSec",

@@ -1,4 +1,4 @@
-import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { cmsServices, defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const hsbc = defineInstitution({
   id: "hsbc",
@@ -12,6 +12,7 @@ export const hsbc = defineInstitution({
     {
       template: patternTemplate("XXX-XXXXX-X-XXX"),
       kind: "new",
+      services: cmsServices("directDebit", "directCredit"),
       subjectPosition: { start: 9, length: 3 },
       subjects: [
         ...[

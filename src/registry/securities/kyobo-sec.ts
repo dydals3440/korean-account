@@ -1,4 +1,5 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
+import { REGULAR_ACCOUNT_SERVICES } from "../cms-service-presets";
 import { expandTwoDigitRange } from "../expand-range";
 
 export const kyoboSec = defineInstitution({
@@ -13,6 +14,7 @@ export const kyoboSec = defineInstitution({
     {
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
+      services: REGULAR_ACCOUNT_SERVICES,
       additionalRules: [(digits) => digits[0] === "0"],
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -20,18 +22,18 @@ export const kyoboSec = defineInstitution({
         defineSubject({ code: "31", category: "savings" }),
         defineSubject({ code: "35", category: "savings" }),
         defineSubject({ code: "51", category: "savings" }),
-        defineSubject({ code: "53", category: "savings" }),
-        defineSubject({ code: "54", category: "savings" }),
+        defineSubject({ code: "53", effectiveFrom: "2010-09-13", category: "savings" }),
+        defineSubject({ code: "54", effectiveFrom: "2010-09-13", category: "savings" }),
         ...expandTwoDigitRange(60, 69).map((code) => defineSubject({ code, category: "savings" })),
         defineSubject({ code: "71", category: "savings" }),
         defineSubject({ code: "80", category: "savings" }),
       ],
     },
     {
-      // PDF p.16: 일련번호(4)-일련번호(4)-검증번호(1)-일련번호(2) = 11 digits;
-      // the printed boxes show the last serial run as a single box.
+      /** p.16 일련(4)-일련(4)-검증(1)-일련(2); the last box is drawn once but holds two digits. */
       template: patternTemplate("XXXX-XXXX-X-XX"),
       kind: "new",
+      services: REGULAR_ACCOUNT_SERVICES,
       additionalRules: [(digits) => digits[0] !== "0"],
       effectiveFrom: "2012-01-25",
     },
