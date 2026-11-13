@@ -13,12 +13,12 @@ describe("templateLength", () => {
       { template: "XXXX-XXXX-XXXX", expected: 12 },
       { template: "XXXXXX-XX-XXXXXX", expected: 14 },
       { template: "X", expected: 1 },
-    ])("$template 의 토큰 수는 $expected", ({ template, expected }) => {
+    ])("$template 이면 $expected 를 반환한다", ({ template, expected }) => {
       // Given
-      const tpl = patternTemplate(template);
+      const input = patternTemplate(template);
 
       // When
-      const result = templateLength(tpl);
+      const result = templateLength(input);
 
       // Then
       expect(result).toBe(expected);
@@ -32,12 +32,12 @@ describe("templateLength", () => {
       const dense = patternTemplate("XXXXX");
 
       // When
-      const sparseLen = templateLength(sparse);
-      const denseLen = templateLength(dense);
+      const sparseResult = templateLength(sparse);
+      const denseResult = templateLength(dense);
 
       // Then
-      expect(sparseLen).toBe(5);
-      expect(denseLen).toBe(5);
+      expect(sparseResult).toBe(5);
+      expect(denseResult).toBe(5);
     });
 
     test("선행/후행 하이픈도 토큰 수에 영향을 주지 않는다", () => {
@@ -46,12 +46,12 @@ describe("templateLength", () => {
       const trailingDash = patternTemplate("XXXX-");
 
       // When
-      const leading = templateLength(leadingDash);
-      const trailing = templateLength(trailingDash);
+      const leadingResult = templateLength(leadingDash);
+      const trailingResult = templateLength(trailingDash);
 
       // Then
-      expect(leading).toBe(4);
-      expect(trailing).toBe(4);
+      expect(leadingResult).toBe(4);
+      expect(trailingResult).toBe(4);
     });
   });
 

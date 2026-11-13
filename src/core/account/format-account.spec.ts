@@ -17,7 +17,7 @@ describe("formatAccount", () => {
       expect(result).toBe("110-436-387740");
     });
 
-    test("XXX-XXX-XXXXXX 신한 신계좌 그루핑", () => {
+    test("신한 신계좌를 XXX-XXX-XXXXXX 로 그루핑한다", () => {
       // Given
       const digits = "110436387740";
       const template = patternTemplate("XXX-XXX-XXXXXX");
@@ -29,7 +29,7 @@ describe("formatAccount", () => {
       expect(result).toBe("110-436-387740");
     });
 
-    test("XXXX-XX-XXXXXXX 카카오뱅크 그루핑", () => {
+    test("카카오뱅크 계좌를 XXXX-XX-XXXXXXX 로 그루핑한다", () => {
       // Given
       const digits = "3333123456789";
       const template = patternTemplate("XXXX-XX-XXXXXXX");
@@ -41,7 +41,7 @@ describe("formatAccount", () => {
       expect(result).toBe("3333-12-3456789");
     });
 
-    test("XXXXXX-XX-XXXXXX KB 14자리 그루핑", () => {
+    test("KB 14자리 계좌를 XXXXXX-XX-XXXXXX 로 그루핑한다", () => {
       // Given
       const digits = "12345604789012";
       const template = patternTemplate("XXXXXX-XX-XXXXXX");
@@ -55,7 +55,7 @@ describe("formatAccount", () => {
   });
 
   describe("길이가 부족한 입력", () => {
-    test("그룹 중간에서 끊긴다", () => {
+    test("그룹 중간에서 입력이 끝나면 입력한 자리까지만 그루핑한다", () => {
       // Given
       const digits = "11043";
       const template = patternTemplate("XXX-XXX-XXXXXX");
@@ -117,7 +117,7 @@ describe("formatAccount", () => {
       expect(result).toBe("123-45678");
     });
 
-    test("크게 초과해도 동작한다", () => {
+    test("템플릿보다 훨씬 길어도 남은 digits 를 그대로 붙인다", () => {
       // Given
       const digits = "12345678901234";
       const template = patternTemplate("XXX");
@@ -129,7 +129,7 @@ describe("formatAccount", () => {
       expect(result).toBe("12345678901234");
     });
 
-    test("매우 긴 입력도 그대로 잘 처리한다", () => {
+    test("60자리 입력은 앞 12자리만 그루핑하고 나머지를 그대로 붙인다", () => {
       // Given
       const digits = "1".repeat(60);
       const template = patternTemplate("XXX-XXX-XXXXXX");
@@ -138,7 +138,6 @@ describe("formatAccount", () => {
       const result = formatAccount(digits, template);
 
       // Then
-      // First 12 digits grouped; the remaining 48 appended verbatim
       expect(result).toBe(`111-111-111111${"1".repeat(48)}`);
     });
   });
@@ -159,16 +158,16 @@ describe("formatAccount", () => {
     test("같은 길이라도 다른 그루핑이면 결과가 다르다", () => {
       // Given
       const digits = "123456";
-      const tA = patternTemplate("XX-XX-XX");
-      const tB = patternTemplate("XXX-XXX");
+      const pairsTemplate = patternTemplate("XX-XX-XX");
+      const triplesTemplate = patternTemplate("XXX-XXX");
 
       // When
-      const a = formatAccount(digits, tA);
-      const b = formatAccount(digits, tB);
+      const pairsResult = formatAccount(digits, pairsTemplate);
+      const triplesResult = formatAccount(digits, triplesTemplate);
 
       // Then
-      expect(a).toBe("12-34-56");
-      expect(b).toBe("123-456");
+      expect(pairsResult).toBe("12-34-56");
+      expect(triplesResult).toBe("123-456");
     });
 
     test("하이픈 없는 템플릿이면 그루핑도 없다", () => {
@@ -191,11 +190,11 @@ describe("formatAccount", () => {
       const template = patternTemplate("XXX-XXX-XXXXXX");
 
       // When
-      const a = formatAccount(digits, template);
-      const b = formatAccount(digits, template);
+      const firstResult = formatAccount(digits, template);
+      const secondResult = formatAccount(digits, template);
 
       // Then
-      expect(a).toBe(b);
+      expect(firstResult).toBe(secondResult);
     });
   });
 });

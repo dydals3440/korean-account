@@ -192,11 +192,11 @@ describe("normalizeAccount", () => {
       const input = "110-436-387740";
 
       // When
-      const a = normalizeAccount(input);
-      const b = normalizeAccount(input);
+      const firstResult = normalizeAccount(input);
+      const secondResult = normalizeAccount(input);
 
       // Then
-      expect(a).toBe(b);
+      expect(firstResult).toBe(secondResult);
     });
   });
 });

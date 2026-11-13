@@ -71,7 +71,7 @@ describe("extractIdentifier", () => {
   });
 
   describe("끝 식별 (증권)", () => {
-    test("키움 10자리 끝 2자리", () => {
+    test("키움 10자리는 끝 2자리 '11' 을 반환한다", () => {
       // Given
       const digits = "1234567811";
       const pattern = { identifierPosition: pos(8, 2) };

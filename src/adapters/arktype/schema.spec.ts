@@ -31,16 +31,25 @@ describe("arktype 한국어 메시지", () => {
     ["110-abc", MESSAGES.charset],
     ["", MESSAGES.required],
   ])("'%s' → %s", (input, message) => {
-    // Given / When
-    const result = accountSchema(input);
+    // Given
+    const account = input;
+
+    // When
+    const result = accountSchema(account);
 
     // Then
     expect(result).toBeInstanceOf(type.errors);
     expect(String(result)).toContain(message);
   });
 
-  test("미등록 기관 id 메시지", () => {
-    const result = institutionIdSchema("unknown");
+  test("미등록 기관 id 는 기관 메시지로 거부한다", () => {
+    // Given
+    const institutionId = "unknown";
+
+    // When
+    const result = institutionIdSchema(institutionId);
+
+    // Then
     expect(String(result)).toContain(MESSAGES.institution);
   });
 });

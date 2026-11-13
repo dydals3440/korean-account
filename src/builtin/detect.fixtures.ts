@@ -93,9 +93,7 @@ export const FIXTURES = [
     kind: "new",
     subjectCategory: "savings",
   },
-  // Kakao 4-digit prefixes (3333/7979), K Bank 100 prefix, Toss 4-digit
-  // prefixes (1000/1500), and the NH federation 11d fallback are non-PDF
-  // augmentations → verified by the consumer (teacher-web) regression specs.
+  // Non-PDF prefixes (Kakao 3333/7979, K Bank 100, Toss 1000/1500, NH coop 11d) are consumer extensions.
   { input: "1712-3456-7890", id: "toss", kind: "virtual" },
   { input: "1912-3456-7890", id: "toss", kind: "virtual" },
   // NH Bank 13d next-gen installment savings (deposit-only). Subject 304 → installment, no withdrawal.
@@ -144,11 +142,9 @@ export const FIXTURES = [
   // virtual 17/19 at the PDF level → excluded from library fixtures. The
   // pattern is still registered, so an explicit include targeting Shinhyup
   // can match it.
-  // K Bank 14d first digit 1 → loan virtual account (principal/interest,
-  // deposit-only) — with the library alone it ties with IBK 14d for lack of
-  // an identifier. Verified in the teacher-web regression spec.
+  // K Bank 14d loan virtual accounts have no identifier and tie with IBK 14d, so they are not fixtures.
 
-  // KB head-office 14d new accounts are non-PDF (real-world prefix) → verified in consumer regression specs.
+  // KB head-office 14d prefixes are non-PDF consumer extensions.
 
   // IBK 14d: digits[9:11]="01" → ordinary deposit (account reported by a real user).
   {

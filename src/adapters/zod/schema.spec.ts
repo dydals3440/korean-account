@@ -19,8 +19,11 @@ describe("accountSchema", () => {
       "1000-1234-5678",
       "123456-04-789012",
     ])("'%s' 는 통과한다", (input) => {
-      // Given / When
-      const result = accountSchema.safeParse(input);
+      // Given
+      const account = input;
+
+      // When
+      const result = accountSchema.safeParse(account);
 
       // Then
       expect(result.success).toBe(true);
@@ -51,8 +54,14 @@ describe("accountSchema", () => {
 
   describe("거부 사유", () => {
     test("빈 문자열은 거부된다", () => {
-      // Given / When / Then
-      expect(accountSchema.safeParse("").success).toBe(false);
+      // Given
+      const input = "";
+
+      // When
+      const result = accountSchema.safeParse(input);
+
+      // Then
+      expect(result.success).toBe(false);
     });
 
     test("자릿수 5자리는 거부된다", () => {
@@ -89,42 +98,69 @@ describe("accountSchema", () => {
     });
 
     test("허용되지 않은 문자가 들어 있으면 거부된다", () => {
-      // Given / When / Then
-      expect(accountSchema.safeParse("110-abc-456").success).toBe(false);
-      expect(accountSchema.safeParse("110_456_789").success).toBe(false);
-      expect(accountSchema.safeParse("110.436.387740").success).toBe(false);
+      // Given
+      const inputs = ["110-abc-456", "110_456_789", "110.436.387740"];
+
+      // When
+      const results = inputs.map((input) => accountSchema.safeParse(input));
+
+      // Then
+      for (const result of results) {
+        expect(result.success).toBe(false);
+      }
     });
   });
 });
 
 describe("institutionIdSchema", () => {
   test("등록된 id 는 통과한다", () => {
-    // Given / When / Then
-    expect(institutionIdSchema.safeParse("shinhan").success).toBe(true);
-    expect(institutionIdSchema.safeParse("kakao").success).toBe(true);
-    expect(institutionIdSchema.safeParse("nh-coop").success).toBe(true);
-    expect(institutionIdSchema.safeParse("savings-bank").success).toBe(true);
+    // Given
+    const inputs = ["shinhan", "kakao", "nh-coop", "savings-bank"];
+
+    // When
+    const results = inputs.map((input) => institutionIdSchema.safeParse(input));
+
+    // Then
+    for (const result of results) {
+      expect(result.success).toBe(true);
+    }
   });
 
   test("등록되지 않은 id 는 거부된다", () => {
-    // Given / When / Then
-    expect(institutionIdSchema.safeParse("unknown").success).toBe(false);
-    expect(institutionIdSchema.safeParse("").success).toBe(false);
+    // Given
+    const inputs = ["unknown", ""];
+
+    // When
+    const results = inputs.map((input) => institutionIdSchema.safeParse(input));
+
+    // Then
+    for (const result of results) {
+      expect(result.success).toBe(false);
+    }
   });
 
   test("문자열이 아니면 거부된다", () => {
-    // Given / When / Then
-    expect(institutionIdSchema.safeParse(123).success).toBe(false);
-    expect(institutionIdSchema.safeParse(null).success).toBe(false);
-    expect(institutionIdSchema.safeParse(undefined).success).toBe(false);
+    // Given
+    const inputs = [123, null, undefined];
+
+    // When
+    const results = inputs.map((input) => institutionIdSchema.safeParse(input));
+
+    // Then
+    for (const result of results) {
+      expect(result.success).toBe(false);
+    }
   });
 });
 
 describe("accountKindSchema", () => {
   test.each(["new", "old", "virtual", "lifetime", "incoming-only", "merged-legacy"])(
     "'%s' 는 통과한다",
-    (kind) => {
-      // Given / When
+    (input) => {
+      // Given
+      const kind = input;
+
+      // When
       const result = accountKindSchema.safeParse(kind);
 
       // Then
@@ -133,10 +169,16 @@ describe("accountKindSchema", () => {
   );
 
   test("enum 외 값은 거부된다", () => {
-    // Given / When / Then
-    expect(accountKindSchema.safeParse("foo").success).toBe(false);
-    expect(accountKindSchema.safeParse("").success).toBe(false);
-    expect(accountKindSchema.safeParse(null).success).toBe(false);
+    // Given
+    const inputs = ["foo", "", null];
+
+    // When
+    const results = inputs.map((input) => accountKindSchema.safeParse(input));
+
+    // Then
+    for (const result of results) {
+      expect(result.success).toBe(false);
+    }
   });
 });
 
@@ -155,8 +197,11 @@ describe("subjectCategorySchema", () => {
     "trust",
     "isa",
     "other",
-  ])("'%s' 는 통과한다", (category) => {
-    // Given / When
+  ])("'%s' 는 통과한다", (input) => {
+    // Given
+    const category = input;
+
+    // When
     const result = subjectCategorySchema.safeParse(category);
 
     // Then
@@ -164,9 +209,16 @@ describe("subjectCategorySchema", () => {
   });
 
   test("enum 외 값은 거부된다", () => {
-    // Given / When / Then
-    expect(subjectCategorySchema.safeParse("foo").success).toBe(false);
-    expect(subjectCategorySchema.safeParse("Ordinary").success).toBe(false);
+    // Given
+    const inputs = ["foo", "Ordinary"];
+
+    // When
+    const results = inputs.map((input) => subjectCategorySchema.safeParse(input));
+
+    // Then
+    for (const result of results) {
+      expect(result.success).toBe(false);
+    }
   });
 });
 
@@ -247,10 +299,10 @@ describe("detectionSchema", () => {
 
   test("capabilities 가 빠지면 거부된다", () => {
     // Given
-    const { capabilities: _capabilities, ...withoutCaps } = baseValid;
+    const { capabilities: _capabilities, ...withoutCapabilities } = baseValid;
 
     // When
-    const result = detectionSchema.safeParse(withoutCaps);
+    const result = detectionSchema.safeParse(withoutCapabilities);
 
     // Then
     expect(result.success).toBe(false);
@@ -279,10 +331,15 @@ describe("detectionSchema", () => {
     };
     const nullCase = baseValid;
 
-    // When / Then
-    expect(detectionSchema.safeParse(trueCase).success).toBe(true);
-    expect(detectionSchema.safeParse(falseCase).success).toBe(true);
-    expect(detectionSchema.safeParse(nullCase).success).toBe(true);
+    // When
+    const trueResult = detectionSchema.safeParse(trueCase);
+    const falseResult = detectionSchema.safeParse(falseCase);
+    const nullResult = detectionSchema.safeParse(nullCase);
+
+    // Then
+    expect(trueResult.success).toBe(true);
+    expect(falseResult.success).toBe(true);
+    expect(nullResult.success).toBe(true);
   });
 });
 

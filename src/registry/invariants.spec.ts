@@ -18,45 +18,78 @@ const patterns = institutions.flatMap((institution) =>
 
 describe("institution 레지스트리 불변식", () => {
   test("id 가 중복되지 않는다", () => {
-    const ids = institutions.map((i) => i.id);
-    expect(new Set(ids).size).toBe(ids.length);
+    // Given
+    const ids = institutions.map((institution) => institution.id);
+
+    // When
+    const uniqueIds = new Set(ids);
+
+    // Then
+    expect(uniqueIds.size).toBe(ids.length);
   });
 
   test("대표 code 와 aliasCode 를 통틀어 중복되지 않는다", () => {
-    const codes = institutions.flatMap((i) => [i.code, ...(i.aliasCodes ?? [])]);
+    // Given
+    const codes = institutions.flatMap((institution) => [
+      institution.code,
+      ...(institution.aliasCodes ?? []),
+    ]);
+
+    // When
     const duplicates = codes.filter((code, index) => codes.indexOf(code) !== index);
+
+    // Then
     expect(duplicates).toEqual([]);
   });
 
   test("successorOf 는 자기 자신을 가리키지 않는다", () => {
-    for (const institution of institutions) {
-      expect(institution.successorOf ?? []).not.toContain(institution.id);
+    // Given
+    const registry = institutions;
+
+    // When
+    const successions = registry.map((institution) => ({
+      id: institution.id,
+      predecessors: institution.successorOf ?? [],
+    }));
+
+    // Then
+    for (const { id, predecessors } of successions) {
+      expect(predecessors).not.toContain(id);
     }
   });
 });
 
 describe("pattern 불변식", () => {
-  // One direction only. A bare `position` is not a dead declaration — it is
-  // unused for scoring, but the public API (`extractSubject` /
-  // `extractIdentifier`) and `DetectionResult.matchedPattern` expose it.
-  // 0.1.0 misread this as bidirectional and deleted 4 fields; 0.1.1 reverted.
+  // One direction only: a bare subjectPosition is still exposed by extractSubject / matchedPattern.
   test.each(patterns)(
     "$institution.id $pattern.template — subjects 는 subjectPosition 을 동반한다",
     ({ pattern }) => {
-      if (pattern.subjects?.length) {
-        expect(pattern.subjectPosition).toBeDefined();
+      // Given
+      const { subjects, subjectPosition } = pattern;
+
+      // When
+      const declaresSubjects = Boolean(subjects?.length);
+
+      // Then
+      if (declaresSubjects) {
+        expect(subjectPosition).toBeDefined();
       }
     },
   );
 
-  // Reverse direction only. A bare `identifierPosition` is not a dead field —
-  // no score bonus, but the public API `extractIdentifier` reads the position.
-  // (0.1.0 misjudged it as dead and deleted it; 0.1.1 reverted.)
+  // One direction only: a bare identifierPosition is still read by extractIdentifier.
   test.each(patterns)(
     "$institution.id $pattern.template — identifiers / identifierRange 는 identifierPosition 을 동반한다",
     ({ pattern }) => {
-      if (pattern.identifiers?.length || pattern.identifierRange) {
-        expect(pattern.identifierPosition).toBeDefined();
+      // Given
+      const { identifiers, identifierRange, identifierPosition } = pattern;
+
+      // When
+      const declaresIdentifiers = Boolean(identifiers?.length || identifierRange);
+
+      // Then
+      if (declaresIdentifiers) {
+        expect(identifierPosition).toBeDefined();
       }
     },
   );
@@ -64,11 +97,17 @@ describe("pattern 불변식", () => {
   test.each(patterns)(
     "$institution.id $pattern.template — 모든 subjects[].code 길이가 subjectPosition.length 와 같다",
     ({ pattern }) => {
-      if (!pattern.subjectPosition || !pattern.subjects) {
-        return;
-      }
-      for (const subject of pattern.subjects) {
-        expect(subject.code).toHaveLength(pattern.subjectPosition.length);
+      // Given
+      const { subjects = [], subjectPosition } = pattern;
+
+      // When
+      const expectedLength = subjectPosition?.length;
+
+      // Then
+      if (expectedLength !== undefined) {
+        for (const subject of subjects) {
+          expect(subject.code).toHaveLength(expectedLength);
+        }
       }
     },
   );
@@ -76,11 +115,17 @@ describe("pattern 불변식", () => {
   test.each(patterns)(
     "$institution.id $pattern.template — 모든 identifiers[] 길이가 identifierPosition.length 와 같다",
     ({ pattern }) => {
-      if (!pattern.identifierPosition || !pattern.identifiers) {
-        return;
-      }
-      for (const identifier of pattern.identifiers) {
-        expect(identifier).toHaveLength(pattern.identifierPosition.length);
+      // Given
+      const { identifiers = [], identifierPosition } = pattern;
+
+      // When
+      const expectedLength = identifierPosition?.length;
+
+      // Then
+      if (expectedLength !== undefined) {
+        for (const identifier of identifiers) {
+          expect(identifier).toHaveLength(expectedLength);
+        }
       }
     },
   );
@@ -88,10 +133,16 @@ describe("pattern 불변식", () => {
   test.each(patterns)(
     "$institution.id $pattern.template — position 이 템플릿 범위를 넘지 않는다",
     ({ pattern }) => {
-      const length = templateLength(pattern.template);
-      for (const position of [pattern.subjectPosition, pattern.identifierPosition]) {
+      // Given
+      const positions = [pattern.subjectPosition, pattern.identifierPosition];
+
+      // When
+      const digitCount = templateLength(pattern.template);
+
+      // Then
+      for (const position of positions) {
         if (position) {
-          expect(position.start + position.length).toBeLessThanOrEqual(length);
+          expect(position.start + position.length).toBeLessThanOrEqual(digitCount);
           expect(position.length).toBeGreaterThan(0);
         }
       }
@@ -101,22 +152,33 @@ describe("pattern 불변식", () => {
   test.each(patterns)(
     "$institution.id $pattern.template — subjects[].code 가 중복되지 않는다",
     ({ pattern }) => {
-      const codes = (pattern.subjects ?? []).map((s) => s.code);
-      expect(new Set(codes).size).toBe(codes.length);
+      // Given
+      const codes = (pattern.subjects ?? []).map((subject) => subject.code);
+
+      // When
+      const uniqueCodes = new Set(codes);
+
+      // Then
+      expect(uniqueCodes.size).toBe(codes.length);
     },
   );
 });
 
 describe("branchRule 이 가리키는 institutionId 는 실재한다", () => {
-  const ids = new Set(institutions.map((i) => i.id));
+  const ids = new Set(institutions.map((institution) => institution.id));
 
-  test.each(patterns.filter((p) => p.pattern.branchRule))(
+  test.each(patterns.filter(({ pattern }) => pattern.branchRule))(
     "$institution.id $pattern.template",
     ({ pattern }) => {
-      // Exhausting every digits value is impossible; smoke-test the ids the rule can return.
-      for (let d = 0; d < 10; d++) {
-        const digits = String(d).repeat(templateLength(pattern.template));
-        const result = pattern.branchRule?.evaluate(digits);
+      // Given — exhausting all digits is impossible; smoke-test one repeated digit per 0–9
+      const digitCount = templateLength(pattern.template);
+      const samples = Array.from({ length: 10 }, (_, digit) => String(digit).repeat(digitCount));
+
+      // When
+      const results = samples.map((digits) => pattern.branchRule?.evaluate(digits));
+
+      // Then
+      for (const result of results) {
         if (result?.institutionId) {
           expect(ids).toContain(result.institutionId);
         }

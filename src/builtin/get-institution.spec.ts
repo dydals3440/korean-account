@@ -2,19 +2,14 @@ import { describe, expect, test } from "vitest";
 
 import { getInstitution } from "./get-institution";
 
-/**
- * Regression guard for `Institution.commonCode` (KFTC standard bank code).
- *
- * KFTC runs two separate namespaces (CMS auto-transfer vs the interbank
- * standard). Among the 14 major banks, only Hana (the KEB merger) has
- * different representative codes in the two systems. A silently dropped or
- * added commonCode would diverge from teacher-web's server BankCodeSchema
- * and break the form submit boundary.
- */
+// Hana is the only major bank whose CMS code (005) differs from its interbank code (081).
 describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
   test("하나은행 (외환·하나 통합) — 기존 라이브러리 code 005·commonCode 081 유지", () => {
-    // Given / When
-    const hana = getInstitution("hana");
+    // Given
+    const id = "hana";
+
+    // When
+    const hana = getInstitution(id);
 
     // Then
     expect(hana?.code).toBe("005");
@@ -40,17 +35,23 @@ describe("Institution.commonCode (KFTC 표준은행코드 매핑)", () => {
     ["kakao", "090"],
     ["toss", "092"],
   ] as const)("%s — CMS code 와 표준은행코드 일치 (commonCode 생략)", (id, code) => {
-    // Given / When
-    const inst = getInstitution(id);
+    // Given
+    const institutionId = id;
+
+    // When
+    const institution = getInstitution(institutionId);
 
     // Then
-    expect(inst?.code).toBe(code);
-    expect(inst?.commonCode).toBeUndefined();
+    expect(institution?.code).toBe(code);
+    expect(institution?.commonCode).toBeUndefined();
   });
 
   test("hana-securities-cma — CMS 081 (증권사 CMA, 표준은행코드 대상 아님)", () => {
-    // Given / When
-    const cma = getInstitution("hana-securities-cma");
+    // Given
+    const id = "hana-securities-cma";
+
+    // When
+    const cma = getInstitution(id);
 
     // Then
     expect(cma?.code).toBe("081");

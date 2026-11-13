@@ -25,16 +25,29 @@ describe("detect", () => {
 
   describe("엣지 케이스", () => {
     test("빈 / 공백 / 하이픈만 입력은 빈 결과를 반환한다", () => {
-      // Given / When / Then
-      expect(detect("")).toEqual([]);
-      expect(detect("    ")).toEqual([]);
-      expect(detect("---")).toEqual([]);
+      // Given
+      const inputs = ["", "    ", "---"];
+
+      // When
+      const resultsPerInput = inputs.map((input) => detect(input));
+
+      // Then
+      for (const results of resultsPerInput) {
+        expect(results).toEqual([]);
+      }
     });
 
     test("비숫자만 입력은 빈 결과를 반환한다", () => {
-      // Given / When / Then
-      expect(detect("abcd")).toEqual([]);
-      expect(detect("한글입력")).toEqual([]);
+      // Given
+      const inputs = ["abcd", "한글입력"];
+
+      // When
+      const resultsPerInput = inputs.map((input) => detect(input));
+
+      // Then
+      for (const results of resultsPerInput) {
+        expect(results).toEqual([]);
+      }
     });
 
     test("한 자리만 입력은 빈 결과를 반환한다 (식별자 미달성)", () => {
@@ -90,12 +103,12 @@ describe("detect", () => {
       const input = "110-436-387740";
 
       // When
-      const [r] = detect(input);
+      const [result] = detect(input);
 
       // Then
-      expect(r?.capabilities).toBeDefined();
-      expect(typeof r?.capabilities.allowsWithdrawal).toBe("boolean");
-      expect(typeof r?.capabilities.virtual).toBe("boolean");
+      expect(result?.capabilities).toBeDefined();
+      expect(typeof result?.capabilities.allowsWithdrawal).toBe("boolean");
+      expect(typeof result?.capabilities.virtual).toBe("boolean");
     });
   });
 
@@ -105,11 +118,11 @@ describe("detect", () => {
       const input = `351-1234-5678-${tail}`;
 
       // When
-      const [r] = detect(input);
+      const [result] = detect(input);
 
       // Then
-      expect(r?.institution.id).toBe("nh-coop");
-      expect(r?.kind).toBe("new");
+      expect(result?.institution.id).toBe("nh-coop");
+      expect(result?.kind).toBe("new");
     });
 
     test.each(["01", "02"])(
@@ -122,7 +135,7 @@ describe("detect", () => {
         const results = detect(input);
 
         // Then
-        expect(results.find((r) => r.institution.id === "nh-coop")).toBeUndefined();
+        expect(results.find((result) => result.institution.id === "nh-coop")).toBeUndefined();
       },
     );
   });
@@ -133,12 +146,12 @@ describe("detect", () => {
       const input = "1712-3456-7890";
 
       // When
-      const [r] = detect(input);
+      const [result] = detect(input);
 
       // Then
-      expect(r?.institution.id).toBe("toss");
-      expect(r?.kind).toBe("virtual");
-      expect(r?.capabilities.virtual).toBe(true);
+      expect(result?.institution.id).toBe("toss");
+      expect(result?.kind).toBe("virtual");
+      expect(result?.capabilities.virtual).toBe(true);
     });
 
     test("19-prefix 면 virtual 로 분기한다", () => {
@@ -146,16 +159,14 @@ describe("detect", () => {
       const input = "1912-3456-7890";
 
       // When
-      const [r] = detect(input);
+      const [result] = detect(input);
 
       // Then
-      expect(r?.institution.id).toBe("toss");
-      expect(r?.kind).toBe("virtual");
+      expect(result?.institution.id).toBe("toss");
+      expect(result?.kind).toBe("virtual");
     });
 
-    // In PDF-strict mode, a Toss-only match on the 1000/1500 prefixes is
-    // guaranteed by the consumer's (teacher-web) 4-digit prefix extension;
-    // the library alone ties with Shinhan's 100 prefix.
+    // No 1000/1500 case: the library alone ties Toss with Shinhan's 100; consumers break the tie.
   });
 
   describe("회귀 가드", () => {
@@ -181,7 +192,7 @@ describe("detect", () => {
       const results = detect(input, { categories: ["bank"] });
 
       // Then
-      expect(results.every((r) => r.institution.category === "bank")).toBe(true);
+      expect(results.every((result) => result.institution.category === "bank")).toBe(true);
     });
   });
 });

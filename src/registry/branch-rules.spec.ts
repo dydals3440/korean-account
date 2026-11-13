@@ -81,12 +81,15 @@ describe("suhyup12BranchToCoop", () => {
   });
 
   test("첫자리가 2/7/9면 suhyup-coop으로 라우팅한다", () => {
-    // Given / When / Then
-    for (const first of ["2", "7", "9"] as const) {
-      const digits = `${first}11111111111`;
-      expect(suhyup12BranchToCoop.evaluate(digits)).toEqual({
-        institutionId: "suhyup-coop",
-      });
+    // Given
+    const inputs = ["2", "7", "9"].map((first) => `${first}11111111111`);
+
+    // When
+    const results = inputs.map((digits) => suhyup12BranchToCoop.evaluate(digits));
+
+    // Then
+    for (const result of results) {
+      expect(result).toEqual({ institutionId: "suhyup-coop" });
     }
   });
 
@@ -161,10 +164,15 @@ describe("suhyupCoop12BranchToBank", () => {
   });
 
   test("첫자리가 2/7/9면 null을 반환한다 (수협중앙회 유지)", () => {
-    // Given / When / Then
-    for (const first of ["2", "7", "9"] as const) {
-      const digits = `${first}11111111111`;
-      expect(suhyupCoop12BranchToBank.evaluate(digits)).toBeNull();
+    // Given
+    const inputs = ["2", "7", "9"].map((first) => `${first}11111111111`);
+
+    // When
+    const results = inputs.map((digits) => suhyupCoop12BranchToBank.evaluate(digits));
+
+    // Then
+    for (const result of results) {
+      expect(result).toBeNull();
     }
   });
 

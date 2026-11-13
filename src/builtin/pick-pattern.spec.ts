@@ -122,7 +122,7 @@ describe("pickPattern", () => {
       expect(result).toBeNull();
     });
 
-    test("KB에는 lifetime 100자리 패턴이 없어 null을 반환한다", () => {
+    test("KB에는 신계좌 100자리 패턴이 없어 null을 반환한다", () => {
       // Given
       const id = "kb";
 

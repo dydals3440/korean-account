@@ -18,7 +18,7 @@ describe("detectBest", () => {
       expect(result?.institution.id).toBe("shinhan");
     });
 
-    test("옵션 (categories) 을 전달할 수 있다", () => {
+    test("categories 옵션을 전달하면 해당 카테고리의 1순위를 반환한다", () => {
       // Given
       const input = "3333-12-3456789";
 
@@ -53,7 +53,7 @@ describe("detectBest", () => {
       expect(result).toBeNull();
     });
 
-    test("minScore 가 너무 높아 매칭이 없으면 null", () => {
+    test("minScore 가 너무 높아 매칭이 없으면 null 을 반환한다", () => {
       // Given
       const input = "1";
 
@@ -67,8 +67,11 @@ describe("detectBest", () => {
 
   describe("타입 narrow", () => {
     test("반환 타입이 DetectionResult<RegisteredInstitution> | null 이다", () => {
-      // Given / When
-      const result = detectBest("110-436-387740");
+      // Given
+      const input = "110-436-387740";
+
+      // When
+      const result = detectBest(input);
 
       // Then
       expectTypeOf(result).toEqualTypeOf<DetectionResult<RegisteredInstitution> | null>();

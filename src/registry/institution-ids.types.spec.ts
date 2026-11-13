@@ -8,17 +8,32 @@ describe("INSTITUTION_IDS ↔ institutions 동기화", () => {
     // Given
     const registryIds = institutions.map((institution) => institution.id);
 
-    // When / Then
-    expect([...INSTITUTION_IDS]).toEqual(registryIds);
+    // When
+    const literalIds = [...INSTITUTION_IDS];
+
+    // Then
+    expect(literalIds).toEqual(registryIds);
   });
 
   test("타입: 리터럴 id union 이 레지스트리 기관 id union 과 같다", () => {
-    // Given / When / Then — adding an id to only one side breaks compilation here.
-    expectTypeOf<InstitutionId>().toEqualTypeOf<RegisteredInstitution["id"]>();
+    // Given
+    type LiteralId = InstitutionId;
+
+    // When
+    type RegistryId = RegisteredInstitution["id"];
+
+    // Then — adding an id to only one side breaks compilation here
+    expectTypeOf<LiteralId>().toEqualTypeOf<RegistryId>();
   });
 
   test("팩토리 호출 없이 리터럴만 담아 번들러가 순수하다고 판단할 수 있다", () => {
-    // Given / When / Then
-    expect(INSTITUTION_IDS.every((id) => typeof id === "string")).toBe(true);
+    // Given
+    const ids = INSTITUTION_IDS;
+
+    // When
+    const allStrings = ids.every((id) => typeof id === "string");
+
+    // Then
+    expect(allStrings).toBe(true);
   });
 });
