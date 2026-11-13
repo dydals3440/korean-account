@@ -5,10 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Never cancel a publish midway: a partial npm release cannot be rolled back.
-concurrency:
-  group: release-${{ github.ref }}
-
 permissions: {}
 
 jobs:
@@ -51,21 +47,20 @@ jobs:
       - name: Check packed consumers
         run: pnpm check:consumer
 
-  # Holds publish rights; only installs the lockfile and runs changesets.
-  release:
-    name: Release
-    needs: verify
+  # Decides between opening the version PR, publishing, or nothing. Read-only.
+  select-mode:
+    name: Select mode
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     permissions:
-      contents: write
-      pull-requests: write
-      # npm trusted publishing (OIDC): no stored npm token.
-      id-token: write
+      contents: read
+    outputs:
+      mode: ${{ steps.select.outputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
@@ -75,19 +70,104 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Pending changesets → version; an unpublished package.json version → publish.
+      - id: select
+        uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+
+  # Opens or updates the version PR. Never publishes and needs no npm identity.
+  version:
+    name: Version
+    needs: [verify, select-mode]
+    if: needs.select-mode.outputs.mode == 'version'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: release-version
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Concurrency orders jobs by arrival, not by push. A run whose commit is no longer the tip of
+      # main would reset the version PR to older changesets, so it stops here.
+      - name: Check that this commit is still the tip of main
+        id: tip
+        env:
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}.git
+        run: |
+          tip=$(git ls-remote "$REPOSITORY_URL" refs/heads/main | cut -f1)
+          if [ "$tip" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::main moved to $tip; a newer run updates the version pull request."
+          fi
+
+      # `pnpm version` is a pnpm built-in, so call changeset explicitly.
+      - name: Create or update the version pull request
+        if: steps.tip.outputs.current == 'true'
+        uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          script: pnpm changeset version
+          commit-message: "chore(release): 패키지 버전 갱신"
+          pr-title: "chore(release): 패키지 버전 갱신"
+
+  # Holds publish rights behind the `npm` environment, which needs a maintainer's approval.
+  # It must not need `version`: that job is skipped in publish mode and would skip this one.
+  publish:
+    name: Publish
+    needs: [verify, select-mode]
+    if: needs.select-mode.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: npm
+    # Never cancel a publish midway: a partial npm release cannot be rolled back.
+    concurrency:
+      group: release-publish
+    permissions:
+      contents: write
+      # npm trusted publishing (OIDC): no stored npm token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      # Trusted publishing needs npm 11.5 or newer.
       - name: Setup npm
         run: npm install --global npm@12.2.2
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # `pnpm version`/`pnpm publish` are pnpm built-ins, so call changeset explicitly.
-      # `prepublishOnly` rebuilds and re-checks dist right before publishing.
-      - name: Create release pull request or publish
-        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      # `pnpm publish` runs `prepublishOnly`, which rebuilds and re-checks dist right before
+      # publishing. The action then creates the git tag and GitHub Release through the API.
+      - name: Publish to npm
+        uses: changesets/action/publish@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          publish-script: pnpm changeset publish
-          version-script: pnpm changeset version
-          commit-message: "chore(release): 패키지 버전 갱신"
-          pr-title: "chore(release): 패키지 버전 갱신"
+          script: pnpm changeset publish
