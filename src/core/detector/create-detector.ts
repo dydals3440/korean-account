@@ -17,7 +17,7 @@ import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
 import { normalizeSubject } from "./normalize-subject";
 import { type BandMember, type RankableDetection, rankDetections } from "./rank";
-import { resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
+import { mergeScoring, resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
 import { scoreInstitution } from "./score";
 
 /** Options resolved once per detector; `extend` merges these instead of raw options. */
@@ -132,7 +132,7 @@ function buildDetector<TInstitution extends Institution>(
 
     return buildDetector<TInstitution | TExtra>([...kept, ...incoming], {
       globalRules: [...config.globalRules, ...(extension.globalRules ?? [])],
-      scoring: { ...config.scoring, ...extension.scoring },
+      scoring: mergeScoring(config.scoring, extension.scoring),
       verifiers: new Map([...config.verifiers, ...toVerifierMap(extension.checkDigitVerifiers)]),
     });
   };

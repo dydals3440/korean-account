@@ -32,6 +32,24 @@ export function resolveWeights(scoring: ScoringWeights): ResolvedScoringWeights 
   };
 }
 
+/** Layers `override` over `base` key by key; an omitted or `undefined` key keeps `base`. */
+export function mergeScoring(
+  base: ScoringWeights,
+  override: ScoringWeights | undefined,
+): ScoringWeights {
+  const pick = (key: keyof ScoringWeights): number | undefined => override?.[key] ?? base[key];
+  return {
+    lengthExact: pick("lengthExact"),
+    lengthNear: pick("lengthNear"),
+    identifierMatch: pick("identifierMatch"),
+    subjectMatch: pick("subjectMatch"),
+    additionalRule: pick("additionalRule"),
+    globalRule: pick("globalRule"),
+    branchRuleMatch: pick("branchRuleMatch"),
+    kindNewBonus: pick("kindNewBonus"),
+  };
+}
+
 /** @throws {RangeError} When `limit` is not a non-negative integer or `Infinity`. */
 export function resolveLimit(limit: number | undefined): number {
   if (limit === undefined) {

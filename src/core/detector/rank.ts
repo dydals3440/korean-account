@@ -1,4 +1,5 @@
 import type { AccountKind, Confidence, DetectionResult, Institution } from "../../types";
+import { CONFIDENCE_RANK } from "./confidence";
 import { prevalence } from "./prevalence";
 
 /** A scored candidate before ranking decides whether it is ambiguous. */
@@ -11,8 +12,6 @@ type ComparableDetection = Pick<DetectionResult, "confidence" | "score" | "insti
 
 /** Institution and band of every match, before option filters; decides `ambiguous`. */
 export type BandMember = Pick<DetectionResult, "confidence" | "institution">;
-
-const CONFIDENCE_RANK: Readonly<Record<Confidence, number>> = { high: 3, medium: 2, low: 1 };
 
 /** Tie-break order between account kinds; higher ranks first. */
 const KIND_RANK: Readonly<Record<AccountKind, number>> = {

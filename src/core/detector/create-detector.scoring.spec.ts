@@ -195,3 +195,53 @@ describe("옵션 검증은 입력과 무관하다", () => {
     expect(run).toThrow(RangeError);
   });
 });
+
+describe("기관 안에서도 근거 있는 패턴을 먼저 고른다", () => {
+  test("점수가 같으면 근거 있는 패턴이 근거 없는 패턴을 이긴다", () => {
+    // Given
+    const institution = defineInstitution({
+      id: "two-patterns",
+      code: "905",
+      nameKo: "패턴 둘",
+      category: "bank",
+      aliases: [],
+      patterns: [
+        {
+          template: patternTemplate("XXX-XXXX-XXXX-XX"),
+          kind: "new",
+          additionalRules: [() => true],
+        },
+        {
+          template: patternTemplate("XXX-XXXX-XXXX-XXX"),
+          kind: "virtual",
+          identifierPosition: { start: 0, length: 3 },
+          identifiers: ["790"],
+        },
+      ],
+    });
+    const detector = createDetector([institution]);
+
+    // When
+    const [top] = detector.detect("7901234567890");
+
+    // Then
+    expect(top?.kind).toBe("virtual");
+    expect(top?.score).toBe(4);
+    expect(top?.confidence).toBe("medium");
+  });
+});
+
+describe("extend 의 scoring 병합", () => {
+  test("undefined 로 둔 가중치는 기존 detector 의 값을 유지한다", () => {
+    // Given
+    const base = createDetector(institutions, { scoring: { identifierMatch: 6 } });
+
+    // When
+    const extended = base.extend({ scoring: { identifierMatch: undefined, subjectMatch: 2 } });
+
+    // Then
+    expect(extended.detect("110-436-387740")[0]?.score).toBe(
+      base.detect("110-436-387740")[0]?.score,
+    );
+  });
+});

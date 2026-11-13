@@ -10,6 +10,7 @@ import { extractIdentifier } from "../account/extract-identifier";
 import { extractSubject } from "../account/extract-subject";
 import { formatAccount } from "../account/format-account";
 import { templateLength } from "../account/template-length";
+import { CONFIDENCE_RANK, scoreToConfidence } from "./confidence";
 
 /** Scoring weights with every default applied. */
 export type ResolvedScoringWeights = {
@@ -60,8 +61,9 @@ const NO_PATTERN_MATCH: PatternScore = { score: 0, subject: null, hasEvidence: f
 const NO_CODE_MATCH: CodeMatch = { score: 0, isMatched: false };
 
 /**
- * Scores every pattern of an institution and keeps the best one (first wins ties).
- * Global rules add their bonus only when some pattern matched.
+ * Scores every pattern of an institution and keeps the best one: the strongest evidence-backed
+ * band first, then the highest score, then the first declared. Global rules add their bonus only
+ * when some pattern matched.
  */
 export function scoreInstitution(
   digits: string,
@@ -75,7 +77,7 @@ export function scoreInstitution(
   if (digits.length > 0) {
     for (const pattern of institution.patterns) {
       const candidate = scorePattern(digits, pattern, weights);
-      if (candidate.score > best.score) {
+      if (isStrongerPattern(candidate, best)) {
         bestPattern = pattern;
         best = candidate;
       }
@@ -94,6 +96,16 @@ export function scoreInstitution(
     subject: best.subject,
     hasEvidence: best.hasEvidence,
   };
+}
+
+/** Band the pattern alone earns; without evidence it is `low`, as in the final result. */
+function patternBand(match: PatternScore): number {
+  return CONFIDENCE_RANK[match.hasEvidence ? scoreToConfidence(match.score) : "low"];
+}
+
+function isStrongerPattern(candidate: PatternScore, best: PatternScore): boolean {
+  const bandDifference = patternBand(candidate) - patternBand(best);
+  return bandDifference > 0 || (bandDifference === 0 && candidate.score > best.score);
 }
 
 function scorePattern(
