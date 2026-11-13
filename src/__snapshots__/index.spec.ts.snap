@@ -90,6 +90,7 @@ exports[`korean-account 의 공개 export 1`] = `
   "suhyup14BranchToCoop",
   "suhyupCoop",
   "suhyupCoop12BranchToBank",
+  "toDetectionPayload",
   "toss",
   "toss12First1719",
   "woori",
@@ -102,6 +103,9 @@ exports[`korean-account/schema 의 공개 export 1`] = `
 [
   "accountKindSchema",
   "accountSchema",
+  "createAccountSchema",
+  "createDetectionSchema",
+  "createInstitutionIdSchema",
   "detectionSchema",
   "institutionIdSchema",
   "subjectCategorySchema",

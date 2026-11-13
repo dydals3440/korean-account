@@ -1,73 +1,69 @@
 import { describe, expect, test } from "vitest";
-import { ValidationError } from "yup";
+import { type Schema, ValidationError } from "yup";
 
-import { MESSAGES } from "../contract";
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
+import { describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,
+  createAccountSchema,
+  createDetectionSchema,
+  createInstitutionIdSchema,
   detectionSchema,
   institutionIdSchema,
   subjectCategorySchema,
 } from "./schema";
 
-const contractSchemas = {
-  account: accountSchema,
-  institutionId: institutionIdSchema,
-  accountKind: accountKindSchema,
-  subjectCategory: subjectCategorySchema,
-  detection: detectionSchema,
-} as const;
+describeAdapterContract<Schema<unknown>>("yup", {
+  schemas: {
+    account: accountSchema,
+    institutionId: institutionIdSchema,
+    accountKind: accountKindSchema,
+    subjectCategory: subjectCategorySchema,
+    detection: detectionSchema,
+  },
+  createAccountSchema,
+  createInstitutionIdSchema,
+  createDetectionSchema,
+  output: (schema, value) => schema.validateSync(value),
+  firstIssue: (schema, value) => {
+    try {
+      schema.validateSync(value, { strict: true });
+      return null;
+    } catch (error) {
+      if (error instanceof ValidationError) return error.message;
+      throw error;
+    }
+  },
+});
 
-describeAdapterContract("yup", (name, value) =>
-  contractSchemas[name as ContractSchemaName].isValidSync(value, { strict: true }),
-);
-
-function firstMessage(run: () => unknown): string | undefined {
-  try {
-    run();
-    return undefined;
-  } catch (error) {
-    return error instanceof ValidationError ? error.message : undefined;
-  }
-}
-
-describe("yup 한국어 메시지", () => {
-  test.each([
-    ["12345", MESSAGES.minDigits],
-    ["1".repeat(41), MESSAGES.tooLong],
-    ["110-abc", MESSAGES.charset],
-    ["", MESSAGES.required],
-  ])("'%s' → %s", (input, message) => {
-    // Given
-    const account = input;
-
-    // When
-    const errorMessage = firstMessage(() => accountSchema.validateSync(account));
-
-    // Then
-    expect(errorMessage).toBe(message);
-  });
-
-  test("미등록 기관 id 는 기관 메시지로 거부한다", () => {
-    // Given
-    const institutionId = "unknown";
-
-    // When
-    const errorMessage = firstMessage(() => institutionIdSchema.validateSync(institutionId));
-
-    // Then
-    expect(errorMessage).toBe(MESSAGES.institution);
-  });
-
-  test("cast 우회 차단 — 숫자 입력은 문자열로 캐스트되지 않는다", () => {
+describe("yup 캐스팅 함정", () => {
+  test("숫자 입력은 문자열로 캐스트되지 않는다", () => {
     // Given
     const input = 1104363877;
 
     // When
-    const result = accountSchema.isValidSync(input);
+    const isValid = accountSchema.isValidSync(input);
 
     // Then
-    expect(result).toBe(false);
+    expect(isValid).toBe(false);
+  });
+
+  test("subject 를 생략한 payload 를 cast 해도 빈 객체가 생기지 않는다", () => {
+    // Given
+    const payload = {
+      institutionId: "shinhan",
+      kind: "new",
+      score: 14,
+      confidence: "high",
+      formatted: "110-436-387740",
+      capabilities: { allowsWithdrawal: true, virtual: false, validatedCheckDigit: null },
+    };
+
+    // When
+    const cast = detectionSchema.cast(payload);
+
+    // Then
+    expect(cast).not.toHaveProperty("subject", {});
+    expect(cast.capabilities.services).toBeUndefined();
   });
 });

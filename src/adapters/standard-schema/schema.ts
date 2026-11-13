@@ -1,20 +1,39 @@
 import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
-import type { InstitutionId } from "../../registry/institution-ids";
-import type { AccountKind, SubjectCategory } from "../../types";
+import { INSTITUTION_IDS, type InstitutionId } from "../../registry/institution-ids";
+import type {
+  AccountKind,
+  DetectionPayload as DetectionPayloadOf,
+  SubjectCategory,
+} from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,
   ACCOUNT_MAX_DIGITS,
   ACCOUNT_MAX_INPUT_LENGTH,
   ACCOUNT_MIN_DIGITS,
+  type AccountSchemaOptions,
+  createLiteralGuard,
   type DetectionPayload,
+  type DetectionSchemaOptions,
   digitCount,
-  isFiniteNumber,
-  isRegisteredInstitutionId,
+  type InstitutionIdSchemaOptions,
+  isNonNegativeFiniteNumber,
+  isRecord,
   MESSAGES,
+  resolveMessages,
+  stripUnknownKeys,
 } from "../contract";
 import type { StandardSchemaV1 } from "./spec";
 
-export type { DetectionPayload } from "../contract";
+export type {
+  AccountMessages,
+  AccountSchemaOptions,
+  DetectionMessages,
+  DetectionPayload,
+  DetectionSchemaOptions,
+  InstitutionIdSchemaOptions,
+  MessageOverrides,
+  ValidationMessages,
+} from "../contract";
 export type { StandardSchemaV1 } from "./spec";
 
 // Hand-written Standard Schema v1 implementation: works with any consumer of the spec
@@ -22,12 +41,15 @@ export type { StandardSchemaV1 } from "./spec";
 
 const VENDOR = "korean-account";
 
+type Guard<T> = (value: unknown) => value is T;
+type Issues = StandardSchemaV1.Issue[];
+
 function ok<T>(value: T): StandardSchemaV1.SuccessResult<T> {
   return { value };
 }
 
-function fail(message: string, path?: readonly PropertyKey[]): StandardSchemaV1.FailureResult {
-  return path ? { issues: [{ message, path }] } : { issues: [{ message }] };
+function fail(message: string): StandardSchemaV1.FailureResult {
+  return { issues: [{ message }] };
 }
 
 function createStandardSchema<T>(
@@ -36,105 +58,159 @@ function createStandardSchema<T>(
   return { "~standard": { version: 1, vendor: VENDOR, validate } };
 }
 
-function picklist<T extends string>(options: readonly T[], message: string): StandardSchemaV1<T> {
-  const set = new Set<string>(options);
-  return createStandardSchema((value) =>
-    typeof value === "string" && set.has(value) ? ok(value as T) : fail(message),
-  );
+function fromGuard<T>(isValid: Guard<T>, message: string): StandardSchemaV1<T> {
+  return createStandardSchema((value) => (isValid(value) ? ok(value) : fail(message)));
 }
 
-/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
-export const accountSchema: StandardSchemaV1<string> = createStandardSchema((value) => {
-  if (typeof value !== "string" || value.length === 0) return fail(MESSAGES.required);
-  if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return fail(MESSAGES.tooLong);
-  if (!ACCOUNT_INPUT_REGEX.test(value)) return fail(MESSAGES.charset);
-  const digits = digitCount(value);
-  if (digits < ACCOUNT_MIN_DIGITS) return fail(MESSAGES.minDigits);
-  if (digits > ACCOUNT_MAX_DIGITS) return fail(MESSAGES.maxDigits);
-  return ok(value);
-});
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean";
+}
+
+/**
+ * Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged.
+ *
+ * @example
+ * createAccountSchema({ messages: { required: "Enter an account number." } });
+ */
+export function createAccountSchema(options: AccountSchemaOptions = {}): StandardSchemaV1<string> {
+  const messages = resolveMessages(options.messages);
+  return createStandardSchema((value) => {
+    if (!isString(value) || value.length === 0) return fail(messages.required);
+    if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return fail(messages.tooLong);
+    if (!ACCOUNT_INPUT_REGEX.test(value)) return fail(messages.charset);
+    const digits = digitCount(value);
+    if (digits < ACCOUNT_MIN_DIGITS) return fail(messages.minDigits);
+    if (digits > ACCOUNT_MAX_DIGITS) return fail(messages.maxDigits);
+    return ok(value);
+  });
+}
+
+/** Institution id from the given list, e.g. the ids of a custom detector. */
+export function createInstitutionIdSchema<const TId extends string>(
+  ids: readonly TId[],
+  options: InstitutionIdSchemaOptions = {},
+): StandardSchemaV1<TId> {
+  return fromGuard(createLiteralGuard(ids), options.message ?? MESSAGES.institution);
+}
+
+/** Serialized detection result for the given institution ids. */
+export function createDetectionSchema<const TId extends string>(
+  ids: readonly TId[],
+  options: DetectionSchemaOptions = {},
+): StandardSchemaV1<DetectionPayloadOf<TId>> {
+  const messages = resolveMessages(options.messages);
+  const isInstitutionId = createLiteralGuard(ids);
+  const isKind = createLiteralGuard(ACCOUNT_KINDS);
+  const isCategory = createLiteralGuard(SUBJECT_CATEGORIES);
+  const isConfidence = createLiteralGuard(CONFIDENCE_LEVELS);
+
+  function collectSubjectIssues(subject: unknown, issues: Issues): void {
+    if (subject === undefined) return;
+    if (!isRecord(subject)) {
+      issues.push({ message: messages.invalidValue, path: ["subject"] });
+      return;
+    }
+    if (!isString(subject.code)) {
+      issues.push({ message: messages.invalidValue, path: ["subject", "code"] });
+    }
+    if (!isCategory(subject.category)) {
+      issues.push({ message: messages.subjectCategory, path: ["subject", "category"] });
+    }
+    if (subject.label !== undefined && !isString(subject.label)) {
+      issues.push({ message: messages.invalidValue, path: ["subject", "label"] });
+    }
+  }
+
+  function collectCapabilityIssues(capabilities: unknown, issues: Issues): void {
+    if (!isRecord(capabilities)) {
+      issues.push({ message: messages.invalidValue, path: ["capabilities"] });
+      return;
+    }
+    for (const key of ["allowsWithdrawal", "virtual"] as const) {
+      if (!isBoolean(capabilities[key])) {
+        issues.push({ message: messages.invalidValue, path: ["capabilities", key] });
+      }
+    }
+    const checkDigit = capabilities.validatedCheckDigit;
+    if (checkDigit !== null && !isBoolean(checkDigit)) {
+      issues.push({
+        message: messages.invalidValue,
+        path: ["capabilities", "validatedCheckDigit"],
+      });
+    }
+    collectServiceIssues(capabilities.services, issues);
+  }
+
+  function collectServiceIssues(services: unknown, issues: Issues): void {
+    if (services === undefined || services === null) return;
+    if (!isRecord(services)) {
+      issues.push({ message: messages.invalidValue, path: ["capabilities", "services"] });
+      return;
+    }
+    for (const key of ["virtualAccount", "directDebit", "directCredit", "additionalServices"]) {
+      if (!isBoolean(services[key])) {
+        issues.push({ message: messages.invalidValue, path: ["capabilities", "services", key] });
+      }
+    }
+  }
+
+  /** Collects every issue; an empty list means the value is a valid payload. */
+  function isDetectionPayload(value: unknown, issues: Issues): value is DetectionPayloadOf<TId> {
+    if (!isRecord(value)) {
+      issues.push({ message: messages.payload });
+      return false;
+    }
+    if (!isInstitutionId(value.institutionId)) {
+      issues.push({ message: messages.institution, path: ["institutionId"] });
+    }
+    if (!isKind(value.kind)) issues.push({ message: messages.accountKind, path: ["kind"] });
+    collectSubjectIssues(value.subject, issues);
+    if (!isNonNegativeFiniteNumber(value.score)) {
+      issues.push({ message: messages.finiteScore, path: ["score"] });
+    }
+    if (!isConfidence(value.confidence)) {
+      issues.push({ message: messages.confidence, path: ["confidence"] });
+    }
+    if (value.ambiguous !== undefined && !isBoolean(value.ambiguous)) {
+      issues.push({ message: messages.invalidValue, path: ["ambiguous"] });
+    }
+    if (!isString(value.formatted)) {
+      issues.push({ message: messages.invalidValue, path: ["formatted"] });
+    }
+    collectCapabilityIssues(value.capabilities, issues);
+    return issues.length === 0;
+  }
+
+  return createStandardSchema((value) => {
+    const issues: Issues = [];
+    const payload = stripUnknownKeys(value);
+    return isDetectionPayload(payload, issues) ? ok(payload) : { issues };
+  });
+}
+
+/** Account number input with the default Korean messages. */
+export const accountSchema: StandardSchemaV1<string> = createAccountSchema();
 
 /** Built-in institution id. */
-export const institutionIdSchema: StandardSchemaV1<InstitutionId> = createStandardSchema((value) =>
-  isRegisteredInstitutionId(value) ? ok(value) : fail(MESSAGES.institution),
-);
+export const institutionIdSchema: StandardSchemaV1<InstitutionId> =
+  createInstitutionIdSchema(INSTITUTION_IDS);
 
 /** `AccountKind` literal. */
-export const accountKindSchema: StandardSchemaV1<AccountKind> = picklist(
-  ACCOUNT_KINDS,
+export const accountKindSchema: StandardSchemaV1<AccountKind> = fromGuard(
+  createLiteralGuard(ACCOUNT_KINDS),
   MESSAGES.accountKind,
 );
 
 /** `SubjectCategory` literal. */
-export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = picklist(
-  SUBJECT_CATEGORIES,
+export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = fromGuard(
+  createLiteralGuard(SUBJECT_CATEGORIES),
   MESSAGES.subjectCategory,
 );
 
-const CONFIDENCE_SET = new Set<string>(CONFIDENCE_LEVELS);
-const KIND_SET = new Set<string>(ACCOUNT_KINDS);
-const CATEGORY_SET = new Set<string>(SUBJECT_CATEGORIES);
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/** Serialized detection result (`DetectionPayload`). */
-export const detectionSchema: StandardSchemaV1<DetectionPayload> = createStandardSchema((value) => {
-  if (!isRecord(value)) return fail("detection payload 형식이 아닙니다.");
-  const issues: StandardSchemaV1.Issue[] = [];
-  const push = (message: string, ...path: PropertyKey[]) => issues.push({ message, path });
-
-  if (!isRegisteredInstitutionId(value.institutionId)) {
-    push(MESSAGES.institution, "institutionId");
-  }
-  if (typeof value.kind !== "string" || !KIND_SET.has(value.kind)) {
-    push(MESSAGES.accountKind, "kind");
-  }
-  if (!isFiniteNumber(value.score) || value.score < 0) {
-    push("score 는 0 이상의 숫자여야 합니다.", "score");
-  }
-  if (typeof value.confidence !== "string" || !CONFIDENCE_SET.has(value.confidence)) {
-    push("confidence 는 high·medium·low 중 하나여야 합니다.", "confidence");
-  }
-  if (typeof value.formatted !== "string") {
-    push("formatted 는 문자열이어야 합니다.", "formatted");
-  }
-
-  const subject = value.subject;
-  if (subject !== undefined) {
-    if (!isRecord(subject)) {
-      push("subject 형식이 아닙니다.", "subject");
-    } else {
-      if (typeof subject.code !== "string") push("code 는 문자열이어야 합니다.", "subject", "code");
-      if (typeof subject.category !== "string" || !CATEGORY_SET.has(subject.category)) {
-        push(MESSAGES.subjectCategory, "subject", "category");
-      }
-      if (subject.label !== undefined && typeof subject.label !== "string") {
-        push("label 은 문자열이어야 합니다.", "subject", "label");
-      }
-    }
-  }
-
-  const capabilities = value.capabilities;
-  if (!isRecord(capabilities)) {
-    push("capabilities 가 필요합니다.", "capabilities");
-  } else {
-    if (typeof capabilities.allowsWithdrawal !== "boolean") {
-      push("allowsWithdrawal 은 boolean 이어야 합니다.", "capabilities", "allowsWithdrawal");
-    }
-    if (typeof capabilities.virtual !== "boolean") {
-      push("virtual 은 boolean 이어야 합니다.", "capabilities", "virtual");
-    }
-    const checkDigit = capabilities.validatedCheckDigit;
-    if (checkDigit !== null && typeof checkDigit !== "boolean") {
-      push(
-        "validatedCheckDigit 은 boolean 또는 null 이어야 합니다.",
-        "capabilities",
-        "validatedCheckDigit",
-      );
-    }
-  }
-
-  return issues.length > 0 ? { issues } : ok(value as unknown as DetectionPayload);
-});
+/** Serialized detection result for the built-in institutions. */
+export const detectionSchema: StandardSchemaV1<DetectionPayload> =
+  createDetectionSchema(INSTITUTION_IDS);

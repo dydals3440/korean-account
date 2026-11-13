@@ -1,6 +1,6 @@
 import type { CONFIDENCE_LEVELS } from "../constants";
 import type { Institution, InstitutionCategory, InstitutionIdInput } from "./institution";
-import type { AccountKind, AccountPattern, CmsServices, Subject } from "./pattern";
+import type { AccountKind, AccountPattern, CmsServices, Subject, SubjectCategory } from "./pattern";
 
 /** Confidence band derived from the score. */
 export type Confidence = (typeof CONFIDENCE_LEVELS)[number];
@@ -39,6 +39,32 @@ export interface DetectionResult<TInstitution extends Institution = Institution>
   /** Another institution is in the same confidence band, so ask the user to confirm. */
   readonly ambiguous: boolean;
   readonly capabilities: DetectionCapabilities;
+}
+
+/**
+ * JSON-safe summary of a `DetectionResult`, produced by `toDetectionPayload` and
+ * validated by every adapter's `detectionSchema`.
+ */
+export interface DetectionPayload<TId extends string = string> {
+  readonly institutionId: TId;
+  readonly kind: AccountKind;
+  readonly subject?:
+    | {
+        readonly code: string;
+        readonly category: SubjectCategory;
+        readonly label?: string | undefined;
+      }
+    | undefined;
+  readonly score: number;
+  readonly confidence: Confidence;
+  readonly ambiguous?: boolean | undefined;
+  readonly formatted: string;
+  readonly capabilities: {
+    readonly allowsWithdrawal: boolean;
+    readonly virtual: boolean;
+    readonly validatedCheckDigit: boolean | null;
+    readonly services?: CmsServices | null | undefined;
+  };
 }
 
 /** Filters and limits for `detect`. Institution filters apply after branch routing; `exclude` wins. */

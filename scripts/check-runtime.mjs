@@ -104,7 +104,11 @@ check("standard-schema adapter imports no external module", () => {
   const files = globSync(`${root}dist/adapters/standard-schema/**/*.{js,cjs}`);
   if (files.length < 2) throw new Error("standard-schema dist files missing");
   for (const file of files) {
-    if (/from\s*["'][^./]|require\(\s*["'][^./]/.test(readFileSync(file, "utf8"))) {
+    // JSDoc examples show `import … from "korean-account"`; only code counts.
+    const code = readFileSync(file, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    if (/from\s*["'][^./]|require\(\s*["'][^./]/.test(code)) {
       throw new Error(`${file} imports an external module`);
     }
   }
