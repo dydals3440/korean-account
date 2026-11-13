@@ -337,8 +337,8 @@ export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = fromGuar
  *
  * Every invalid field is reported in one pass, each issue with a `path` such as
  * `["capabilities", "virtual"]`. A value that is not an object fails with `payload` and no
- * path; a field of the wrong type fails with `invalidValue`. Unknown keys are kept: on success
- * `value` is the input object itself.
+ * path; a field of the wrong type fails with `invalidValue`. On success `value` is a copy that
+ * keeps only `DetectionPayload` keys, at every level.
  *
  * @example
  * // client.ts

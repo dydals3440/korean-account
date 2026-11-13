@@ -233,7 +233,8 @@ export const subjectCategorySchema: ZodType<SubjectCategory> = z.enum(SUBJECT_CA
  * does not re-run detection, so a server that must trust the institution should call `detect`
  * on the account number itself.
  *
- * Unknown keys are stripped. A wrong literal or `score` fails with the `ValidationMessages`
+ * Keys outside `DetectionPayload` are removed at every level. A wrong literal or `score` fails
+ * with the `ValidationMessages`
  * defaults; other type errors use zod's own messages. Read the type with `z.infer`, since
  * `z.input` is `unknown` on zod 4.
  *

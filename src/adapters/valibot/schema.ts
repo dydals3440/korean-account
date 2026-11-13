@@ -227,7 +227,8 @@ export const subjectCategorySchema: v.GenericSchema<SubjectCategory> = v.picklis
  * does not re-run detection, so a server that must trust the institution should call `detect`
  * on the account number itself.
  *
- * Unknown keys are stripped. A wrong literal or `score` fails with the `ValidationMessages`
+ * Keys outside `DetectionPayload` are removed at every level. A wrong literal or `score` fails
+ * with the `ValidationMessages`
  * defaults; a missing key and other type errors use valibot's own messages.
  *
  * @example

@@ -255,10 +255,9 @@ export const subjectCategorySchema: Type<SubjectCategory> = literalSchema(
  * does not re-run detection, so a server that must trust the institution should call `detect`
  * on the account number itself.
  *
- * Unknown keys are kept. A wrong literal fails with its `ValidationMessages` default as is; the
- * `finiteScore` message comes from `ctx.reject`, so arktype prefixes it with `score` (read
- * `ArkError.problem` for the message alone). A missing key, a non-number `score` and other type
- * errors use arktype's own messages.
+ * Keys outside `DetectionPayload` are removed at every level, and optional keys may be set to
+ * `undefined`. A wrong literal or `score` fails with its `ValidationMessages` default, unprefixed;
+ * a missing key and other type errors use arktype's own messages.
  *
  * @example
  * // client.ts

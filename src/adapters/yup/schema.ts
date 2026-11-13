@@ -82,8 +82,8 @@ export function createAccountSchema(options: AccountSchemaOptions = {}): Schema<
  *
  * Built for custom detectors: pass the ids of the institutions given to `createDetector`, and
  * the output type narrows to their union. Ids are compared exactly (`"KB"` is not `"kb"`).
- * `undefined` fails with the schema's message (`.defined()` closes the gap where yup's `oneOf`
- * lets `undefined` through); `null` and non-strings fail with yup's own messages.
+ * `undefined`, `null` and non-strings fail with the schema's message too (`.defined()` closes the
+ * gap where yup's `oneOf` lets `undefined` through).
  *
  * @typeParam TId - Accepted ids, inferred from `ids`. A literal array, or `.map((i) => i.id)`
  *   over built-in or `defineInstitution` institutions, narrows without `as const`; an array
@@ -229,7 +229,7 @@ export const institutionIdSchema: Schema<InstitutionId> =
 /**
  * Schema for an `AccountKind`: one of `ACCOUNT_KINDS` from `korean-account`.
  *
- * `undefined` fails with the same message as an unknown value; `null` fails with yup's own.
+ * `undefined`, `null` and non-strings fail with the same message as an unknown value.
  *
  * @example
  * accountKindSchema.validateSync("virtual"); // => "virtual"
@@ -244,7 +244,7 @@ export const accountKindSchema: Schema<AccountKind> = literalSchema(
 /**
  * Schema for a `SubjectCategory`: one of `SUBJECT_CATEGORIES` from `korean-account`.
  *
- * `undefined` fails with the same message as an unknown value; `null` fails with yup's own.
+ * `undefined`, `null` and non-strings fail with the same message as an unknown value.
  *
  * @example
  * subjectCategorySchema.validateSync("savings"); // => "savings"
@@ -265,7 +265,9 @@ export const subjectCategorySchema: Schema<SubjectCategory> = literalSchema(
  * does not re-run detection, so a server that must trust the institution should call `detect`
  * on the account number itself.
  *
- * Every field is strict, so `score: "14"` is rejected rather than cast. Unknown keys are kept.
+ * Every field is strict, so `score: "14"` is rejected rather than cast. Keys outside
+ * `DetectionPayload` are removed at every level by a transform, which yup skips when you pass
+ * `{ strict: true }`.
  * A wrong literal or a numeric `score` out of range fails with the `ValidationMessages`
  * defaults; other type errors use yup's own messages. An omitted `subject` or
  * `capabilities.services` stays omitted after `cast()`.

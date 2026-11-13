@@ -64,10 +64,11 @@ export type CheckDigitVerifier = (digits: string) => boolean;
  */
 export interface DetectionCapabilities {
   /**
-   * Whether CMS direct debit (출금이체) can be registered against the account. Resolved in order
-   * from `subject.allowsWithdrawal`, `subject.services.directDebit` and the pattern's
-   * `services.directDebit`. When the pattern declares no `services`, virtual accounts and the
-   * `incoming-only` and `lifetime` kinds are `false`; other accounts default to `true`.
+   * Whether CMS direct debit (출금이체) can be registered against the account. With PDF
+   * `services` on the pattern: the subject's own `allowsWithdrawal`, else the 출금이체 column with
+   * the subject's `services` exceptions applied. Without them: virtual accounts and the
+   * `incoming-only` and `lifetime` kinds are always `false`, and the subject can only narrow
+   * the rest. `DetectionResult.subject.allowsWithdrawal` always holds the same value.
    */
   readonly allowsWithdrawal: boolean;
   /**
@@ -354,7 +355,8 @@ export interface Detector<TInstitution extends Institution = Institution> {
   ): readonly DetectionResult<TInstitution>[];
   /**
    * Returns a new detector with institutions added or replaced and rules, weights or verifiers
-   * merged in; see {@link ExtendDetectorOptions}.
+   * merged in key by key (an `undefined` weight or verifier keeps the current one); see
+   * {@link ExtendDetectorOptions}. Without `institutions`, result ids keep this detector's union.
    *
    * @throws {RangeError} When a merged `scoring` weight is not a finite number ≥ 0.
    */

@@ -85,8 +85,10 @@ export interface Subject {
   /** Display label; `undefined` uses `subjectCategoryLabels[category]`. */
   readonly label?: string | undefined;
   /**
-   * Whether direct debit is allowed, taking precedence over `services.directDebit`;
-   * `undefined` derives it as described in `DetectionCapabilities.allowsWithdrawal`.
+   * Whether direct debit is allowed for this subject, overriding the 출금이체 column. On a
+   * pattern without `services` it can only narrow the kind rule: a virtual, lifetime or
+   * deposit-only account never debits. `undefined` derives it as described in
+   * `DetectionCapabilities.allowsWithdrawal`.
    */
   readonly allowsWithdrawal?: boolean | undefined;
   /**
@@ -116,8 +118,8 @@ export interface ResolvedSubject extends Subject {
   /** The registry label, or the category label from `subjectCategoryLabels` when none is set. */
   readonly label: string;
   /**
-   * Whether direct debit (출금이체) is allowed: the subject's own value, then its `services`
-   * exception, then the pattern's `services.directDebit`, then the account-kind default.
+   * Whether direct debit (출금이체) is allowed; always the same value as
+   * `capabilities.allowsWithdrawal`, resolved as described there.
    */
   readonly allowsWithdrawal: boolean;
   /** Whether this subject marks the account itself as a virtual account. @default false */
