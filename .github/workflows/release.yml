@@ -105,8 +105,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Concurrency orders jobs by arrival, not by push. A run whose commit is no longer the tip of
+      # main would reset the version PR to older changesets, so it stops here.
+      - name: Check that this commit is still the tip of main
+        id: tip
+        env:
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}.git
+        run: |
+          tip=$(git ls-remote "$REPOSITORY_URL" refs/heads/main | cut -f1)
+          if [ "$tip" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::main moved to $tip; a newer run updates the version pull request."
+          fi
+
       # `pnpm version` is a pnpm built-in, so call changeset explicitly.
       - name: Create or update the version pull request
+        if: steps.tip.outputs.current == 'true'
         uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           script: pnpm changeset version
