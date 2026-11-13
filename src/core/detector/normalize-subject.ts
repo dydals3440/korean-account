@@ -12,10 +12,9 @@ export function isDebitableKind(kind: AccountKind): boolean {
   return !NON_DEBITABLE_KINDS.has(kind);
 }
 
-/** Subject with every display default resolved. */
+/** Subject with withdrawal and label defaults resolved. */
 export type NormalizedSubject = Subject & {
   readonly allowsWithdrawal: boolean;
-  readonly virtual: boolean;
   readonly label: string;
 };
 
