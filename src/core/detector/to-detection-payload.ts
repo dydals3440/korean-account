@@ -19,7 +19,7 @@ export function toDetectionPayload<TInstitution extends Institution>(
       subject: {
         code: subject.code,
         category: subject.category,
-        ...(subject.label !== undefined && { label: subject.label }),
+        label: subject.label,
       },
     }),
     score: result.score,

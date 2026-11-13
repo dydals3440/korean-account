@@ -135,7 +135,7 @@ export interface Detector<TInstitution extends Institution = Institution> {
     options?: DetectOptions<TInstitution["id"]>,
   ): readonly DetectionResult<TInstitution>[];
   /** Returns a new detector with extra institutions, rules, weights or verifiers. */
-  extend<TExtra extends Institution>(
+  extend<TExtra extends Institution = never>(
     options: ExtendDetectorOptions<TInstitution, TExtra>,
   ): Detector<TInstitution | TExtra>;
   /** Returns a new detector without the institutions matching an id or predicate. */

@@ -141,7 +141,7 @@ function buildDetector<TInstitution extends Institution>(
     return rankDetections(candidates, bandMembers).slice(0, limit);
   };
 
-  const extend = <TExtra extends Institution>(
+  const extend = <TExtra extends Institution = never>(
     extension: ExtendDetectorOptions<TInstitution, TExtra>,
   ): Detector<TInstitution | TExtra> => {
     const incoming = extension.institutions ?? [];

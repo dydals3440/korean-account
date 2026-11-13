@@ -227,10 +227,6 @@ function isIdentifierMatch(
   pattern: AccountPattern,
   lookup: PatternLookup,
 ): boolean {
-  const expectedLength = pattern.identifierPosition?.length ?? 0;
-  if (identifier.length === 0 || identifier.length < expectedLength) {
-    return false;
-  }
   if (lookup.identifiers.has(identifier)) {
     return true;
   }

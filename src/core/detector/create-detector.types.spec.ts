@@ -83,3 +83,29 @@ describe("정의 타입과 exactOptionalPropertyTypes", () => {
     expectTypeOf(institution.id).toEqualTypeOf<"my-bank">();
   });
 });
+
+describe("extend 의 결과 타입", () => {
+  test("기관 없이 가중치만 바꾸면 기존 기관 id 유니온을 유지한다", () => {
+    // Given
+    const detector = createDetector([kb, shinhan]);
+
+    // When
+    const tuned = detector.extend({ scoring: { identifierMatch: 6 } });
+
+    // Then
+    type Id = ReturnType<typeof tuned.detect>[number]["institution"]["id"];
+    expectTypeOf<Id>().toEqualTypeOf<"kb" | "shinhan">();
+  });
+
+  test("기관을 더하면 그 id 가 유니온에 추가된다", () => {
+    // Given
+    const detector = createDetector([kb]);
+
+    // When
+    const extended = detector.extend({ institutions: [toss] });
+
+    // Then
+    type Id = ReturnType<typeof extended.detect>[number]["institution"]["id"];
+    expectTypeOf<Id>().toEqualTypeOf<"kb" | "toss">();
+  });
+});
