@@ -1,52 +1,31 @@
 import type { PatternTemplate } from "../../types";
 
+const GROUP_SEPARATOR = "-";
+
 /**
- * Groups normalized digits into the template shape (`XXX-XX-XXXXXX` etc.).
- *
- * - When digits run short, remaining tokens are dropped along with a trailing
- *   hyphen (useful while the user is still typing).
- * - When digits outlast the template, the excess is appended verbatim.
+ * Groups digits by a template. Short input stops at the last typed digit;
+ * digits beyond the template are appended unchanged.
  *
  * @example
- * import { patternTemplate } from "korean-account";
- * const tpl = patternTemplate("XXX-XXX-XXXXXX");
- * formatAccount("110436387740", tpl); // "110-436-387740"
- * formatAccount("110436", tpl);       // "110-436"
+ * const template = patternTemplate("XXX-XXX-XXXXXX");
+ * formatAccount("110436387740", template); // "110-436-387740"
+ * formatAccount("110436", template);       // "110-436"
  */
 export function formatAccount(digits: string, template: PatternTemplate): string {
-  if (digits.length === 0) {
-    return "";
-  }
+  let formatted = "";
+  let digitIndex = 0;
 
-  let result = "";
-  let cursor = 0;
-
-  for (const ch of template) {
-    if (ch === "-") {
-      if (cursor === 0) {
-        continue;
-      }
-
-      if (cursor >= digits.length) {
-        break;
-      }
-
-      result += "-";
-
-      continue;
-    }
-
-    if (cursor >= digits.length) {
+  for (const token of template) {
+    if (digitIndex === digits.length) {
       break;
     }
-
-    result += digits[cursor];
-    cursor += 1;
+    if (token !== GROUP_SEPARATOR) {
+      formatted += digits.charAt(digitIndex);
+      digitIndex += 1;
+    } else if (digitIndex > 0) {
+      formatted += GROUP_SEPARATOR;
+    }
   }
 
-  if (cursor < digits.length) {
-    result += digits.slice(cursor);
-  }
-
-  return result;
+  return formatted + digits.slice(digitIndex);
 }

@@ -2,11 +2,7 @@ import { defineInstitution, defineSubject, patternTemplate } from "../../core/de
 import type { Subject } from "../../types";
 import { expandTwoDigitRange } from "../expand-range";
 
-/**
- * Subject set shared by the integrated Citi 13-digit ('06.7.18) pattern and
- * the former KorAm 11-digit pattern. The PDF states "(former KorAm) — same as
- * integrated Citi".
- */
+/** Subjects of the integrated Citi 13-digit and former KorAm 11-digit formats (PDF p.6). */
 const integratedCitiSubjects: readonly Subject[] = [
   defineSubject({ code: "01", category: "ordinary" }),
   defineSubject({ code: "11", category: "ordinary" }),

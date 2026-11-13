@@ -20,21 +20,10 @@ type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type
 
 export type { DetectionPayload } from "../contract";
 
-// Exports are annotated `Type<T>` (stable across arktype 2.x; its `out t`
-// variance makes narrowed results assignable). All account rules live in one
-// `.narrow` instead of native length/regex constraints: `ctx.reject({ problem })`
-// is arktype's only mechanism that replaces the composed English
-// "must be … (was …)" sentence with our exact Korean messages.
-// Known deviation (documented): nested `detectionSchema` field errors keep
-// arktype's default English composition — the contract tests assert
-// accept/reject behavior only.
+// `Type<T>` annotations keep d.ts stable across arktype 2.x. Account rules use one `.narrow`
+// because `ctx.reject({ problem })` is the only way to replace arktype's English messages.
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: Type<string> = type("string").narrow((value, ctx) => {
   if (value.length === 0) return ctx.reject({ problem: MESSAGES.required });
   if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return ctx.reject({ problem: MESSAGES.tooLong });
@@ -45,18 +34,18 @@ export const accountSchema: Type<string> = type("string").narrow((value, ctx) =>
   return true;
 });
 
-/** Schema accepting only registered institution ids. */
+/** Built-in institution id. */
 export const institutionIdSchema: Type<InstitutionId> = type
   .enumerated(...INSTITUTION_IDS)
   .configure({ message: MESSAGES.institution });
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: Type<AccountKind> = type.enumerated(...ACCOUNT_KINDS);
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: Type<SubjectCategory> = type.enumerated(...SUBJECT_CATEGORIES);
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: Type<DetectionPayload> = type({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,

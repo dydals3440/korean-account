@@ -3,6 +3,8 @@
 * @dydals3440
 
 /src/core/ @dydals3440
+/src/builtin/ @dydals3440
+/src/types/ @dydals3440
 /src/registry/ @dydals3440
 /src/adapters/ @dydals3440
 /.github/ @dydals3440

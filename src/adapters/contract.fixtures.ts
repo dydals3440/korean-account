@@ -3,11 +3,8 @@ import { describe, expect, test } from "vitest";
 import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../constants";
 import type { DetectionPayload } from "./contract";
 
-// Behavioral contract shared by every validation adapter. Each adapter's spec
-// runs this exact table through its own library, so the five schema families
-// cannot drift: an input either passes everywhere or fails everywhere.
-// The invalid rows deliberately include the yup trap inputs (numbers that
-// would cast, undefined that oneOf would pass, objects with missing keys).
+// Every adapter spec runs this table, so an input passes or fails in all five adapters alike.
+// Invalid rows include yup traps: castable numbers, `undefined` for oneOf, missing keys.
 
 const baseDetection: DetectionPayload = {
   institutionId: "shinhan",

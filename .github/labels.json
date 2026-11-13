@@ -36,7 +36,7 @@
   },
   {
     "name": "area: core",
-    "description": "src/core: 식별·스코어링·분기 규칙",
+    "description": "src/core·builtin: 식별·스코어링·분기 규칙",
     "color": "1d76db"
   },
   {

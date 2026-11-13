@@ -1,28 +1,22 @@
 import type { PatternTemplate } from "../../types";
 
-const ALLOWED_CHARS = new Set<string>(["X", "-"]);
+const TEMPLATE_SYNTAX = /^[X-]+$/;
 
 /**
- * Validates a pattern template string and returns it as the branded type.
+ * Validates a template made of `X` (one digit) and `-` (group separator).
  *
- * A template expresses digit count (`X`) and visual grouping (`-`) only.
- * Identifier, subject, and check-digit positions are declared on the
- * `AccountPattern` object via the `*Position` fields.
- *
+ * @throws {TypeError} When the template is empty or has other characters.
  * @example
- * patternTemplate("XXX-XX-XXXXXX");  // 11 digits, 3-2-6 grouping
- * patternTemplate("XXXX-XX-XXXXXX"); // 12 digits, 4-2-6 grouping
+ * patternTemplate("XXX-XX-XXXXXX"); // 11 digits, grouped 3-2-6
  */
 export function patternTemplate(template: string): PatternTemplate {
   if (template.length === 0) {
-    throw new Error("Pattern template must be non-empty.");
+    throw new TypeError("korean-account: pattern template must be non-empty");
   }
-  for (const ch of template) {
-    if (!ALLOWED_CHARS.has(ch)) {
-      throw new Error(
-        `Invalid pattern template "${template}" — unexpected character "${ch}". Allowed: X, -.`,
-      );
-    }
+  if (!TEMPLATE_SYNTAX.test(template)) {
+    throw new TypeError(
+      `korean-account: invalid pattern template "${template}" (only "X" and "-" are allowed)`,
+    );
   }
   return template as PatternTemplate;
 }

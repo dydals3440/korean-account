@@ -16,26 +16,11 @@ import {
 
 export type { DetectionPayload } from "../contract";
 
-// Exports are annotated with yup's stable `Schema<T>` base — `ObjectSchema`'s
-// extra TContext/TDefault/TFlags generics are exactly the churny surface the
-// d.ts must not print. The adapter-compat CI greps dist/yup.d.ts for leaks.
-//
-// yup traps this file must not regress on (each has a contract-test case):
-// 1. yup CASTS by default — string().validateSync(123) returns "123". Every
-//    leaf bakes .strict(true) so consumers get contract behavior by default.
-// 2. yup is "optional unless required": oneOf() passes `undefined`. Every
-//    non-optional field carries .defined() (NOT .required() — that also
-//    rejects "" for strings, which only accountSchema wants).
-// 3. A nested object schema defaults to {} — a missing `subject` would be
-//    cast to {} and then fail on `code`. `.default(undefined)` restores
-//    "absent means absent" even in non-strict use.
+// `Schema<T>` annotations keep yup's churny generics out of the d.ts. Guarded yup traps:
+// casting (`.strict(true)`), oneOf accepting `undefined` (`.defined()`, not `.required()`),
+// and nested objects defaulting to `{}` (`.default(undefined)`).
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: Schema<string> = string()
   .strict(true)
   .required(MESSAGES.required)
@@ -52,25 +37,25 @@ export const accountSchema: Schema<string> = string()
     (value) => value === undefined || digitCount(value) <= ACCOUNT_MAX_DIGITS,
   );
 
-/** Schema accepting only registered institution ids. */
+/** Built-in institution id. */
 export const institutionIdSchema: Schema<InstitutionId> = string<InstitutionId>()
   .strict(true)
   .defined(MESSAGES.institution)
   .oneOf(INSTITUTION_IDS, MESSAGES.institution);
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: Schema<AccountKind> = string<AccountKind>()
   .strict(true)
   .defined(MESSAGES.accountKind)
   .oneOf(ACCOUNT_KINDS, MESSAGES.accountKind);
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: Schema<SubjectCategory> = string<SubjectCategory>()
   .strict(true)
   .defined(MESSAGES.subjectCategory)
   .oneOf(SUBJECT_CATEGORIES, MESSAGES.subjectCategory);
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: Schema<DetectionPayload> = object({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,

@@ -1,9 +1,7 @@
 import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
-// Uses bank code 081 in the CMS participant namespace — registered in the
-// bank section. A separate institution from 270 Hana Securities (securities
-// category).
+// CMS lists this CMA under bank code 081, separate from Hana Securities (270).
 
 export const hanaSecuritiesCma = defineInstitution({
   id: "hana-securities-cma",

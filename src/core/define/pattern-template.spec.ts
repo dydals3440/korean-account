@@ -29,8 +29,12 @@ describe("patternTemplate", () => {
       // Given
       const input = "";
 
-      // When / Then
-      expect(() => patternTemplate(input)).toThrow(/non-empty/);
+      // When
+      const create = () => patternTemplate(input);
+
+      // Then
+      expect(create).toThrow(TypeError);
+      expect(create).toThrow(/non-empty/);
     });
   });
 
@@ -52,8 +56,12 @@ describe("patternTemplate", () => {
       // Given
       const input = template;
 
-      // When / Then
-      expect(() => patternTemplate(input)).toThrow(/Invalid/);
+      // When
+      const create = () => patternTemplate(input);
+
+      // Then
+      expect(create).toThrow(TypeError);
+      expect(create).toThrow(/invalid pattern template/);
     });
   });
 

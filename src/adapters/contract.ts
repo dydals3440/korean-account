@@ -1,11 +1,7 @@
 import { INSTITUTION_IDS, type InstitutionId } from "../registry/institution-ids";
 import type { AccountKind, Confidence, SubjectCategory } from "../types";
 
-// Single source of truth for every validation adapter (zod / valibot / yup /
-// arktype / standard-schema). Adapters must read rules and messages from
-// here — never inline them — so the five schema families cannot drift.
-// Depends only on shared constants, the pure institution-id literals, and
-// types: importing an adapter never pulls the full registry.
+// Rules and messages shared by every adapter so the five schema families cannot drift.
 
 /** Charset accepted by `accountSchema` before normalization. */
 export const ACCOUNT_INPUT_REGEX = /^[\d\-\s]+$/;
@@ -26,19 +22,19 @@ export const MESSAGES = {
   finiteScore: "score 는 유한한 숫자여야 합니다.",
 } as const;
 
-/** Number of ASCII digits in the input (what the account rules count). */
+/** Number of ASCII digits in the input. */
 export function digitCount(value: string): number {
   return value.replace(/\D/g, "").length;
 }
 
 const ID_SET = new Set<string>(INSTITUTION_IDS);
 
-/** Type guard over the registered institution-id literals. */
+/** Whether the value is a built-in institution id. */
 export function isRegisteredInstitutionId(value: unknown): value is InstitutionId {
   return typeof value === "string" && ID_SET.has(value);
 }
 
-/** Serialized detection result — the output type of every `detectionSchema`. */
+/** Serializable detection result validated by every `detectionSchema`. */
 export interface DetectionPayload {
   readonly institutionId: InstitutionId;
   readonly kind: AccountKind;
@@ -59,7 +55,7 @@ export interface DetectionPayload {
   };
 }
 
-/** Internal finite-number guard shared by detection payload schemas. */
+/** Whether the value is a finite number. */
 export function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }

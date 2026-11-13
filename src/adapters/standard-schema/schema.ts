@@ -17,10 +17,8 @@ import type { StandardSchemaV1 } from "./spec";
 export type { DetectionPayload } from "../contract";
 export type { StandardSchemaV1 } from "./spec";
 
-// The dependency-free adapter: implements the Standard Schema interface by
-// hand, so anything that consumes StandardSchemaV1 (TanStack Form, tRPC v11,
-// Hono, @hookform/resolvers' standardSchemaResolver, ...) works without zod,
-// valibot, yup, or arktype installed. Every validate is synchronous.
+// Hand-written Standard Schema v1 implementation: works with any consumer of the spec
+// (TanStack Form, tRPC, Hono, standardSchemaResolver) without a validator library.
 
 const VENDOR = "korean-account";
 
@@ -45,12 +43,7 @@ function picklist<T extends string>(options: readonly T[], message: string): Sta
   );
 }
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: StandardSchemaV1<string> = createStandardSchema((value) => {
   if (typeof value !== "string" || value.length === 0) return fail(MESSAGES.required);
   if (value.length > ACCOUNT_MAX_INPUT_LENGTH) return fail(MESSAGES.tooLong);
@@ -61,18 +54,18 @@ export const accountSchema: StandardSchemaV1<string> = createStandardSchema((val
   return ok(value);
 });
 
-/** Schema accepting only registered institution ids. */
+/** Built-in institution id. */
 export const institutionIdSchema: StandardSchemaV1<InstitutionId> = createStandardSchema((value) =>
   isRegisteredInstitutionId(value) ? ok(value) : fail(MESSAGES.institution),
 );
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: StandardSchemaV1<AccountKind> = picklist(
   ACCOUNT_KINDS,
   MESSAGES.accountKind,
 );
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: StandardSchemaV1<SubjectCategory> = picklist(
   SUBJECT_CATEGORIES,
   MESSAGES.subjectCategory,
@@ -86,7 +79,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: StandardSchemaV1<DetectionPayload> = createStandardSchema((value) => {
   if (!isRecord(value)) return fail("detection payload 형식이 아닙니다.");
   const issues: StandardSchemaV1.Issue[] = [];

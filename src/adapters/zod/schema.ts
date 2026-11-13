@@ -17,17 +17,9 @@ import {
 
 export type { DetectionPayload } from "../contract";
 
-// Every export is annotated `ZodType<T>`. Without it, the generated d.ts
-// hardcodes zod v3-only types such as `z.ZodEffects`, and v4 consumers under
-// `skipLibCheck: true` silently lose the schema types. The zod CI matrix
-// compiles both majors.
+// `ZodType<T>` annotations keep zod-major-specific types such as `ZodEffects` out of the d.ts.
 
-/**
- * Schema for a raw Korean account-number string.
- *
- * - digits, hyphens, and spaces only
- * - 6–20 digits after normalization
- */
+/** Account number input: digits, spaces and hyphens holding 6–20 digits. Outputs the input unchanged. */
 export const accountSchema: ZodType<string> = z
   .string()
   .min(1, MESSAGES.required)
@@ -36,25 +28,19 @@ export const accountSchema: ZodType<string> = z
   .refine((v) => digitCount(v) >= ACCOUNT_MIN_DIGITS, { message: MESSAGES.minDigits })
   .refine((v) => digitCount(v) <= ACCOUNT_MAX_DIGITS, { message: MESSAGES.maxDigits });
 
-/**
- * Schema accepting only registered institution ids.
- *
- * Uses `z.custom`: v3's `.refine((v): v is InstitutionId => …)` narrows the
- * output via the type predicate but v4's `.refine` does not, so the same code
- * would produce different types across majors.
- */
+/** Built-in institution id. `z.custom` keeps the output type identical on zod v3 and v4. */
 export const institutionIdSchema: ZodType<InstitutionId> = z.custom<InstitutionId>(
   isRegisteredInstitutionId,
   { message: MESSAGES.institution },
 );
 
-/** Account kind schema. */
+/** `AccountKind` literal. */
 export const accountKindSchema: ZodType<AccountKind> = z.enum(ACCOUNT_KINDS);
 
-/** Subject category schema. */
+/** `SubjectCategory` literal. */
 export const subjectCategorySchema: ZodType<SubjectCategory> = z.enum(SUBJECT_CATEGORIES);
 
-/** Serialized detection result schema. */
+/** Serialized detection result (`DetectionPayload`). */
 export const detectionSchema: ZodType<DetectionPayload> = z.object({
   institutionId: institutionIdSchema,
   kind: accountKindSchema,
