@@ -25,7 +25,7 @@ function lengthBonus(len: number): number {
 
 describe("scoreInstitution", () => {
   describe("빈 입력 / 빈 패턴", () => {
-    test("빈 digits면 0점과 디지트 그대로 formatted를 반환한다", () => {
+    test("빈 digits면 0점과 매칭 없음을 반환한다", () => {
       // Given
       const institution = makeInstitution([
         { template: patternTemplate("XXX-XXX-XXXXXX"), kind: "old" },
@@ -37,7 +37,7 @@ describe("scoreInstitution", () => {
       // Then
       expect(result.score).toBe(0);
       expect(result.matchedPattern).toBeNull();
-      expect(result.formatted).toBe("");
+      expect(result.hasEvidence).toBe(false);
     });
 
     test("institution.patterns 가 비어 있으면 0점", () => {
