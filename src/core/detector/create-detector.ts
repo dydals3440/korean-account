@@ -20,7 +20,7 @@ import {
 } from "./capabilities";
 import { scoreToConfidence } from "./confidence";
 import { createLengthIndex } from "./length-index";
-import { normalizeSubject } from "./normalize-subject";
+import { resolveSubject } from "./normalize-subject";
 import { type BandMember, type RankableDetection, rankDetections } from "./rank";
 import { mergeScoring, resolveLimit, resolveMinScore, resolveWeights } from "./resolve-options";
 import { scoreInstitution } from "./score";
@@ -100,32 +100,32 @@ function buildDetector<TInstitution extends Institution>(
         continue;
       }
 
-      const services = resolveServices(match.matchedPattern, match.subject);
-      const subject = match.subject
-        ? normalizeSubject(match.subject, branch.kind, services)
-        : undefined;
-      const validatedCheckDigit = verifyCheckDigit(
-        digits,
-        match.matchedPattern,
-        branch.institution.id,
-        config.verifiers,
-      );
+      const capabilities = resolveCapabilities({
+        kind: branch.kind,
+        subject: match.subject,
+        services: resolveServices(match.matchedPattern, match.subject),
+        virtualOverride: branch.virtualOverride,
+        validatedCheckDigit: verifyCheckDigit(
+          digits,
+          match.matchedPattern,
+          branch.institution.id,
+          config.verifiers,
+        ),
+      });
+      const subject =
+        match.subject === null
+          ? null
+          : resolveSubject(match.subject, capabilities.allowsWithdrawal);
 
       candidates.push({
         institution: branch.institution,
         matchedPattern: match.matchedPattern,
         kind: branch.kind,
-        ...(subject && { subject }),
+        ...(subject !== null && { subject }),
         formatted: match.formatted,
         score,
         confidence,
-        capabilities: resolveCapabilities({
-          kind: branch.kind,
-          subject,
-          services,
-          virtualOverride: branch.virtualOverride,
-          validatedCheckDigit,
-        }),
+        capabilities,
       });
     }
 

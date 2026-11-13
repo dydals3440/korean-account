@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { institutions } from "../../registry";
-import type { Subject } from "../../types";
+import type { AccountPattern, Subject } from "../../types";
+import { cmsServices } from "../define/cms-services";
 import { defineInstitution } from "../define/define-institution";
 import { patternTemplate } from "../define/pattern-template";
 import { createDetector } from "./create-detector";
@@ -243,5 +244,75 @@ describe("extend 의 scoring 병합", () => {
     expect(extended.detect("110-436-387740")[0]?.score).toBe(
       base.detect("110-436-387740")[0]?.score,
     );
+  });
+});
+
+describe("과목과 capabilities 의 출금 가능 여부는 항상 같다", () => {
+  const ordinary = { code: "01", category: "ordinary" } as const;
+  const build = (pattern: Omit<AccountPattern, "template" | "subjectPosition">) =>
+    createDetector([
+      defineInstitution({
+        id: "custom",
+        code: "906",
+        nameKo: "커스텀",
+        category: "bank",
+        aliases: [],
+        patterns: [
+          {
+            template: patternTemplate("XX-XXXXXX"),
+            subjectPosition: { start: 0, length: 2 },
+            ...pattern,
+          },
+        ],
+      }),
+    ]);
+
+  test.each([
+    [
+      "서비스 열 없는 평생계좌의 과목 true 는 계좌 종류 규칙에 막힌다",
+      build({ kind: "lifetime", subjects: [{ ...ordinary, allowsWithdrawal: true }] }),
+      false,
+    ],
+    [
+      "서비스 열 없는 입금전용의 과목 서비스 예외도 계좌 종류 규칙에 막힌다",
+      build({
+        kind: "incoming-only",
+        subjects: [{ ...ordinary, services: { directDebit: true } }],
+      }),
+      false,
+    ],
+    [
+      "분기 규칙의 가상계좌 지정은 과목 값에도 반영된다",
+      build({
+        kind: "new",
+        subjects: [ordinary],
+        branchRule: { describe: "virtual", evaluate: () => ({ virtualOverride: true }) },
+      }),
+      false,
+    ],
+    [
+      "서비스 열이 있으면 과목 값이 출금이체 열보다 우선한다",
+      build({
+        kind: "new",
+        services: cmsServices("directDebit"),
+        subjects: [{ ...ordinary, allowsWithdrawal: false }],
+      }),
+      false,
+    ],
+    [
+      "서비스 열의 출금이체를 과목이 그대로 따른다",
+      build({ kind: "virtual", services: cmsServices("directDebit"), subjects: [ordinary] }),
+      true,
+    ],
+  ])("%s", (_, detector, expected) => {
+    // Given
+    const input = "01-234567";
+
+    // When
+    const [top] = detector.detect(input);
+
+    // Then
+    expect(top?.subject?.allowsWithdrawal).toBe(expected);
+    expect(top?.capabilities.allowsWithdrawal).toBe(expected);
   });
 });

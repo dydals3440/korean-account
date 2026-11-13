@@ -1,4 +1,4 @@
-import type { AccountKind, CmsServices, Subject } from "../../types";
+import type { AccountKind, Subject } from "../../types";
 import { subjectCategoryLabels } from "../labels";
 
 const NON_DEBITABLE_KINDS: ReadonlySet<AccountKind> = new Set([
@@ -19,24 +19,21 @@ export type NormalizedSubject = Subject & {
 };
 
 /**
- * Fills a subject's defaults. Withdrawal comes from the subject, then the pattern's PDF
- * `services`, then the kind when the pattern declares no services.
+ * Fills a subject's label and virtual defaults; withdrawal follows the kind unless the subject
+ * sets it. Detection resolves withdrawal with the pattern's services instead (`resolveSubject`).
  *
  * @example
  * normalizeSubject({ code: "01", category: "ordinary" }, "new");
  * // { code: "01", category: "ordinary", allowsWithdrawal: true, virtual: false, label: "보통예금" }
  */
-export function normalizeSubject(
-  subject: Subject,
-  kind: AccountKind,
-  patternServices?: CmsServices | null,
-): NormalizedSubject {
+export function normalizeSubject(subject: Subject, kind: AccountKind): NormalizedSubject {
   const virtual = subject.virtual ?? false;
-  const allowsWithdrawal =
-    subject.allowsWithdrawal ??
-    subject.services?.directDebit ??
-    patternServices?.directDebit ??
-    (!virtual && isDebitableKind(kind));
+  return resolveSubject(subject, subject.allowsWithdrawal ?? (!virtual && isDebitableKind(kind)));
+}
+
+/** Fills a subject's label and virtual defaults with an already resolved withdrawal value. */
+export function resolveSubject(subject: Subject, allowsWithdrawal: boolean): NormalizedSubject {
+  const virtual = subject.virtual ?? false;
   const label = subject.label ?? subjectCategoryLabels[subject.category];
   return { ...subject, allowsWithdrawal, virtual, label };
 }

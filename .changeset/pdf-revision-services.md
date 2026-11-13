@@ -6,5 +6,6 @@
 
 - `capabilities.services`: 패턴의 PDF 서비스 4열(가상계좌 가능여부·출금이체·입금이체·부가서비스)을 돌려줍니다. 과목별 괄호 예외도 반영합니다.
 - `capabilities.allowsWithdrawal`은 과목의 입금전용 각주와 PDF 출금이체 열을 따릅니다. 농협·지역농협 가상계좌, 국민 9로 시작하는 11자리·연계 90, 우체국 14자리 기타 코드가 `true`로 바뀝니다.
+- `subject.allowsWithdrawal`과 `capabilities.allowsWithdrawal`은 한 번 계산한 같은 값입니다. 서비스 열이 없는 커스텀 패턴에서는 0.4.x처럼 가상·평생·입금전용 계좌를 출금 불가로 봅니다.
 - `cmsServices()` 헬퍼와 `AccountPattern.services`·`Subject.services`로 커스텀 기관도 서비스 열을 선언할 수 있습니다.
 - 데이터 정정: 국민 과목 26(연계)·11자리 분리, 씨티 10자리(구 씨티), 아이엠 14자리 입금전용 과목, 우체국 12자리(신계좌)·14자리 기타 코드, 미래에셋 230 계좌, 하나 610 적용일, 우리 18·92·경남·광주·하나 CMA 분류, 누락된 적용일을 바로잡았습니다. 자세한 근거는 `docs/source-audit.md`에 있습니다.
