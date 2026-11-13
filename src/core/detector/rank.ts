@@ -1,14 +1,42 @@
-import type { AccountKind, Confidence, DetectionResult, Institution } from "../../types";
+import type {
+  AccountKind,
+  AccountPattern,
+  Confidence,
+  DetectionCapabilities,
+  DetectionResult,
+  Institution,
+  ResolvedSubject,
+} from "../../types";
 import { CONFIDENCE_RANK } from "./confidence";
-import { prevalence } from "./prevalence";
 
-/** A scored candidate before ranking decides whether it is ambiguous. */
-export type RankableDetection<TInstitution extends Institution> = Omit<
-  DetectionResult<TInstitution>,
-  "ambiguous"
->;
+/**
+ * A scored candidate with the ranking facts that stay out of the public result. One fixed shape
+ * (`subject` is `null` when absent) keeps the per-candidate objects on V8's fast path.
+ */
+export interface RankableCandidate<TInstitution extends Institution> {
+  readonly institution: TInstitution;
+  readonly matchedPattern: AccountPattern;
+  readonly kind: AccountKind;
+  readonly subject: ResolvedSubject | null;
+  readonly formatted: string;
+  readonly score: number;
+  readonly confidence: Confidence;
+  readonly capabilities: DetectionCapabilities;
+  /** Primary sort key from {@link rankKey}: confidence band, then evidence. */
+  readonly rankKey: number;
+  /** `prevalence(institution)`, computed once instead of per comparison. */
+  readonly prior: number;
+  /** The matched pattern belongs to `institution` rather than being rerouted to it. */
+  readonly isOwnPattern: boolean;
+}
 
-type ComparableDetection = Pick<DetectionResult, "confidence" | "score" | "institution" | "kind">;
+/**
+ * Combines band and evidence into one number: a higher band always wins, and within a band a
+ * match backed by an identifier, subject code or branch condition beats one backed by length.
+ */
+export function rankKey(confidence: Confidence, hasEvidence: boolean): number {
+  return CONFIDENCE_RANK[confidence] * 2 + (hasEvidence ? 1 : 0);
+}
 
 /** Institution and band of every match, before option filters; decides `ambiguous`. */
 export type BandMember = Pick<DetectionResult, "confidence" | "institution">;
@@ -24,44 +52,84 @@ const KIND_RANK: Readonly<Record<AccountKind, number>> = {
 };
 
 /**
- * Orders by confidence band, then score, prevalence prior and kind rank (all descending).
- * The band comes first so an unevidenced `low` match never outranks an evidenced one.
+ * Orders by confidence band, then evidence, score, prevalence prior, kind rank and finally the
+ * institution's own pattern over a rerouted one (all descending). Band and evidence come first
+ * so a match backed only by length never outranks one backed by its digits.
  */
-export function compareDetections(a: ComparableDetection, b: ComparableDetection): number {
+function compareCandidates<TInstitution extends Institution>(
+  a: RankableCandidate<TInstitution>,
+  b: RankableCandidate<TInstitution>,
+): number {
   return (
-    CONFIDENCE_RANK[b.confidence] - CONFIDENCE_RANK[a.confidence] ||
+    b.rankKey - a.rankKey ||
     b.score - a.score ||
-    prevalence(b.institution) - prevalence(a.institution) ||
-    KIND_RANK[b.kind] - KIND_RANK[a.kind]
+    b.prior - a.prior ||
+    KIND_RANK[b.kind] - KIND_RANK[a.kind] ||
+    Number(b.isOwnPattern) - Number(a.isOwnPattern)
   );
 }
 
+/** The public result without the ranking fields; `subject` is omitted rather than `null`. */
+function toDetectionResult<TInstitution extends Institution>(
+  candidate: RankableCandidate<TInstitution>,
+  ambiguous: boolean,
+): DetectionResult<TInstitution> {
+  const {
+    subject,
+    rankKey: _rankKey,
+    prior: _prior,
+    isOwnPattern: _isOwnPattern,
+    ...result
+  } = candidate;
+  return subject === null ? { ...result, ambiguous } : { ...result, subject, ambiguous };
+}
+
 /**
- * Sorts candidates, drops low-confidence ones when the top result is high or medium, and marks
- * candidates whose band holds another institution among `bandMembers`.
+ * Sorts candidates, keeps the best one per institution, drops low-confidence ones when the top
+ * result is high or medium, cuts to `limit`, and marks a result ambiguous when another
+ * institution's strongest band among `bandMembers` equals the result's band.
  */
 export function rankDetections<TInstitution extends Institution>(
-  candidates: readonly RankableDetection<TInstitution>[],
+  candidates: readonly RankableCandidate<TInstitution>[],
   bandMembers: readonly BandMember[],
+  limit: number,
 ): readonly DetectionResult<TInstitution>[] {
   // Sorts a copy instead of `toSorted` to keep pre-ES2023 runtimes supported.
   // oxlint-disable-next-line unicorn/no-array-sort
-  const sorted = [...candidates].sort(compareDetections);
-  const topConfidence = sorted[0]?.confidence;
+  const sorted = [...candidates].sort(compareCandidates);
+  const seenIds = new Set<string>();
+  const unique = sorted.filter((candidate) => {
+    const isFirst = !seenIds.has(candidate.institution.id);
+    seenIds.add(candidate.institution.id);
+    return isFirst;
+  });
+
+  const topConfidence = unique[0]?.confidence;
   const isTopReliable = topConfidence === "high" || topConfidence === "medium";
   const kept = isTopReliable
-    ? sorted.filter((candidate) => candidate.confidence !== "low")
-    : sorted;
+    ? unique.filter((candidate) => candidate.confidence !== "low")
+    : unique;
 
-  const institutionIdsByConfidence = new Map<Confidence, Set<string>>();
-  for (const member of bandMembers) {
-    const ids = institutionIdsByConfidence.get(member.confidence) ?? new Set<string>();
-    ids.add(member.institution.id);
-    institutionIdsByConfidence.set(member.confidence, ids);
+  const bestBandById = new Map<string, number>();
+  for (const { institution, confidence } of bandMembers) {
+    const band = CONFIDENCE_RANK[confidence];
+    bestBandById.set(institution.id, Math.max(band, bestBandById.get(institution.id) ?? band));
   }
+  const hasRivalInBand = (institutionId: string, band: number): boolean => {
+    for (const [id, bestBand] of bestBandById) {
+      if (bestBand === band && id !== institutionId) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-  return kept.map((candidate) => ({
-    ...candidate,
-    ambiguous: (institutionIdsByConfidence.get(candidate.confidence)?.size ?? 0) > 1,
-  }));
+  return kept
+    .slice(0, limit)
+    .map((candidate) =>
+      toDetectionResult(
+        candidate,
+        hasRivalInBand(candidate.institution.id, CONFIDENCE_RANK[candidate.confidence]),
+      ),
+    );
 }

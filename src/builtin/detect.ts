@@ -11,8 +11,9 @@ const builtinDetector = createDetector(institutions);
  * Input goes through {@link normalizeAccount}, so hyphens, spaces and full-width digits are
  * accepted as typed or pasted. An institution is scored only when one of its patterns is within
  * one digit of the input length, so candidates appear once the number is nearly complete.
- * Candidates are ordered by confidence band, then score, then the {@link prevalence} prior, then
- * account kind, so an unevidenced `"low"` match never outranks an evidenced one.
+ * Candidates are ordered by confidence band, then evidence, score, the {@link prevalence} prior
+ * and account kind, so a match backed only by length never outranks one backed by its digits.
+ * Each institution appears at most once, even when a branch rule reroutes several readings to it.
  *
  * Results are hints, not proof that an account exists. `confidence` is `"high"` at score ≥ 7,
  * `"medium"` at ≥ 4 and `"low"` otherwise, and always `"low"` when no identifier, subject code

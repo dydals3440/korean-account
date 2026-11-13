@@ -21,7 +21,7 @@
     "name": "scoped detector ({ createDetector, kb, shinhan, toss })",
     "path": "dist/index.js",
     "import": "{ createDetector, kb, shinhan, toss }",
-    "limit": "4.5 KB"
+    "limit": "4.75 kB"
   },
   {
     "name": "korean-account/zod (without the registry)",
