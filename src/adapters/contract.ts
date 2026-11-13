@@ -42,11 +42,13 @@ export function isRegisteredInstitutionId(value: unknown): value is InstitutionI
 export interface DetectionPayload {
   readonly institutionId: InstitutionId;
   readonly kind: AccountKind;
-  readonly subject?: {
-    readonly code: string;
-    readonly category: SubjectCategory;
-    readonly label?: string;
-  };
+  readonly subject?:
+    | {
+        readonly code: string;
+        readonly category: SubjectCategory;
+        readonly label?: string | undefined;
+      }
+    | undefined;
   readonly score: number;
   readonly confidence: Confidence;
   readonly formatted: string;

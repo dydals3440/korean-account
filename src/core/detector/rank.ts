@@ -24,6 +24,8 @@ export function compareDetections(a: DetectionResult, b: DetectionResult): numbe
 export function rankDetections<TInstitution extends Institution>(
   results: readonly DetectionResult<TInstitution>[],
 ): readonly DetectionResult<TInstitution>[] {
+  // Sorts a copy instead of `toSorted` to keep pre-ES2023 runtimes supported.
+  // oxlint-disable-next-line unicorn/no-array-sort
   const sorted = [...results].sort(compareDetections);
   const topConfidence = sorted[0]?.confidence;
   if (topConfidence === "high" || topConfidence === "medium") {

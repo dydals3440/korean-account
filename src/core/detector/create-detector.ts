@@ -101,7 +101,7 @@ function buildDetector<TInstitution extends Institution>(
         institution: branch.institution,
         matchedPattern: match.matchedPattern,
         kind: branch.kind,
-        subject,
+        ...(subject && { subject }),
         formatted: match.formatted,
         score,
         confidence: scoreToConfidence(score),

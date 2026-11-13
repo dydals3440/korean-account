@@ -14,9 +14,8 @@ import {
   MESSAGES,
 } from "../contract";
 
-// ArkType is ESM-only. CJS declarations must resolve its types as imports,
-// including consumers using TypeScript's frozen Node16 module model.
-// The inline query preserves resolution-mode in tsdown's TS7 declarations.
+// ArkType is ESM-only; the inline import keeps `resolution-mode` in emitted CJS declarations.
+// oxlint-disable-next-line typescript/consistent-type-imports
 type Type<T> = import("arktype", { with: { "resolution-mode": "import" } }).Type<T>;
 
 export type { DetectionPayload } from "../contract";
