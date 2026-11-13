@@ -20,6 +20,7 @@ import {
   isNonNegativeFiniteNumber,
   MESSAGES,
   resolveMessages,
+  stripUnknownKeys,
 } from "../contract";
 
 // ArkType is ESM-only; the inline import keeps `resolution-mode` in emitted CJS declarations.
@@ -104,7 +105,9 @@ export function createDetectionSchema<const TId extends string>(
       }).or("null"),
     },
   });
-  return schema as unknown as Type<DetectionPayloadOf<TId>>;
+  // The copy drops keys outside DetectionPayload and explicit `undefined`s, matching zod and
+  // valibot, before the shape is checked.
+  return type("unknown").pipe(stripUnknownKeys, schema) as unknown as Type<DetectionPayloadOf<TId>>;
 }
 
 /** One of the given string literals. */

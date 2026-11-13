@@ -20,6 +20,7 @@ import {
   isNonNegativeFiniteNumber,
   MESSAGES,
   resolveMessages,
+  stripUnknownKeys,
 } from "../contract";
 
 export type {
@@ -60,8 +61,7 @@ export function createInstitutionIdSchema<const TId extends string>(
   ids: readonly TId[],
   options: InstitutionIdSchemaOptions = {},
 ): Schema<TId> {
-  const message = options.message ?? MESSAGES.institution;
-  return string<TId>().strict(true).defined(message).oneOf(ids, message);
+  return literalSchema(ids, options.message ?? MESSAGES.institution);
 }
 
 /** Serialized detection result for the given institution ids. */
@@ -106,7 +106,10 @@ export function createDetectionSchema<const TId extends string>(
       validatedCheckDigit: boolean().strict(true).defined().nullable(),
       services,
     }).defined(),
-  }).defined();
+  })
+    .defined()
+    // Strips keys outside DetectionPayload like zod and valibot; skipped under `strict: true`.
+    .transform(stripUnknownKeys);
   return schema as unknown as Schema<DetectionPayloadOf<TId>>;
 }
 
@@ -115,7 +118,11 @@ function literalSchema<TLiteral extends string>(
   literals: readonly TLiteral[],
   message: string,
 ): Schema<TLiteral> {
-  return mixed<TLiteral>().strict(true).defined(message).oneOf(literals, message);
+  return mixed<TLiteral>()
+    .strict(true)
+    .defined(message)
+    .oneOf(literals, message)
+    .nonNullable(message);
 }
 
 /** Account number input with the default Korean messages. */

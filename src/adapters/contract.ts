@@ -108,6 +108,57 @@ export function createLiteralGuard<const TLiteral extends string>(
   return (value): value is TLiteral => typeof value === "string" && allowed.has(value);
 }
 
+/** Whether the value is a non-null object whose keys can be read. */
+export function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === "object" && value !== null;
+}
+
+const PAYLOAD_KEYS = [
+  "institutionId",
+  "kind",
+  "subject",
+  "score",
+  "confidence",
+  "ambiguous",
+  "formatted",
+  "capabilities",
+];
+const SUBJECT_KEYS = ["code", "category", "label"];
+const CAPABILITY_KEYS = ["allowsWithdrawal", "virtual", "validatedCheckDigit", "services"];
+const SERVICE_KEYS = ["virtualAccount", "directDebit", "directCredit", "additionalServices"];
+
+function pickKeys(
+  record: Readonly<Record<string, unknown>>,
+  keys: readonly string[],
+): Record<string, unknown> {
+  return Object.fromEntries(
+    keys.filter((key) => record[key] !== undefined).map((key) => [key, record[key]]),
+  );
+}
+
+/**
+ * Copies a payload-shaped value keeping only `DetectionPayload` keys, at every level, so keys a
+ * client adds never reach the validated output. Keys set to `undefined` are dropped too, since
+ * the payload treats them as omitted. Anything else is returned as is for the schema to reject.
+ */
+export function stripUnknownKeys(value: unknown): unknown {
+  if (!isRecord(value)) {
+    return value;
+  }
+  const payload = pickKeys(value, PAYLOAD_KEYS);
+  if (isRecord(payload.subject)) {
+    payload.subject = pickKeys(payload.subject, SUBJECT_KEYS);
+  }
+  if (isRecord(payload.capabilities)) {
+    const capabilities = pickKeys(payload.capabilities, CAPABILITY_KEYS);
+    if (isRecord(capabilities.services)) {
+      capabilities.services = pickKeys(capabilities.services, SERVICE_KEYS);
+    }
+    payload.capabilities = capabilities;
+  }
+  return payload;
+}
+
 /** Whether the value is a finite number ≥ 0. */
 export function isNonNegativeFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && 0 <= value;

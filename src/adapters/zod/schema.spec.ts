@@ -23,6 +23,7 @@ describeAdapterContract<ZodType<unknown>>("zod", {
   createAccountSchema,
   createInstitutionIdSchema,
   createDetectionSchema,
+  output: (schema, value) => schema.parse(value),
   firstIssue: (schema, value) => {
     const result = schema.safeParse(value);
     return result.success ? null : (result.error.issues[0]?.message ?? "");

@@ -35,6 +35,10 @@ describeAdapterContract<StandardSchemaV1<unknown, unknown>>("standard-schema", {
   createAccountSchema,
   createInstitutionIdSchema,
   createDetectionSchema,
+  output: (schema, value) => {
+    const result = validateSync(schema, value);
+    return result.issues === undefined ? result.value : null;
+  },
   firstIssue: (schema, value) => {
     const result = validateSync(schema, value);
     return result.issues === undefined ? null : (result.issues[0]?.message ?? "");

@@ -13,4 +13,6 @@
 - 문자열이 아닌 입력(`null`, 숫자 등)은 다섯 어댑터 모두 `required` 메시지로 거부합니다.
 - arktype 어댑터를 객체 스키마 안에 넣어도 메시지 앞에 필드 경로가 붙지 않습니다.
 - zod `accountSchema`는 `ZodString`이라 zod 3·4 모두에서 `z.input`·`z.infer`가 `string`입니다. 각 어댑터의 추론 타입은 peer 하한 버전에서도 소비자 검사로 확인합니다.
-- yup·arktype 어댑터의 크기 예산을 1.25 kB에서 1.5 kB로 맞췄습니다(실측 1.42 kB·1.44 kB).
+- `detectionSchema`는 다섯 어댑터 모두 `DetectionPayload` 밖의 키를 모든 단계에서 지우고(zod·valibot 기본 동작과 같음), 선택 필드에 명시한 `undefined`를 받습니다. yup은 `strict: true`로 검증하면 변환 단계를 건너뛰므로 키가 남습니다.
+- yup `institutionIdSchema`와 리터럴 스키마가 숫자·`null`에도 라이브러리 메시지를 냅니다.
+- 크기 예산: yup·arktype 1.75 kB, standard-schema 2 kB(실측 1.67·1.69·1.91 kB). 키 정리 함수가 늘어난 몫입니다.

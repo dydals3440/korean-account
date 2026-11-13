@@ -23,6 +23,7 @@ describeAdapterContract<v.GenericSchema<unknown>>("valibot", {
   createAccountSchema,
   createInstitutionIdSchema,
   createDetectionSchema,
+  output: (schema, value) => v.parse(schema, value),
   firstIssue: (schema, value) => {
     const result = v.safeParse(schema, value);
     return result.success ? null : (result.issues[0]?.message ?? "");

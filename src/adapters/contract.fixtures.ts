@@ -90,6 +90,9 @@ export const ADAPTER_CONTRACT = {
         capabilities: { allowsWithdrawal: true, virtual: false, validatedCheckDigit: false },
       },
       { ...baseDetection, ambiguous: true },
+      { ...baseDetection, ambiguous: undefined, subject: undefined },
+      { ...baseDetection, subject: { code: "01", category: "ordinary", label: undefined } },
+      { ...baseDetection, capabilities: { ...baseDetection.capabilities, services: undefined } },
       { ...baseDetection, ambiguous: false },
       { ...baseDetection, capabilities: { ...baseDetection.capabilities, services: null } },
       { ...baseDetection, capabilities: { ...baseDetection.capabilities, services: ALL_SERVICES } },
@@ -152,6 +155,8 @@ export interface AdapterHarness<TSchema> {
   ) => TSchema;
   /** First issue message, or `null` when the value passes. */
   readonly firstIssue: (schema: TSchema, value: unknown) => string | null;
+  /** The validated output for a value that passes. */
+  readonly output: (schema: TSchema, value: unknown) => unknown;
 }
 
 const CUSTOM_IDS = ["my-bank", "my-coop"];
@@ -278,6 +283,48 @@ export function describeAdapterContract<TSchema>(
 
       // Then
       expect(issue).toBe("Score must be a finite number.");
+    });
+
+    test.each([
+      ["institutionId", 123, MESSAGES.institution],
+      ["institutionId", null, MESSAGES.institution],
+      ["accountKind", 123, MESSAGES.accountKind],
+      ["accountKind", null, MESSAGES.accountKind],
+      ["subjectCategory", 123, MESSAGES.subjectCategory],
+      ["subjectCategory", null, MESSAGES.subjectCategory],
+    ] as const)("%s 는 %j 에 라이브러리 기본 문구 대신 %s 를 낸다", (name, value, message) => {
+      // Given
+      const schema = schemas[name];
+
+      // When
+      const issue = firstIssue(schema, value);
+
+      // Then
+      expect(issue).toBe(message);
+    });
+
+    test("detectionSchema 는 모든 단계에서 DetectionPayload 밖의 키를 지운다", () => {
+      // Given
+      const input = {
+        ...baseDetection,
+        isAdmin: true,
+        subject: { code: "01", category: "ordinary", extra: 1 },
+        capabilities: {
+          ...baseDetection.capabilities,
+          extra: 1,
+          services: { ...ALL_SERVICES, extra: 1 },
+        },
+      };
+
+      // When
+      const result = harness.output(schemas.detection, input);
+
+      // Then
+      expect(result).toEqual({
+        ...baseDetection,
+        subject: { code: "01", category: "ordinary" },
+        capabilities: { ...baseDetection.capabilities, services: ALL_SERVICES },
+      });
     });
 
     test("createInstitutionIdSchema 는 넘긴 ID 만 받는다", () => {

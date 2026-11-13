@@ -24,6 +24,7 @@ describeAdapterContract<Schema<unknown>>("yup", {
   createAccountSchema,
   createInstitutionIdSchema,
   createDetectionSchema,
+  output: (schema, value) => schema.validateSync(value),
   firstIssue: (schema, value) => {
     try {
       schema.validateSync(value, { strict: true });

@@ -17,8 +17,10 @@ import {
   digitCount,
   type InstitutionIdSchemaOptions,
   isNonNegativeFiniteNumber,
+  isRecord,
   MESSAGES,
   resolveMessages,
+  stripUnknownKeys,
 } from "../contract";
 import type { StandardSchemaV1 } from "./spec";
 
@@ -58,10 +60,6 @@ function createStandardSchema<T>(
 
 function fromGuard<T>(isValid: Guard<T>, message: string): StandardSchemaV1<T> {
   return createStandardSchema((value) => (isValid(value) ? ok(value) : fail(message)));
-}
-
-function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
-  return typeof value === "object" && value !== null;
 }
 
 function isString(value: unknown): value is string {
@@ -189,7 +187,8 @@ export function createDetectionSchema<const TId extends string>(
 
   return createStandardSchema((value) => {
     const issues: Issues = [];
-    return isDetectionPayload(value, issues) ? ok(value) : { issues };
+    const payload = stripUnknownKeys(value);
+    return isDetectionPayload(payload, issues) ? ok(payload) : { issues };
   });
 }
 

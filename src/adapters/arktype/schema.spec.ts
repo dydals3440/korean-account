@@ -25,6 +25,7 @@ describeAdapterContract<(value: unknown) => unknown>("arktype", {
   createAccountSchema,
   createInstitutionIdSchema,
   createDetectionSchema,
+  output: (schema, value) => schema(value),
   firstIssue: (schema, value) => {
     const result = schema(value);
     return result instanceof type.errors ? (result[0]?.message ?? "") : null;
