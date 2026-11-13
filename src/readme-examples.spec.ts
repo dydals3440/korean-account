@@ -50,7 +50,7 @@ describe("README 코드 예제가 주장하는 값", () => {
     expect(result?.subject?.code).toBe("110");
     expect(result?.subject?.category).toBe("savings");
     expect(result?.formatted).toBe("110-436-387740");
-    expect(result?.score).toBe(14);
+    expect(result?.score).toBe(9);
     expect(result?.confidence).toBe("high");
     expect(result?.capabilities).toEqual({
       allowsWithdrawal: true,

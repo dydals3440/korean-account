@@ -2,13 +2,13 @@ import type { AccountKind, Institution, InstitutionCategory } from "../../types"
 
 /** Criteria for {@link filterInstitutions}. All given criteria must match; `exclude` wins over `include`. */
 export interface InstitutionFilter {
-  readonly categories?: readonly InstitutionCategory[];
+  readonly categories?: readonly InstitutionCategory[] | undefined;
   /** Keeps institutions with at least one pattern of these kinds. */
-  readonly kinds?: readonly AccountKind[];
+  readonly kinds?: readonly AccountKind[] | undefined;
   /** Keeps institutions that declare subject codes on at least one pattern. */
-  readonly hasSubject?: boolean;
-  readonly include?: readonly string[];
-  readonly exclude?: readonly string[];
+  readonly hasSubject?: boolean | undefined;
+  readonly include?: readonly string[] | undefined;
+  readonly exclude?: readonly string[] | undefined;
 }
 
 /** Returns the institutions matching every given criterion, in input order. */

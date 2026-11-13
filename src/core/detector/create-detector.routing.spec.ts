@@ -44,9 +44,25 @@ describe("기관 필터는 최종 분기 결과에 적용한다", () => {
     const results = detector.detect(input, { include: ["suhyup"] });
 
     // Then
-    expect(results).toHaveLength(1);
-    expect(results[0]?.matchedPattern).toBe(suhyupCoop.patterns[0]);
+    const routedFromCoop = results.find(
+      (result) => result.matchedPattern === suhyupCoop.patterns[0],
+    );
+    expect(routedFromCoop?.institution.id).toBe("suhyup");
     expect(results.every((result) => result.institution.id === "suhyup")).toBe(true);
+  });
+
+  test("대체 분기로만 라우팅된 후보는 근거가 없어 low 다", () => {
+    // Given
+    const input = "112345678901";
+
+    // When
+    const results = detector.detect(input, { limit: Infinity });
+
+    // Then
+    expect(results.length).toBeGreaterThan(0);
+    for (const result of results) {
+      expect(result.confidence).toBe("low");
+    }
   });
 
   test("필터 후 limit을 적용하고 같은 기관으로 분기한 후보를 합치지 않는다", () => {

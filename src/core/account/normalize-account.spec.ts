@@ -139,15 +139,15 @@ describe("normalizeAccount", () => {
       expect(result).toBe("110");
     });
 
-    test("전각 숫자(０-９)는 ASCII 범위 밖이므로 무시된다", () => {
+    test("전각 숫자(０-９)는 ASCII 숫자로 바꿔 유지한다", () => {
       // Given
-      const input = "１２３456";
+      const input = "１１０-436-387740";
 
       // When
       const result = normalizeAccount(input);
 
       // Then
-      expect(result).toBe("456");
+      expect(result).toBe("110436387740");
     });
   });
 

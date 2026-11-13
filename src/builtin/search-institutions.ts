@@ -10,13 +10,13 @@ import type { AccountKind, InstitutionCategory } from "../types";
 export interface SearchInstitutionsFilter<
   TCategory extends InstitutionCategory = InstitutionCategory,
 > {
-  readonly categories?: readonly TCategory[];
+  readonly categories?: readonly TCategory[] | undefined;
   /** Keeps institutions with at least one pattern of these kinds. */
-  readonly kinds?: readonly AccountKind[];
+  readonly kinds?: readonly AccountKind[] | undefined;
   /** Keeps institutions that declare subject codes on at least one pattern. */
-  readonly hasSubject?: boolean;
-  readonly include?: readonly InstitutionIdByCategory<TCategory>[];
-  readonly exclude?: readonly InstitutionIdByCategory<TCategory>[];
+  readonly hasSubject?: boolean | undefined;
+  readonly include?: readonly InstitutionIdByCategory<TCategory>[] | undefined;
+  readonly exclude?: readonly InstitutionIdByCategory<TCategory>[] | undefined;
 }
 
 /**

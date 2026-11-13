@@ -3,9 +3,9 @@ import { templateLength } from "../account/template-length";
 
 /** Criteria for {@link findPattern}. */
 export interface PatternFilter {
-  readonly kind?: AccountKind;
+  readonly kind?: AccountKind | undefined;
   /** Template length in digits, hyphens excluded. */
-  readonly length?: number;
+  readonly length?: number | undefined;
 }
 
 /** Returns the institution's first pattern matching the filter, or `null`. */
