@@ -2,9 +2,10 @@ import { describe, expect, test } from "vitest";
 
 import { extractIdentifier } from "../core/account/extract-identifier";
 import { normalizeAccount } from "../core/account/normalize-account";
-import { institutions } from "../registry";
+import { type InstitutionId, institutions } from "../registry";
 import type { DetectionResult } from "../types";
 import { detect } from "./detect";
+import { FIXTURES } from "./detect.fixtures";
 import {
   createSeededRandom,
   randomDigits,
@@ -14,6 +15,17 @@ import {
 const RANDOM_INPUT_COUNT = 3000;
 const SAMPLES_PER_PATTERN = 20;
 const RANDOM_LENGTHS = [7, 8, 9, 10, 11, 12, 13, 14];
+
+const SCORE_BAND_RANK = { low: 0, medium: 1, high: 2 } as const;
+
+function scoreBand(score: number): keyof typeof SCORE_BAND_RANK {
+  if (score >= 7) {
+    return "high";
+  }
+  return score >= 4 ? "medium" : "low";
+}
+
+const ID_SET = new Set<string>(institutions.map((institution) => institution.id));
 
 /** Independent oracle: an identifier, subject or non-fallback branch condition supports the result. */
 function hasEvidence(result: DetectionResult, input: string): boolean {
@@ -177,5 +189,150 @@ describe("평가 기준: 모호성", () => {
 
     // Then
     expect(top?.ambiguous).toBe(false);
+  });
+});
+
+describe("평가 기준: 실제 계좌 코퍼스 래칫", () => {
+  const evaluations = FIXTURES.map((fixture) => {
+    const results = detect(fixture.input);
+    const rank = results.findIndex((result) => result.institution.id === fixture.id);
+    return { fixture, results, rank };
+  });
+
+  test("top-1 적중률 100% — 모든 fixture 의 1순위가 기대 기관", () => {
+    // Given
+    const corpus = evaluations;
+
+    // When
+    const misses = corpus
+      .filter((evaluation) => evaluation.rank !== 0)
+      .map(
+        (evaluation) =>
+          `${evaluation.fixture.input} → ${evaluation.results[0]?.institution.id ?? "none"}`,
+      );
+
+    // Then
+    expect(misses).toEqual([]);
+  });
+
+  // Measured 100% (50/50) with DEFAULT_WEIGHTS on 2026-08; pinned below so the corpus can grow.
+  test("1순위 high-confidence 비율 래칫 (≥ 95%)", () => {
+    // Given
+    const topResults = evaluations.map((evaluation) => evaluation.results[0]);
+
+    // When
+    const highRatio =
+      topResults.filter((top) => top?.confidence === "high").length / topResults.length;
+
+    // Then
+    expect(highRatio).toBeGreaterThanOrEqual(0.95);
+  });
+
+  // Measured 1.375 after shared identifier/subject spans stopped counting twice (0.5.0).
+  test("1·2순위 평균 점수 마진 래칫 (≥ 1.3)", () => {
+    // Given
+    const multiCandidateHits = evaluations.filter(
+      (evaluation) => evaluation.rank === 0 && evaluation.results.length > 1,
+    );
+
+    // When
+    const margins = multiCandidateHits.map(
+      (evaluation) => (evaluation.results[0]?.score ?? 0) - (evaluation.results[1]?.score ?? 0),
+    );
+    const averageMargin = margins.reduce((sum, margin) => sum + margin, 0) / margins.length;
+
+    // Then
+    expect(averageMargin).toBeGreaterThanOrEqual(1.3);
+  });
+});
+
+describe("평가 기준: 무작위 입력 불변식", () => {
+  test("임의 14자리 digits 1000건이면 limit·정렬·confidence 상한을 지킨다", () => {
+    // Given
+    const rng = createSeededRandom(0xc0ffee);
+    const inputs = Array.from({ length: 1000 }, () => randomDigits(rng, 14));
+
+    // When
+    const resultsPerInput = inputs.map((input) => detect(input));
+
+    // Then
+    for (const results of resultsPerInput) {
+      expect(results.length).toBeLessThanOrEqual(5);
+
+      for (let k = 1; k < results.length; k += 1) {
+        const prev = results[k - 1];
+        const curr = results[k];
+        if (!prev || !curr) {
+          continue;
+        }
+        expect(prev.score).toBeGreaterThanOrEqual(curr.score);
+      }
+
+      // A high/medium top result narrows out low candidates.
+      const top = results[0];
+      if (top && (top.confidence === "high" || top.confidence === "medium")) {
+        expect(results.every((result) => result.confidence !== "low")).toBe(true);
+      }
+
+      // Confidence never exceeds the score band; missing evidence lowers it to low.
+      for (const result of results) {
+        expect(SCORE_BAND_RANK[result.confidence]).toBeLessThanOrEqual(
+          SCORE_BAND_RANK[scoreBand(result.score)],
+        );
+      }
+
+      for (const result of results) {
+        const id: string = result.institution.id;
+        expect(ID_SET.has(id)).toBe(true);
+      }
+    }
+  });
+
+  test("임의 길이 5~16자리 500건: 모든 결과가 institution·matchedPattern·capabilities 를 갖는다", () => {
+    // Given
+    const rng = createSeededRandom(0xbeef);
+    const inputs = Array.from({ length: 500 }, () => {
+      const length = 5 + Math.floor(rng() * 12);
+      return randomDigits(rng, length);
+    });
+
+    // When
+    const resultsPerInput = inputs.map((input) => detect(input));
+
+    // Then
+    for (const results of resultsPerInput) {
+      for (const result of results) {
+        expect(result.institution).toBeDefined();
+        expect(result.matchedPattern).toBeDefined();
+        expect(result.capabilities).toBeDefined();
+        expect(typeof result.capabilities.allowsWithdrawal).toBe("boolean");
+        expect(typeof result.capabilities.virtual).toBe("boolean");
+      }
+    }
+  });
+
+  test("빈 입력 / 비숫자 / 1자리면 항상 빈 결과를 반환한다", () => {
+    // Given
+    const inputs = ["", " ", "---", "abc", "한글", "1"];
+
+    // When
+    const resultsPerInput = inputs.map((input) => detect(input));
+
+    // Then
+    for (const results of resultsPerInput) {
+      expect(results).toEqual([]);
+    }
+  });
+
+  test("등록된 institution id 는 모두 InstitutionId 이며 중복되지 않는다", () => {
+    // Given
+    const registry = institutions;
+
+    // When — the InstitutionId[] annotation fails to compile if an id falls outside the union
+    const ids: InstitutionId[] = registry.map((institution) => institution.id);
+
+    // Then
+    expect(ids.length).toBe(registry.length);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
