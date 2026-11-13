@@ -1,55 +1,30 @@
 import { type } from "arktype";
-import { describe, expect, test } from "vitest";
 
-import { MESSAGES } from "../contract";
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
+import { describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,
+  createAccountSchema,
+  createDetectionSchema,
+  createInstitutionIdSchema,
   detectionSchema,
   institutionIdSchema,
   subjectCategorySchema,
 } from "./schema";
 
-const contractSchemas = {
-  account: accountSchema,
-  institutionId: institutionIdSchema,
-  accountKind: accountKindSchema,
-  subjectCategory: subjectCategorySchema,
-  detection: detectionSchema,
-} as const;
-
-describeAdapterContract(
-  "arktype",
-  (name, value) => !(contractSchemas[name as ContractSchemaName](value) instanceof type.errors),
-);
-
-describe("arktype 한국어 메시지", () => {
-  test.each([
-    ["12345", MESSAGES.minDigits],
-    ["1".repeat(41), MESSAGES.tooLong],
-    ["110-abc", MESSAGES.charset],
-    ["", MESSAGES.required],
-  ])("'%s' → %s", (input, message) => {
-    // Given
-    const account = input;
-
-    // When
-    const result = accountSchema(account);
-
-    // Then
-    expect(result).toBeInstanceOf(type.errors);
-    expect(String(result)).toContain(message);
-  });
-
-  test("미등록 기관 id 는 기관 메시지로 거부한다", () => {
-    // Given
-    const institutionId = "unknown";
-
-    // When
-    const result = institutionIdSchema(institutionId);
-
-    // Then
-    expect(String(result)).toContain(MESSAGES.institution);
-  });
+describeAdapterContract<(value: unknown) => unknown>("arktype", {
+  schemas: {
+    account: accountSchema,
+    institutionId: institutionIdSchema,
+    accountKind: accountKindSchema,
+    subjectCategory: subjectCategorySchema,
+    detection: detectionSchema,
+  },
+  createAccountSchema,
+  createInstitutionIdSchema,
+  createDetectionSchema,
+  firstIssue: (schema, value) => {
+    const result = schema(value);
+    return result instanceof type.errors ? (result[0]?.message ?? "") : null;
+  },
 });

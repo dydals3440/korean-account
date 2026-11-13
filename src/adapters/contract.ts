@@ -1,16 +1,44 @@
-import { INSTITUTION_IDS, type InstitutionId } from "../registry/institution-ids";
-import type { AccountKind, Confidence, SubjectCategory } from "../types";
+import type { InstitutionId } from "../registry/institution-ids";
+import type { DetectionPayload as DetectionPayloadOf } from "../types";
 
 // Rules and messages shared by every adapter so the five schema families cannot drift.
 
-/** Charset accepted by `accountSchema` before normalization. */
+/** Characters accepted by `accountSchema` before normalization. */
 export const ACCOUNT_INPUT_REGEX = /^[\d\-\s]+$/;
 export const ACCOUNT_MAX_INPUT_LENGTH = 40;
 export const ACCOUNT_MIN_DIGITS = 6;
 export const ACCOUNT_MAX_DIGITS = 20;
+/** Matches input with at least `ACCOUNT_MIN_DIGITS` digits. */
+export const ACCOUNT_MIN_DIGITS_REGEX = new RegExp(String.raw`(?:\D*\d){${ACCOUNT_MIN_DIGITS}}`);
+/** Matches input with at most `ACCOUNT_MAX_DIGITS` digits. */
+export const ACCOUNT_MAX_DIGITS_REGEX = new RegExp(
+  String.raw`^\D*(?:\d\D*){0,${ACCOUNT_MAX_DIGITS}}$`,
+);
 
-/** Korean validation messages keyed by rule. */
-export const MESSAGES = {
+/** Messages for the account-number rules. */
+export interface AccountMessages {
+  readonly required: string;
+  readonly tooLong: string;
+  readonly charset: string;
+  readonly minDigits: string;
+  readonly maxDigits: string;
+}
+
+/** Messages for every adapter rule. */
+export interface ValidationMessages extends AccountMessages {
+  readonly institution: string;
+  readonly accountKind: string;
+  readonly subjectCategory: string;
+  readonly confidence: string;
+  readonly finiteScore: string;
+  /** Used by the standard-schema adapter, which has no library type messages to fall back on. */
+  readonly payload: string;
+  /** Used by the standard-schema adapter for a field of the wrong primitive type. */
+  readonly invalidValue: string;
+}
+
+/** Default Korean messages. */
+export const MESSAGES: ValidationMessages = {
   required: "계좌번호를 입력해주세요.",
   tooLong: "너무 긴 입력입니다.",
   charset: "숫자, 공백, 하이픈만 입력해주세요.",
@@ -19,43 +47,57 @@ export const MESSAGES = {
   institution: "지원하지 않는 금융기관입니다.",
   accountKind: "지원하지 않는 계좌 종류입니다.",
   subjectCategory: "지원하지 않는 과목 분류입니다.",
-  finiteScore: "score 는 유한한 숫자여야 합니다.",
-} as const;
+  confidence: "confidence 는 high·medium·low 중 하나여야 합니다.",
+  finiteScore: "score 는 0 이상의 유한한 숫자여야 합니다.",
+  payload: "detection payload 형식이 아닙니다.",
+  invalidValue: "값의 형식이 올바르지 않습니다.",
+};
+
+/** Per-key message overrides; an omitted or `undefined` key keeps the Korean default. */
+export type MessageOverrides<TMessages> = {
+  readonly [TKey in keyof TMessages]?: string | undefined;
+};
+
+/** Options for `createAccountSchema`. */
+export interface AccountSchemaOptions {
+  readonly messages?: MessageOverrides<AccountMessages> | undefined;
+}
+
+/** Options for `createInstitutionIdSchema`. */
+export interface InstitutionIdSchemaOptions {
+  readonly message?: string | undefined;
+}
+
+/** Options for `createDetectionSchema`. */
+export interface DetectionSchemaOptions {
+  readonly messages?: MessageOverrides<ValidationMessages> | undefined;
+}
+
+/** Built-in institution payload validated by the default `detectionSchema`. */
+export type DetectionPayload = DetectionPayloadOf<InstitutionId>;
+
+/** Merges message overrides over the defaults. */
+export function resolveMessages(
+  overrides: MessageOverrides<ValidationMessages> | undefined,
+): ValidationMessages {
+  const defined = Object.entries(overrides ?? {}).filter((entry) => entry[1] !== undefined);
+  return { ...MESSAGES, ...Object.fromEntries(defined) };
+}
 
 /** Number of ASCII digits in the input. */
 export function digitCount(value: string): number {
   return value.replace(/\D/g, "").length;
 }
 
-const ID_SET = new Set<string>(INSTITUTION_IDS);
-
-/** Whether the value is a built-in institution id. */
-export function isRegisteredInstitutionId(value: unknown): value is InstitutionId {
-  return typeof value === "string" && ID_SET.has(value);
+/** Type guard for one of the given string literals. */
+export function createLiteralGuard<const TLiteral extends string>(
+  literals: readonly TLiteral[],
+): (value: unknown) => value is TLiteral {
+  const allowed = new Set<string>(literals);
+  return (value): value is TLiteral => typeof value === "string" && allowed.has(value);
 }
 
-/** Serializable detection result validated by every `detectionSchema`. */
-export interface DetectionPayload {
-  readonly institutionId: InstitutionId;
-  readonly kind: AccountKind;
-  readonly subject?:
-    | {
-        readonly code: string;
-        readonly category: SubjectCategory;
-        readonly label?: string | undefined;
-      }
-    | undefined;
-  readonly score: number;
-  readonly confidence: Confidence;
-  readonly formatted: string;
-  readonly capabilities: {
-    readonly allowsWithdrawal: boolean;
-    readonly virtual: boolean;
-    readonly validatedCheckDigit: boolean | null;
-  };
-}
-
-/** Whether the value is a finite number. */
-export function isFiniteNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
+/** Whether the value is a finite number ≥ 0. */
+export function isNonNegativeFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && 0 <= value;
 }

@@ -22,6 +22,56 @@ const REVIEWED_TOP_CHANGES = {
   "000000000000": "0.5.0: a fallback branch route is not evidence, so every candidate is low",
 };
 
+// Inferred schema types a consumer relies on, checked against each installed peer version.
+const INFERENCE_CHECKS = {
+  zod: `
+    import type { z } from "zod";
+    import * as schemas from "korean-account/zod";
+    const custom = schemas.createDetectionSchema(["my-bank"]);
+    export const zodChecks: [
+      Equal<z.input<typeof schemas.accountSchema>, string>,
+      Equal<z.infer<typeof schemas.accountSchema>, string>,
+      Equal<z.infer<typeof schemas.institutionIdSchema>, InstitutionId>,
+      Equal<z.infer<typeof schemas.detectionSchema>, DetectionPayload<InstitutionId>>,
+      Equal<z.infer<typeof custom>, DetectionPayload<"my-bank">>,
+    ] = [true, true, true, true, true];
+  `,
+  valibot: `
+    import type * as v from "valibot";
+    import * as schemas from "korean-account/valibot";
+    const custom = schemas.createDetectionSchema(["my-bank"]);
+    export const valibotChecks: [
+      Equal<v.InferInput<typeof schemas.accountSchema>, string>,
+      Equal<v.InferOutput<typeof schemas.detectionSchema>, DetectionPayload<InstitutionId>>,
+      Equal<v.InferOutput<typeof custom>, DetectionPayload<"my-bank">>,
+    ] = [true, true, true];
+  `,
+  yup: `
+    import type { InferType } from "yup";
+    import * as schemas from "korean-account/yup";
+    const custom = schemas.createDetectionSchema(["my-bank"]);
+    export const yupChecks: [
+      Equal<InferType<typeof schemas.accountSchema>, string>,
+      Equal<InferType<typeof schemas.detectionSchema>, DetectionPayload<InstitutionId>>,
+      Equal<InferType<typeof custom>, DetectionPayload<"my-bank">>,
+    ] = [true, true, true];
+  `,
+  arktype: `
+    import * as schemas from "korean-account/arktype";
+    const custom = schemas.createDetectionSchema(["my-bank"]);
+    export const arktypeChecks: [
+      Equal<(typeof schemas.accountSchema)["infer"], string>,
+      Equal<(typeof schemas.detectionSchema)["infer"], DetectionPayload<InstitutionId>>,
+      Equal<(typeof custom)["infer"], DetectionPayload<"my-bank">>,
+    ] = [true, true, true];
+  `,
+};
+
+/** Type-level equality test, strict about `any` and optional modifiers. */
+const EQUAL_TYPE = `
+  type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+`;
+
 const ALL_PEER_CASES = [
   "none",
   "zod@3.23.0",
@@ -202,6 +252,23 @@ try {
           `;
         })
         .join("\n");
+    writeFileSync(
+      join(cwd, "inference.mts"),
+      `
+        import type { DetectionPayload, InstitutionId } from "korean-account";
+        import type { StandardSchemaV1 } from "korean-account/standard-schema";
+        import * as standard from "korean-account/standard-schema";
+        ${EQUAL_TYPE}
+        export const standardChecks: [
+          Equal<StandardSchemaV1.InferInput<typeof standard.accountSchema>, string>,
+          Equal<
+            StandardSchemaV1.InferOutput<typeof standard.detectionSchema>,
+            DetectionPayload<InstitutionId>
+          >,
+        ] = [true, true];
+        ${adapter ? INFERENCE_CHECKS[adapter] : ""}
+      `,
+    );
     for (const extension of ["mts", "cts"]) {
       writeFileSync(join(cwd, `consumer.${extension}`), types);
       writeFileSync(
@@ -232,7 +299,9 @@ try {
             module,
             moduleResolution: resolution,
           },
-          include: legacyEsm ? ["consumer.mts"] : ["consumer.mts", "consumer.cts"],
+          include: legacyEsm
+            ? ["consumer.mts", "inference.mts"]
+            : ["consumer.mts", "consumer.cts", "inference.mts"],
         }),
       );
       run("npm", ["exec", "--", "tsc", "--project", "tsconfig.json"], cwd);

@@ -1,55 +1,30 @@
 import * as v from "valibot";
-import { describe, expect, test } from "vitest";
 
-import { MESSAGES } from "../contract";
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
+import { describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,
+  createAccountSchema,
+  createDetectionSchema,
+  createInstitutionIdSchema,
   detectionSchema,
   institutionIdSchema,
   subjectCategorySchema,
 } from "./schema";
 
-const contractSchemas = {
-  account: accountSchema,
-  institutionId: institutionIdSchema,
-  accountKind: accountKindSchema,
-  subjectCategory: subjectCategorySchema,
-  detection: detectionSchema,
-} as const satisfies Record<ContractSchemaName, v.GenericSchema<unknown>>;
-
-describeAdapterContract(
-  "valibot",
-  (name, value) => v.safeParse(contractSchemas[name], value).success,
-);
-
-describe("valibot 한국어 메시지", () => {
-  test.each([
-    ["12345", MESSAGES.minDigits],
-    ["1".repeat(41), MESSAGES.tooLong],
-    ["110-abc", MESSAGES.charset],
-    ["", MESSAGES.required],
-  ])("'%s' → %s", (input, message) => {
-    // Given
-    const account = input;
-
-    // When
-    const result = v.safeParse(accountSchema, account);
-
-    // Then
-    expect(result.success).toBe(false);
-    expect(result.issues?.[0]?.message).toBe(message);
-  });
-
-  test("미등록 기관 id 는 기관 메시지로 거부한다", () => {
-    // Given
-    const institutionId = "unknown";
-
-    // When
-    const result = v.safeParse(institutionIdSchema, institutionId);
-
-    // Then
-    expect(result.issues?.[0]?.message).toBe(MESSAGES.institution);
-  });
+describeAdapterContract<v.GenericSchema<unknown>>("valibot", {
+  schemas: {
+    account: accountSchema,
+    institutionId: institutionIdSchema,
+    accountKind: accountKindSchema,
+    subjectCategory: subjectCategorySchema,
+    detection: detectionSchema,
+  },
+  createAccountSchema,
+  createInstitutionIdSchema,
+  createDetectionSchema,
+  firstIssue: (schema, value) => {
+    const result = v.safeParse(schema, value);
+    return result.success ? null : (result.issues[0]?.message ?? "");
+  },
 });

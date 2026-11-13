@@ -3,6 +3,7 @@ export type {
   Confidence,
   CreateDetectorOptions,
   DetectionCapabilities,
+  DetectionPayload,
   DetectionResult,
   DetectOptions,
   Detector,

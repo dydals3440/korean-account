@@ -1,23 +1,18 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 
 import { MESSAGES } from "../contract";
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
+import { describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,
+  createAccountSchema,
+  createDetectionSchema,
+  createInstitutionIdSchema,
   detectionSchema,
   institutionIdSchema,
   type StandardSchemaV1,
   subjectCategorySchema,
 } from "./schema";
-
-const contractSchemas = {
-  account: accountSchema,
-  institutionId: institutionIdSchema,
-  accountKind: accountKindSchema,
-  subjectCategory: subjectCategorySchema,
-  detection: detectionSchema,
-} as const;
 
 /** Runs `~standard.validate`, failing the test if it returns a Promise. */
 function validateSync<Output>(
@@ -29,10 +24,21 @@ function validateSync<Output>(
   return result;
 }
 
-describeAdapterContract("standard-schema", (name, value) => {
-  const result = contractSchemas[name as ContractSchemaName]["~standard"].validate(value);
-  if (result instanceof Promise) throw new Error("validate must be synchronous");
-  return result.issues === undefined;
+describeAdapterContract<StandardSchemaV1<unknown, unknown>>("standard-schema", {
+  schemas: {
+    account: accountSchema,
+    institutionId: institutionIdSchema,
+    accountKind: accountKindSchema,
+    subjectCategory: subjectCategorySchema,
+    detection: detectionSchema,
+  },
+  createAccountSchema,
+  createInstitutionIdSchema,
+  createDetectionSchema,
+  firstIssue: (schema, value) => {
+    const result = validateSync(schema, value);
+    return result.issues === undefined ? null : (result.issues[0]?.message ?? "");
+  },
 });
 
 describe("standard-schema 인터페이스", () => {
@@ -78,6 +84,22 @@ describe("standard-schema 인터페이스", () => {
 
     // Then
     expect(result.issues?.[0]?.path).toEqual(["institutionId"]);
+  });
+
+  test("detection 의 무효한 필드를 한 번에 모두 이슈로 모은다", () => {
+    // Given
+    const input = { institutionId: "unknown", kind: "new", score: -1, confidence: "high" };
+
+    // When
+    const result = validateSync(detectionSchema, input);
+
+    // Then
+    expect(result.issues?.map((issue) => issue.path)).toEqual([
+      ["institutionId"],
+      ["score"],
+      ["formatted"],
+      ["capabilities"],
+    ]);
   });
 
   test("InferOutput 은 accountSchema 의 출력 타입을 string 으로 추론한다", () => {

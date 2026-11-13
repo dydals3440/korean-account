@@ -48,14 +48,14 @@
     "path": "dist/adapters/yup/index.js",
     "import": "*",
     "ignore": ["yup"],
-    "limit": "1250 B"
+    "limit": "1.5 kB"
   },
   {
     "name": "korean-account/arktype (without the registry)",
     "path": "dist/adapters/arktype/index.js",
     "import": "*",
     "ignore": ["arktype"],
-    "limit": "1250 B"
+    "limit": "1.5 kB"
   },
   {
     "name": "korean-account/standard-schema (zero-dep)",
