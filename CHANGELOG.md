@@ -1,5 +1,74 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- eeb2ddb: 검증 어댑터 5종(zod·valibot·yup·arktype·standard-schema)에 같은 팩토리와 변환 헬퍼를 추가했습니다.
+
+  - `createAccountSchema({ messages })`: 계좌번호 메시지를 키별로 덮어씁니다. 생략하거나 `undefined`로 둔 키는 한국어 기본값을 씁니다.
+  - `createInstitutionIdSchema(ids)`, `createDetectionSchema(ids)`: 커스텀 detector의 기관 ID로 검증하고, 출력 타입도 그 ID 유니온으로 좁혀집니다.
+  - `toDetectionPayload(result)`(루트): `DetectionResult`를 JSON으로 보낼 수 있는 `DetectionPayload`로 바꿉니다. 모든 어댑터의 `detectionSchema`가 이 결과를 그대로 통과시킵니다.
+  - `detectionSchema`가 `ambiguous`와 `capabilities.services`를 선택 필드로 받습니다. 기존 payload도 그대로 통과합니다.
+  - 메시지는 한 곳(`MESSAGES`)에서 관리해 다섯 어댑터의 기본 메시지가 같습니다. standard-schema 어댑터에 흩어져 있던 문구도 이 목록으로 옮겼습니다.
+  - `accountSchema`가 전각 숫자(`０–９`)와 전각 하이픈을 받습니다. `detect`가 받는 입력과 같습니다.
+  - 문자열이 아닌 입력(`null`, 숫자 등)은 다섯 어댑터 모두 `required` 메시지로 거부합니다.
+  - arktype 어댑터를 객체 스키마 안에 넣어도 메시지 앞에 필드 경로가 붙지 않습니다.
+  - zod `accountSchema`는 `ZodString`이라 zod 3·4 모두에서 `z.input`·`z.infer`가 `string`입니다. 각 어댑터의 추론 타입은 peer 하한 버전에서도 소비자 검사로 확인합니다.
+  - `detectionSchema`는 다섯 어댑터 모두 `DetectionPayload` 밖의 키를 모든 단계에서 지우고(zod·valibot 기본 동작과 같음), 선택 필드에 명시한 `undefined`를 받습니다. yup은 `strict: true`로 검증하면 변환 단계를 건너뛰므로 키가 남습니다.
+  - yup `institutionIdSchema`와 리터럴 스키마가 숫자·`null`에도 라이브러리 메시지를 냅니다.
+  - 크기 예산: yup·arktype 1.75 kB, standard-schema 2 kB(실측 1.67·1.69·1.91 kB). 키 정리 함수가 늘어난 몫입니다.
+
+- a040c5d: 평가 기준을 근거 중심으로 바로잡았습니다. 점수·신뢰도·후보 목록이 달라질 수 있으니 [마이그레이션 가이드](https://github.com/dydals3440/korean-account/blob/main/docs/migration.md#04x--050)를 확인하세요.
+
+  - 식별자·과목 코드·조건 분기 중 어떤 근거도 없는 후보는 항상 `low`입니다. 무작위 12자리가 수협 `medium`으로 나오던 오탐을 고쳤습니다.
+  - 같은 자리를 식별자와 과목으로 함께 선언한 패턴은 큰 점수 하나만 더합니다(예: 신한 `110-436-387740` 14점 → 9점, 여전히 `high`).
+  - 분기 규칙 가산점은 근거 있는 후보에만 붙고, "그 외" 분기는 `BranchRuleResult.isFallback: true`로 근거에서 제외합니다.
+  - `DetectionResult.ambiguous`: 같은 신뢰도 등급에 다른 기관 후보가 있으면 `true`입니다. 옵션 필터나 `limit`으로 숨긴 기관도 셉니다.
+  - 후보는 신뢰도 등급을 먼저 보고 정렬합니다. 근거 없는 `low` 후보가 점수만 높아서 근거 있는 후보보다 앞에 오지 않습니다.
+  - 한 기관 안에서 대표 패턴을 고를 때도 근거 있는 패턴을 먼저 고릅니다. 입력 중인 14자리 가상계좌가 같은 점수의 13자리 패턴 때문에 `low`로 나오던 문제가 사라집니다.
+  - `extend({ scoring })`에서 `undefined`로 둔 가중치는 기존 detector의 값을 유지합니다.
+  - 전각 숫자(`０–９`)를 ASCII 숫자로 인정합니다.
+  - `scoring` 가중치가 유한한 0 이상 숫자가 아니거나 `limit`이 0 이상 정수·`Infinity`가 아니면 `RangeError`를 던집니다. `undefined`는 기본값으로 처리합니다.
+
+- b262918: 내부 구조를 계층별 모듈로 재편했습니다. 공개 export 목록은 그대로입니다.
+
+  - `detect()`의 반환 타입을 `readonly DetectionResult<RegisteredInstitution>[]`로 명시해 타입 선언과 IDE 표시가 짧아졌습니다.
+  - 어댑터(`korean-account/zod` 등)의 타입 선언이 더 이상 기관 레지스트리 선언을 포함하지 않습니다.
+  - `Detector.remove`가 등록된 기관 id를 자동완성하고, `extend` 옵션 타입을 `ExtendDetectorOptions`로 공개합니다.
+  - `patternTemplate`이 잘못된 템플릿에 `TypeError`를 던지고, 메시지가 `korean-account:`로 시작합니다.
+  - 탐지 결과에 과목이 없으면 `subject` 키를 생략합니다(이전에는 `undefined` 값으로 존재).
+  - 분기 규칙 상수 8개(`kb11FirstDigit` 등), `scoreToConfidence`, `normalizeSubject`를 deprecated 처리했습니다. 1.0에서 제거합니다.
+
+- fa499b0: 결과에 같은 기관이 한 번만 나옵니다. 0.4.0에서 정한 "분기로 같은 기관이 된 중복 후보 유지" 방침을 뒤집는 변경입니다.
+
+  - 분기 규칙이 다른 기관의 패턴을 같은 기관으로 재배정하면, 옵션으로 거른 뒤 남은 해석 중 순위가 가장 높은 하나만 남깁니다(예: `212-345678901`의 수협중앙회). `limit`은 이제 기관 수를 셉니다.
+  - 정렬 키에 근거 유무를 추가했습니다(신뢰도 등급 → 근거 유무 → 점수 → 사전확률 → 계좌 종류). 같은 `low`끼리는 식별자·과목·분기 조건이 맞은 후보가 길이만 맞은 후보보다 앞에 옵니다. 모든 키가 같으면 다른 기관에서 재배정된 패턴보다 그 기관 자신의 패턴을 남겨 결과가 기관 순서에 좌우되지 않습니다.
+  - `ambiguous`는 기관마다 가장 높은 등급 하나로 셉니다. 지워진 하위 등급 중복 때문에 다른 기관이 모호하다고 잘못 표시되던 경우(예: `222627308617`의 경남은행)가 사라집니다.
+
+- 0d9d8b0: `detect(input, { partial: true })`로 입력 중인 앞자리에서 후보를 제안합니다(기본값 `false`).
+
+  - 입력보다 2자리 이상 긴 형식도 채점합니다. 예를 들어 `3333`만 입력해도 카카오뱅크가 1순위로 나옵니다. 끝 4자리를 덜 입력했을 때 정답 기관이 top-5에 드는 비율은 6%에서 60%로 오릅니다.
+  - 앞자리 일치는 식별자·과목 점수의 절반만 받아 항상 `low`입니다. 목록으로만 보여 주고 미리 선택하거나 유료 조회를 호출하지 마세요.
+  - 완성된 번호의 결과는 partial 여부와 같으므로 입력하는 내내 켜 둬도 됩니다. 등록한 검증번호 검증기는 짧은 숫자열도 받을 수 있습니다.
+
+- 2327d98: 금융결제원 CMS 계좌번호체계 2026.05.08 수정본(2026.11.11 게시)으로 레지스트리를 다시 대조하고, PDF의 서비스 열을 데이터로 반영했습니다.
+
+  - `capabilities.services`: 패턴의 PDF 서비스 4열(가상계좌 가능여부·출금이체·입금이체·부가서비스)을 돌려줍니다. 과목별 괄호 예외도 반영합니다.
+  - `capabilities.allowsWithdrawal`은 과목의 입금전용 각주와 PDF 출금이체 열을 따릅니다. 농협·지역농협 가상계좌, 국민 9로 시작하는 11자리·연계 90, 우체국 14자리 기타 코드가 `true`로 바뀝니다.
+  - `subject.allowsWithdrawal`과 `capabilities.allowsWithdrawal`은 한 번 계산한 같은 값입니다. 서비스 열이 없는 커스텀 패턴에서는 0.4.x처럼 가상·평생·입금전용 계좌를 출금 불가로 봅니다.
+  - `cmsServices()` 헬퍼와 `AccountPattern.services`·`Subject.services`로 커스텀 기관도 서비스 열을 선언할 수 있습니다.
+  - 데이터 정정: 국민 과목 26(연계)·11자리 분리, 씨티 10자리(구 씨티), 아이엠 14자리 입금전용 과목, 우체국 12자리(신계좌)·14자리 기타 코드, 미래에셋 230 계좌, 하나 610 적용일, 우리 18·92·경남·광주·하나 CMA 분류, 누락된 적용일을 바로잡았습니다. 자세한 근거는 `docs/source-audit.md`에 있습니다.
+
+- b5a0def: 공개 타입의 null·undefined 규칙을 통일하고, 커스텀 기관 정의에서 생기던 타입 구멍을 막았습니다.
+
+  - **바뀌는 동작**: `extractIdentifier`가 식별 자리가 없거나 입력이 그 자리를 다 채우지 못하면 `""`나 일부 숫자 대신 `null`을 돌려줍니다. `extractSubject` 등 찾지 못하면 `null`을 돌려주는 다른 조회 함수와 같은 규칙입니다.
+  - `Subject.services`에 `{ directDebit: undefined }`처럼 값을 비워 넘기면 `capabilities.services.directDebit`가 타입은 `boolean`인데 실제로는 `undefined`가 되던 문제를 고쳤습니다. 이제 키마다 병합해서 패턴 값을 유지합니다.
+  - `Institution`·`AccountPattern`·`Subject`·`BranchRuleResult`의 선택 필드가 `undefined`를 명시적으로 받습니다. `exactOptionalPropertyTypes`를 켠 프로젝트에서도 조건부 값을 그대로 넘길 수 있습니다.
+  - `DetectionResult.subject`가 `ResolvedSubject` 타입입니다. 런타임에 항상 채워져 있던 `label`·`allowsWithdrawal`·`virtual`을 타입에서도 `undefined` 없이 읽을 수 있습니다.
+  - `patternTemplate`이 하이픈만 있거나(`"---"`), 앞뒤에 붙거나(`"-XXXX"`), 겹친(`"XX--X"`) 템플릿을 `TypeError`로 거부합니다. 이전에는 이런 템플릿이 아무 1자리 입력과 일치했습니다.
+  - 기관 없이 `extend({ scoring })`만 호출해도 결과의 기관 ID 타입이 `string`으로 넓어지지 않고 기존 유니온을 유지합니다.
+
 ## 0.4.1
 
 ### Patch Changes
