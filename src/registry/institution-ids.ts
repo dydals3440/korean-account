@@ -1,6 +1,7 @@
 /**
- * Built-in institution ids as plain literals, so adapters can validate ids
- * without bundling the registry. `institution-ids.types.spec.ts` keeps it in sync.
+ * Built-in institution ids as plain literals, in `institutions` order. Adapters validate ids
+ * against this list without bundling the registry data; `institution-ids.types.spec.ts` fails
+ * when it drifts from the registry.
  */
 export const INSTITUTION_IDS = [
   // banks (25)
@@ -65,5 +66,8 @@ export const INSTITUTION_IDS = [
   "woori-inv",
 ] as const;
 
-/** Union of built-in institution ids. */
+/**
+ * Union of built-in institution ids, e.g. `"kb" | "shinhan" | "toss" | ...`. Accepted by
+ * `getInstitution`, `pickPattern` and the `detect` filters.
+ */
 export type InstitutionId = (typeof INSTITUTION_IDS)[number];

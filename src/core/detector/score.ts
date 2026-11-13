@@ -135,7 +135,10 @@ function scorePattern(
   };
 }
 
-/** The same digits count once: when identifier and subject spans overlap, only the larger score counts. */
+/**
+ * The same digits count once: when identifier and subject spans overlap, only the larger score
+ * counts.
+ */
 function combineCodeScores(
   pattern: AccountPattern,
   identifierScore: number,
