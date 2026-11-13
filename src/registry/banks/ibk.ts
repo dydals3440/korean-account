@@ -15,12 +15,13 @@ export const ibk = defineInstitution({
       template: patternTemplate("XXXXXXXX-XX"),
       kind: "lifetime",
       services: cmsServices(),
-      note: "자동이체 신규등록 중단 (2012.11.12)",
+      note: "평생계좌, 자동이체 신규등록 중단(2012.11.12), 기존 계좌는 유지",
     },
     {
       template: patternTemplate("XXX-XXXXXXXX"),
       kind: "lifetime",
       services: cmsServices(),
+      note: "평생계좌, 자동이체 신규등록 중단(2012.11.12), 기존 계좌는 유지",
     },
     {
       template: patternTemplate("XXX-XX-XXXXXX-X"),

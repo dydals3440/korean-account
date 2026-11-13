@@ -108,7 +108,7 @@ export const nh = defineInstitution({
         defineSubject({ code: "65", category: "ordinary", virtual: true }),
       ],
       effectiveFrom: "2007-11-27",
-      note: "HMC·삼성·미래에셋·현대·NH·한화 증권 한정",
+      note: "구가상계좌, HMC·삼성·미래에셋·현대·NH·한화 증권 한정",
     },
     {
       template: patternTemplate("XXX-XXXX-XXXX-XX-X"),
@@ -118,19 +118,11 @@ export const nh = defineInstitution({
       identifiers: ["790", "791"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
-        defineSubject({
-          code: "790",
-          category: "ordinary",
-          virtual: true,
-          effectiveFrom: "2009-01-28",
-        }),
-        defineSubject({
-          code: "791",
-          category: "ordinary",
-          virtual: true,
-          effectiveFrom: "2009-01-28",
-        }),
+        defineSubject({ code: "790", category: "ordinary", virtual: true }),
+        defineSubject({ code: "791", category: "ordinary", virtual: true }),
       ],
+      effectiveFrom: "2009-01-28",
+      note: "신가상계좌",
     },
   ],
 });

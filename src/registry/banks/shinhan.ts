@@ -158,6 +158,7 @@ export const shinhan = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
+      effectiveFrom: "2006-10-09",
       services: cmsServices("virtualAccount", "directCredit"),
       additionalRules: [(digits) => digits.slice(3, 6) !== "901"],
       subjectPosition: { start: 0, length: 3 },

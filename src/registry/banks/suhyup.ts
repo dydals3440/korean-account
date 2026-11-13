@@ -28,7 +28,6 @@ export const suhyup = defineInstitution({
       identifierPosition: { start: 0, length: 3 },
       branchRule: suhyup12BranchToCoop,
       validatesCheckDigit: false,
-      effectiveFrom: "2025-11-10",
       note: "수협 분리 시행, 체크디지트 검증 안함",
     },
     {

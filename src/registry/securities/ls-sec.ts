@@ -7,7 +7,7 @@ export const lsSec = defineInstitution({
   nameKo: "엘에스투자증권",
   nameEn: "LS Securities",
   category: "securities",
-  aliases: ["엘에스투자증권", "LS투자증권", "이베스트투자증권", "이베스트"],
+  aliases: ["엘에스투자증권", "LS투자증권", "이베스트투자증권", "이베스트", "엘에스증권"],
   userBaseMillions: 3,
   successorOf: ["ebest-legacy"],
   patterns: [
@@ -22,7 +22,7 @@ export const lsSec = defineInstitution({
         defineSubject({ code: "45", category: "savings" }),
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "55", category: "savings" }),
-        defineSubject({ code: "56", category: "savings" }),
+        defineSubject({ code: "56", effectiveFrom: "2010-09-17", category: "savings" }),
         ...["65", "77", "78"].map((code) =>
           defineSubject({
             code,

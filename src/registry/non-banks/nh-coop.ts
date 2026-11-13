@@ -98,14 +98,9 @@ export const nhCoop = defineInstitution({
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["792"],
       subjectPosition: { start: 0, length: 3 },
-      subjects: [
-        defineSubject({
-          code: "792",
-          category: "ordinary",
-          virtual: true,
-          effectiveFrom: "2009-01-28",
-        }),
-      ],
+      subjects: [defineSubject({ code: "792", category: "ordinary", virtual: true })],
+      effectiveFrom: "2009-01-28",
+      note: "신가상계좌",
     },
   ],
 });

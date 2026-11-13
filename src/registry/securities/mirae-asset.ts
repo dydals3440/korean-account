@@ -33,6 +33,7 @@ export const miraeAsset = defineInstitution({
     {
       template: patternTemplate("XXXXXXXXXXX"),
       kind: "old",
+      effectiveFrom: "2010-05-22",
       services: REGULAR_ACCOUNT_SERVICES,
       note: "2016.12.31 이전 등록분",
     },
@@ -51,6 +52,7 @@ export const miraeAsset = defineInstitution({
     {
       template: patternTemplate("XXXXXXXXXXXXXX"),
       kind: "old",
+      effectiveFrom: "2010-05-22",
       services: REGULAR_ACCOUNT_SERVICES,
       note: "2016.12.31 이전 등록분",
     },
@@ -58,6 +60,7 @@ export const miraeAsset = defineInstitution({
       template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "merged-legacy",
       services: REGULAR_ACCOUNT_SERVICES,
+      note: "2010.5.22 이전 개설, 2016.12.31 이전 등록분",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
         defineSubject({ code: "01", category: "ordinary" }),
@@ -96,13 +99,24 @@ export const miraeAsset = defineInstitution({
       note: "2016.12.31 이전 등록에 한함",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
-        ...["20", "21", "22", "33", "39", "51", "58"].map((code) =>
+        defineSubject({
+          code: "39",
+          category: "other",
+          services: REGULAR_ACCOUNT_SERVICES,
+          effectiveFrom: "2016-03-14",
+        }),
+        ...["20", "21", "22", "33", "51", "58"].map((code) =>
           defineSubject({ code, category: "other", services: REGULAR_ACCOUNT_SERVICES }),
         ),
         ...["05", "15", "34", "37", "60", "62", "63", "90", "91"].map((code) =>
           defineSubject({ code, category: "other", allowsWithdrawal: false }),
         ),
-        defineSubject({ code: "92", category: "isa", allowsWithdrawal: false }),
+        defineSubject({
+          code: "92",
+          effectiveFrom: "2016-03-14",
+          category: "isa",
+          allowsWithdrawal: false,
+        }),
       ],
     },
   ],

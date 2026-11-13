@@ -7,7 +7,7 @@ export const hyundaiMotorSec = defineInstitution({
   nameKo: "현대차증권",
   nameEn: "Hyundai Motor Securities",
   category: "securities",
-  aliases: ["현대차증권", "HMC투자증권"],
+  aliases: ["현대차증권", "HMC투자증권", "현대차투자증권"],
   userBaseMillions: 2.6,
   patterns: [
     { template: patternTemplate("XXXXXXXX"), kind: "new", services: REGULAR_ACCOUNT_SERVICES },

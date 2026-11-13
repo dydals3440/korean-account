@@ -195,7 +195,7 @@ export const FIXTURES = [
     input: "123-15-67890-1",
     id: "hana",
     kind: "old",
-    subjectCategory: "other",
+    subjectCategory: "installment",
   },
   {
     input: "123-16-123456789",

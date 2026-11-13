@@ -25,6 +25,7 @@ export const kb = defineInstitution({
     {
       template: patternTemplate("XXX-XXX-XXXX"),
       kind: "incoming-only",
+      effectiveFrom: "2017-03-17",
       services: cmsServices("directCredit"),
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["0"],
@@ -34,6 +35,7 @@ export const kb = defineInstitution({
     {
       template: patternTemplate("XXX-XXXX-XXXX"),
       kind: "incoming-only",
+      effectiveFrom: "2017-03-17",
       services: cmsServices("directCredit"),
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["0"],
@@ -42,6 +44,7 @@ export const kb = defineInstitution({
     {
       template: patternTemplate("XXX-XXXX-XXXX"),
       kind: "lifetime",
+      effectiveFrom: "2017-03-17",
       services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["9"],
@@ -58,13 +61,13 @@ export const kb = defineInstitution({
       kind: "virtual",
       services: cmsServices("virtualAccount", "directCredit", "additionalServices"),
       subjectPosition: { start: 4, length: 2 },
+      effectiveFrom: "2010-08-26",
       subjects: [
         defineSubject({
           code: "92",
           category: "ordinary",
           virtual: true,
           allowsWithdrawal: false,
-          effectiveFrom: "2010-08-26",
           note: "수납전용 비실명 가상계좌",
         }),
       ],

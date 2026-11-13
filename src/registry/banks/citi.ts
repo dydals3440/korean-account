@@ -34,7 +34,7 @@ const integratedCitiSubjects: readonly Subject[] = [
   defineSubject({
     code: "99",
     category: "household-current",
-    label: "가계종합",
+    label: "가계종합예금",
   }),
   ...["91", "92"].map((code) =>
     defineSubject({
@@ -82,12 +82,12 @@ const formerCitiSubjects: readonly Subject[] = [
   defineSubject({
     code: "40",
     category: "household-current",
-    label: "가계종합",
+    label: "가계종합예금",
   }),
   defineSubject({
     code: "48",
     category: "household-current",
-    label: "가계종합",
+    label: "가계종합예금",
   }),
 ];
 
@@ -113,7 +113,7 @@ export const citi = defineInstitution({
         defineSubject({
           code: "0",
           category: "household-current",
-          label: "가계종합",
+          label: "가계종합예금",
         }),
       ],
     },

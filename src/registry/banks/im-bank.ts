@@ -13,6 +13,9 @@ const DEPOSIT_ONLY_PRODUCTS = [
   { code: "28", category: "installment", label: "장기주택마련저축" },
 ] as const;
 
+const depositOnlyCodes = (prefix: "" | "5"): readonly string[] =>
+  DEPOSIT_ONLY_PRODUCTS.map(({ code }) => `${prefix}${code}`);
+
 const depositOnlySubjects = (prefix: "" | "5"): readonly Subject[] =>
   DEPOSIT_ONLY_PRODUCTS.map(({ code, category, label }) =>
     defineSubject({ code: `${prefix}${code}`, category, label, allowsWithdrawal: false }),
@@ -67,7 +70,7 @@ export const imBank = defineInstitution({
       kind: "new",
       services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 3 },
-      identifiers: ["505", "508", "502", "501", "504"],
+      identifiers: ["505", "508", "502", "501", "504", ...depositOnlyCodes("5"), "524"],
       subjectPosition: { start: 0, length: 3 },
       subjects: [
         defineSubject({ code: "505", category: "ordinary" }),
@@ -131,6 +134,7 @@ export const imBank = defineInstitution({
         }),
         defineSubject({
           code: "999",
+          label: "모임통장용 가상계좌",
           category: "ordinary",
           virtual: true,
           allowsWithdrawal: false,

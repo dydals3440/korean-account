@@ -30,7 +30,7 @@ export const hanaSecuritiesCma = defineInstitution({
           code: "94",
           category: "linked",
           virtual: true,
-          label: "증권가상",
+          label: "증권가상계좌",
         }),
         defineSubject({
           code: "37",
@@ -38,7 +38,7 @@ export const hanaSecuritiesCma = defineInstitution({
           category: "ordinary",
           virtual: true,
           allowsWithdrawal: false,
-          label: "일반가상",
+          label: "일반가상계좌",
         }),
         defineSubject({
           code: "60",

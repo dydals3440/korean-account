@@ -8,7 +8,7 @@ export const meritz = defineInstitution({
   nameKo: "메리츠증권",
   nameEn: "Meritz Securities",
   category: "securities",
-  aliases: ["메리츠", "메리츠증권", "아이엠투자증권"],
+  aliases: ["메리츠", "메리츠증권", "아이엠투자증권", "메리츠종합금융증권"],
   userBaseMillions: 3.6,
   successorOf: ["im-investment-sec"],
   patterns: [

@@ -13,6 +13,8 @@ export const deutsche = defineInstitution({
       template: patternTemplate("XXXXXXXXXX"),
       kind: "new",
       services: cmsServices("virtualAccount", "directDebit", "directCredit"),
+      effectiveFrom: "2017-03-20",
+      note: "과목코드 삭제, 일련번호(가상계좌 포함)",
     },
   ],
 });

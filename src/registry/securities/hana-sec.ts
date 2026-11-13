@@ -27,7 +27,7 @@ export const hanaSec = defineInstitution({
         defineSubject({ code: "31", category: "savings" }),
         defineSubject({ code: "51", category: "savings" }),
         defineSubject({ code: "61", category: "savings" }),
-        defineSubject({ code: "69", category: "savings" }),
+        defineSubject({ code: "69", effectiveFrom: "2016-05-02", category: "savings" }),
         defineSubject({ code: "80", category: "savings" }),
       ],
     },

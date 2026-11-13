@@ -22,6 +22,7 @@ export const kiwoom = defineInstitution({
         defineSubject({ code: "41", category: "savings" }),
         defineSubject({
           code: "50",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -29,6 +30,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "51",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -36,6 +38,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "52",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -43,6 +46,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "53",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -50,6 +54,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "54",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -57,6 +62,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "55",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -64,6 +70,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "56",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -71,6 +78,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "57",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -78,6 +86,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "58",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -85,6 +94,7 @@ export const kiwoom = defineInstitution({
         }),
         defineSubject({
           code: "59",
+          effectiveFrom: "2016-03-28",
           services: cmsServices("directCredit", "additionalServices"),
           category: "isa",
           allowsWithdrawal: false,
@@ -93,7 +103,12 @@ export const kiwoom = defineInstitution({
         defineSubject({ code: "61", category: "savings" }),
         defineSubject({ code: "71", category: "savings" }),
         defineSubject({ code: "72", category: "savings" }),
-        defineSubject({ code: "74", category: "savings" }),
+        defineSubject({
+          code: "74",
+          label: "GFD계좌",
+          effectiveFrom: "2018-01-27",
+          category: "savings",
+        }),
         defineSubject({ code: "98", category: "other" }),
       ],
     },

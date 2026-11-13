@@ -17,7 +17,7 @@ export const woori = defineInstitution({
       kind: "new",
       services: REGULAR_ACCOUNT_SERVICES,
       identifierPosition: { start: 0, length: 4 },
-      identifiers: ["1002", "1005", "1006"],
+      identifiers: ["1002", "1003", "1004", "1005", "1006", "1007"],
       subjectPosition: { start: 1, length: 3 },
       subjects: [
         defineSubject({ code: "006", category: "ordinary" }),
