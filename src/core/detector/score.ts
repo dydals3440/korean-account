@@ -1,10 +1,4 @@
-import type {
-  AccountPattern,
-  GlobalRule,
-  Institution,
-  ScoringWeights,
-  Subject,
-} from "../../types";
+import type { AccountPattern, GlobalRule, Institution, ScoringWeights, Subject } from "../../types";
 import { extractIdentifier } from "../account/extract-identifier";
 import { extractSubject } from "../account/extract-subject";
 import { formatAccount } from "../account/format-account";
