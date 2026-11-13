@@ -78,36 +78,38 @@ export function createDetectionSchema<const TId extends string>(
   const messages = resolveMessages(options.messages);
   // arktype cannot resolve its inferred object type over a generic id, so this one boundary is
   // asserted; the shared contract tests pin the runtime behaviour.
+  const subject = type({
+    code: "string",
+    category: literalSchema(SUBJECT_CATEGORIES, messages.subjectCategory),
+    "label?": "string | undefined",
+  });
+  const services = type({
+    virtualAccount: "boolean",
+    directDebit: "boolean",
+    directCredit: "boolean",
+    additionalServices: "boolean",
+  });
   const schema = type({
     institutionId: createInstitutionIdSchema(ids, { message: messages.institution }),
     kind: literalSchema(ACCOUNT_KINDS, messages.accountKind),
-    "subject?": {
-      code: "string",
-      category: literalSchema(SUBJECT_CATEGORIES, messages.subjectCategory),
-      "label?": "string",
-    },
+    "subject?": [subject, "|", "undefined"],
     score: type("number").narrow(
       (value, ctx) =>
         isNonNegativeFiniteNumber(value) || ctx.reject({ message: messages.finiteScore }),
     ),
     confidence: literalSchema(CONFIDENCE_LEVELS, messages.confidence),
-    "ambiguous?": "boolean",
+    "ambiguous?": "boolean | undefined",
     formatted: "string",
     capabilities: {
       allowsWithdrawal: "boolean",
       virtual: "boolean",
       validatedCheckDigit: "boolean | null",
-      "services?": type({
-        virtualAccount: "boolean",
-        directDebit: "boolean",
-        directCredit: "boolean",
-        additionalServices: "boolean",
-      }).or("null"),
+      "services?": [services, "|", "null | undefined"],
     },
   });
-  // The copy drops keys outside DetectionPayload and explicit `undefined`s, matching zod and
-  // valibot, before the shape is checked.
-  return type("unknown").pipe(stripUnknownKeys, schema) as unknown as Type<DetectionPayloadOf<TId>>;
+  // Validate first so `.allows()` checks the real shape, then copy only DetectionPayload keys,
+  // as zod and valibot do.
+  return schema.pipe(stripUnknownKeys) as unknown as Type<DetectionPayloadOf<TId>>;
 }
 
 /** One of the given string literals. */

@@ -44,3 +44,30 @@ describe("arktype 중첩 메시지", () => {
     expect(result instanceof type.errors ? result[0]?.message : null).toBe(MESSAGES.minDigits);
   });
 });
+
+describe("arktype detectionSchema.allows", () => {
+  const payload = {
+    institutionId: "shinhan",
+    kind: "new",
+    score: 9,
+    confidence: "high",
+    formatted: "110-436-387740",
+    capabilities: { allowsWithdrawal: true, virtual: false, validatedCheckDigit: null },
+  };
+
+  test.each([
+    [payload, true],
+    [{ ...payload, score: Number.NaN }, false],
+    [{ ...payload, institutionId: "unknown" }, false],
+    [{ ...payload, ambiguous: undefined, extra: 1 }, true],
+  ])("allows(%j) 는 %s 다", (value, expected) => {
+    // Given
+    const schema = detectionSchema;
+
+    // When
+    const allowed = schema.allows(value);
+
+    // Then
+    expect(allowed).toBe(expected);
+  });
+});
