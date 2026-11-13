@@ -2,6 +2,8 @@ import { describe, expectTypeOf, test } from "vitest";
 
 import type { DetectionResult, RegisteredInstitution } from "../..";
 import { institutions, kb, shinhan, toss } from "../../registry";
+import { defineInstitution } from "../define/define-institution";
+import { patternTemplate } from "../define/pattern-template";
 import { createDetector } from "./create-detector";
 
 describe("createDetector generic narrowing", () => {
@@ -48,5 +50,36 @@ describe("createDetector generic narrowing", () => {
 
     // Then
     expectTypeOf(extended.institutions[0]!.id).toEqualTypeOf<"kb" | "shinhan">();
+  });
+});
+
+describe("정의 타입과 exactOptionalPropertyTypes", () => {
+  test("선택 필드에 undefined 를 명시해도 기관을 정의할 수 있다", () => {
+    // Given
+    const note: string | undefined = undefined;
+
+    // When
+    const institution = defineInstitution({
+      id: "my-bank",
+      code: "999",
+      nameKo: "내 은행",
+      nameEn: undefined,
+      category: "bank",
+      aliases: [],
+      priority: undefined,
+      notes: note,
+      patterns: [
+        {
+          template: patternTemplate("XXX-XXXXXX"),
+          kind: "new",
+          identifierPosition: undefined,
+          subjects: [{ code: "01", category: "ordinary", label: undefined, services: {} }],
+          note,
+        },
+      ],
+    });
+
+    // Then
+    expectTypeOf(institution.id).toEqualTypeOf<"my-bank">();
   });
 });

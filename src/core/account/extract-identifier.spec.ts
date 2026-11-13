@@ -99,7 +99,7 @@ describe("extractIdentifier", () => {
       expect(result).toBe("4");
     });
 
-    test("식별 영역에 도달하지 못하면 빈 문자열을 반환한다", () => {
+    test("식별 영역에 도달하지 못하면 null 을 반환한다", () => {
       // Given
       const digitsShort = "11";
       const digitsEmpty = "";
@@ -110,13 +110,13 @@ describe("extractIdentifier", () => {
       const emptyResult = extractIdentifier(digitsEmpty, pattern);
 
       // Then
-      expect(shortResult).toBe("");
-      expect(emptyResult).toBe("");
+      expect(shortResult).toBeNull();
+      expect(emptyResult).toBeNull();
     });
   });
 
   describe("identifierPosition 미지정", () => {
-    test("identifierPosition 이 없으면 빈 문자열을 반환한다", () => {
+    test("identifierPosition 이 없으면 null 을 반환한다", () => {
       // Given
       const digits = "123456789012";
       const pattern = {};
@@ -125,7 +125,7 @@ describe("extractIdentifier", () => {
       const result = extractIdentifier(digits, pattern);
 
       // Then
-      expect(result).toBe("");
+      expect(result).toBeNull();
     });
   });
 });

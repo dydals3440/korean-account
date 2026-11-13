@@ -37,10 +37,18 @@ export function resolveServices(
   pattern: AccountPattern,
   subject: Subject | null,
 ): CmsServices | null {
-  if (pattern.services === undefined) {
+  const base = pattern.services;
+  if (base === undefined) {
     return null;
   }
-  return { ...pattern.services, ...subject?.services };
+  // Key by key, so an explicit `undefined` exception keeps the pattern value instead of erasing it.
+  const exceptions = subject?.services;
+  return {
+    virtualAccount: exceptions?.virtualAccount ?? base.virtualAccount,
+    directDebit: exceptions?.directDebit ?? base.directDebit,
+    directCredit: exceptions?.directCredit ?? base.directCredit,
+    additionalServices: exceptions?.additionalServices ?? base.additionalServices,
+  };
 }
 
 export interface CapabilityInput {

@@ -42,7 +42,7 @@ function hasEvidence(result: DetectionResult, input: string): boolean {
 
   const position = pattern.identifierPosition;
   const identifier = extractIdentifier(digits, pattern);
-  if (position === undefined || identifier.length < position.length) {
+  if (position === undefined || identifier === null || identifier.length < position.length) {
     return false;
   }
   if (pattern.identifiers?.includes(identifier)) {

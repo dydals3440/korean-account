@@ -18,6 +18,10 @@ const selected = process.argv.slice(2);
 // Latest published release; consumers upgrading from it must keep compiling and running.
 const BASELINE_VERSION = "0.4.1";
 // Canonical inputs whose top candidate changed on purpose since the baseline, with the reason.
+// Root exports whose signature intentionally changed since the baseline (see docs/migration.md).
+// `searchInstitutions` is checked per category below; `extractIdentifier` now returns `null`.
+const ROOT_TYPE_EXCEPTIONS = `"searchInstitutions" | "extractIdentifier"`;
+
 const REVIEWED_TOP_CHANGES = {
   "000000000000": "0.5.0: a fallback branch route is not evidence, so every candidate is low",
 };
@@ -233,7 +237,7 @@ try {
           (entry, index) => `
           import * as current${index} from "korean-account${entry}";
           import * as previous${index} from "korean-account-baseline${entry}";
-          const dropIn${index}: ${entry ? `typeof previous${index}` : `Omit<typeof previous${index}, "searchInstitutions">`} = current${index};
+          const dropIn${index}: ${entry ? `typeof previous${index}` : `Omit<typeof previous${index}, ${ROOT_TYPE_EXCEPTIONS}>`} = current${index};
           export { dropIn${index} };
         `,
         )

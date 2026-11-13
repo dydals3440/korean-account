@@ -188,7 +188,7 @@ function scoreIdentifier(
   }
 
   const identifier = extractIdentifier(digits, pattern);
-  if (!isIdentifierMatch(identifier, pattern, lookup)) {
+  if (identifier === null || !isIdentifierMatch(identifier, pattern, lookup)) {
     return NO_CODE_MATCH;
   }
   return {
