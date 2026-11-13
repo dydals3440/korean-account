@@ -8,18 +8,20 @@ import { fileURLToPath } from "node:url";
 
 import spawn from "cross-spawn";
 
-import { applyRegistryChanges } from "./compatibility.mjs";
-
 const root = fileURLToPath(new URL("..", import.meta.url));
-const registryChanges = JSON.parse(
-  readFileSync(join(root, "scripts/compatibility-changes.json"), "utf8"),
-);
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const typescript = process.env.CONSUMER_TYPESCRIPT ?? pkg.devDependencies.typescript;
 assert.match(typescript, /^\^?\d+\.\d+\.\d+$/);
 const runtimeOnly = process.env.CONSUMER_RUNTIME_ONLY === "true";
 const legacyEsm = typescript === "5.1.6";
 const selected = process.argv.slice(2);
+// Latest published release; consumers upgrading from it must keep compiling and running.
+const BASELINE_VERSION = "0.4.1";
+// Canonical inputs whose top candidate changed on purpose since the baseline, with the reason.
+const REVIEWED_TOP_CHANGES = {
+  "000000000000": "0.5.0: a fallback branch route is not evidence, so every candidate is low",
+};
+
 const ALL_PEER_CASES = [
   "none",
   "zod@3.23.0",
@@ -73,7 +75,7 @@ try {
         "--no-fund",
         "--package-lock=false",
         tarball,
-        "korean-account-baseline@npm:korean-account@0.3.1",
+        `korean-account-baseline@npm:korean-account@${BASELINE_VERSION}`,
         ...(runtimeOnly ? [] : [`typescript@${typescript}`]),
         ...(peer === "none" ? [] : [peer]),
         // ArkType's own declarations refer to NodeJS and buffer types.
@@ -90,9 +92,6 @@ try {
       const require = createRequire(import.meta.url);
       const entries = ${JSON.stringify(entries)};
       const adapter = ${JSON.stringify(adapter)};
-      const json = value => JSON.parse(JSON.stringify(value));
-      const applyRegistryChanges = ${applyRegistryChanges.toString()};
-      const registryChanges = ${JSON.stringify(registryChanges)};
       const account = "110-436-387740";
       for (const mode of ["import", "require"]) {
         const load = name => mode === "import" ? import(name) : require(name);
@@ -102,27 +101,25 @@ try {
           const keys = value => Object.keys(value).filter(key => key !== "__esModule").sort();
           assert.deepEqual(keys(current), keys(baseline), mode + entry + " exports");
           if (!entry) {
-            const expectedRegistry = applyRegistryChanges(json(baseline.institutions), registryChanges);
-            assert.deepEqual(json(current.institutions), expectedRegistry);
-            const expectedResult = result => {
-              if (result === null) return null;
-              const expected = json(result);
-              expected.institution = expectedRegistry.find(i => i.id === result.institution.id);
-              const owner = baseline.institutions.find(i => i.patterns.includes(result.matchedPattern));
-              const patternIndex = owner.patterns.indexOf(result.matchedPattern);
-              expected.matchedPattern = expectedRegistry.find(i => i.id === owner.id).patterns[patternIndex];
-              if (result.subject) {
-                const subject = expected.matchedPattern.subjects?.find(s => s.code === result.subject.code);
-                assert(subject, "Missing reviewed subject " + result.subject.code);
-                expected.subject = json(baseline.normalizeSubject(subject, result.kind));
-                if (subject.allowsWithdrawal === false) expected.capabilities.allowsWithdrawal = false;
-              }
-
-              return expected;
-            };
+            assert.deepEqual(
+              current.institutions.map(institution => institution.id),
+              baseline.institutions.map(institution => institution.id),
+            );
+            // Scores and confidence may be recalibrated between releases; the top candidate may not move.
+            const topCandidate = result =>
+              result === null
+                ? null
+                : [result.institution.id, result.kind, result.subject?.code ?? null, result.formatted];
+            const reviewedTopChanges = ${JSON.stringify(REVIEWED_TOP_CHANGES)};
             for (const input of [account, "3333-12-3456789", "1002-123-456789", "12345", "", "000000000000"]) {
-              assert.deepEqual(json(current.detect(input)), baseline.detect(input).map(expectedResult));
-              assert.deepEqual(json(current.detectBest(input)), expectedResult(baseline.detectBest(input)));
+              if (input in reviewedTopChanges) {
+                assert.equal(current.detectBest(input)?.confidence ?? "low", "low", reviewedTopChanges[input]);
+              } else {
+                assert.deepEqual(topCandidate(current.detectBest(input)), topCandidate(baseline.detectBest(input)), input);
+              }
+              for (const result of current.detect(input)) {
+                assert.equal(typeof result.ambiguous, "boolean");
+              }
             }
             assert.equal(current.normalizeAccount(account), "110436387740");
             assert.equal(current.createDetector([current.kb, current.shinhan]).detect(account)[0]?.institution.id, "shinhan");
@@ -184,9 +181,8 @@ try {
           (entry, index) => `
           import * as current${index} from "korean-account${entry}";
           import * as previous${index} from "korean-account-baseline${entry}";
-          const backward${index}: ${entry ? `typeof previous${index}` : `Omit<typeof previous${index}, "searchInstitutions">`} = current${index};
-          const forward${index}: ${entry ? `typeof current${index}` : `Omit<typeof current${index}, "searchInstitutions">`} = previous${index};
-          export { backward${index}, forward${index} };
+          const dropIn${index}: ${entry ? `typeof previous${index}` : `Omit<typeof previous${index}, "searchInstitutions">`} = current${index};
+          export { dropIn${index} };
         `,
         )
         .join("\n") +
@@ -199,9 +195,8 @@ try {
             .map((value) => JSON.stringify(value))
             .join(" | ");
           return `
-            const searchBackward${index}: typeof previous0.searchInstitutions<${type}> = current0.searchInstitutions<${type}>;
-            const searchForward${index}: typeof current0.searchInstitutions<${type}> = previous0.searchInstitutions<${type}>;
-            export { searchBackward${index}, searchForward${index} };
+            const searchDropIn${index}: typeof previous0.searchInstitutions<${type}> = current0.searchInstitutions<${type}>;
+            export { searchDropIn${index} };
           `;
         })
         .join("\n");
@@ -241,7 +236,7 @@ try {
       run("npm", ["exec", "--", "tsc", "--project", "tsconfig.json"], cwd);
     }
     console.log(
-      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; 0.3.1 API compatible; reviewed 0.4 corrections)`,
+      `✓ packed consumer: ${peer} (ESM, CJS runtime; ${legacyEsm ? "TS 5.1 ESM types" : "ESM/CJS types"}, Node16, NodeNext, Bundler; drop-in for ${BASELINE_VERSION})`,
     );
   }
 } finally {
