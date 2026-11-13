@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const busan = defineInstitution({
   id: "busan",
@@ -12,7 +10,7 @@ export const busan = defineInstitution({
   userBaseMillions: 3.3,
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -32,7 +30,7 @@ export const busan = defineInstitution({
     {
       // The PDF row header says 13 digits but draws only 12 boxes (check digit
       // omitted) — normalized to 13 digits.
-      template: T("XXX-XXXX-XXXXX-X"),
+      template: patternTemplate("XXX-XXXX-XXXXX-X"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["101", "102", "112", "103", "109", "113"],

@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const bnpParibas = defineInstitution({
   id: "bnp-paribas",
@@ -11,7 +10,7 @@ export const bnpParibas = defineInstitution({
   userBaseMillions: 0.01,
   patterns: [
     {
-      template: T("XXXXX-XXXXXX-XXX"),
+      template: patternTemplate("XXXXX-XXXXXX-XXX"),
       kind: "new",
       effectiveFrom: "2019-01-21",
       note: "서비스 미참가",

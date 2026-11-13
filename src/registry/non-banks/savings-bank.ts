@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const savingsBank = defineInstitution({
   id: "savings-bank",
@@ -12,7 +10,7 @@ export const savingsBank = defineInstitution({
   userBaseMillions: 6,
   patterns: [
     {
-      template: T("XXX-XX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XX-XXXXXX-X"),
       kind: "new",
       subjectPosition: { start: 5, length: 2 },
       subjects: [

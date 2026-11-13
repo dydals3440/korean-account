@@ -1,5 +1,4 @@
-import type { InstitutionId } from "../registry";
-import { INSTITUTION_IDS } from "../registry/institution-ids";
+import { INSTITUTION_IDS, type InstitutionId } from "../registry/institution-ids";
 import type { AccountKind, Confidence, SubjectCategory } from "../types";
 
 // Single source of truth for every validation adapter (zod / valibot / yup /

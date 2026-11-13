@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "vitest";
 
-import { getInstitution } from "../../registry";
+import { getInstitution } from "../../builtin/get-institution";
 import type { AccountPattern } from "../../types";
 import { extractIdentifier } from "./extract-identifier";
 import { normalizeAccount } from "./normalize-account";

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 
 import {
-  defineBranchRule,
   kb11FirstDigit,
   kbank10First9,
   kbank14First79,
@@ -351,21 +350,5 @@ describe("toss12First1719", () => {
 
     // Then
     expect(result).toBeNull();
-  });
-});
-
-describe("defineBranchRule", () => {
-  test("입력 BranchRule을 그대로 반환한다 (타입 안전 헬퍼)", () => {
-    // Given
-    const input = {
-      describe: "test rule",
-      evaluate: () => null,
-    };
-
-    // When
-    const result = defineBranchRule(input);
-
-    // Then
-    expect(result).toBe(input);
   });
 });

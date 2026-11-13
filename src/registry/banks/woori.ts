@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const woori = defineInstitution({
   id: "woori",
@@ -14,7 +12,7 @@ export const woori = defineInstitution({
   successorOf: ["sangup", "hanil", "pyunghwa"],
   patterns: [
     {
-      template: T("XXXX-XXX-XXXXXX"),
+      template: patternTemplate("XXXX-XXX-XXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["1002", "1005", "1006"],
@@ -31,7 +29,7 @@ export const woori = defineInstitution({
     // PDF p.5: 14 digits = branch(3)-customer(5)-check1(1)-subject(2)-serial(2)-check2(1).
     // The printed box glyphs omit the check1 box; the digit-count column (14) is authoritative.
     {
-      template: T("XXX-XXXXX-X-XX-XX-X"),
+      template: patternTemplate("XXX-XXXXX-X-XX-XX-X"),
       kind: "new",
       subjectPosition: { start: 9, length: 2 },
       subjects: [
@@ -40,7 +38,7 @@ export const woori = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -55,7 +53,7 @@ export const woori = defineInstitution({
       note: "(구)상업",
     },
     {
-      template: T("XXX-XXXXXX-XX-XX-X"),
+      template: patternTemplate("XXX-XXXXXX-XX-XX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 9, length: 2 },
       subjects: [
@@ -70,7 +68,7 @@ export const woori = defineInstitution({
       note: "(구)한일은행",
     },
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [

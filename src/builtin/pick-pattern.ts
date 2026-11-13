@@ -1,39 +1,21 @@
-import { getInstitution } from "../registry";
-import type { AccountKind, AccountPattern } from "../types";
-import { templateLength } from "../core/account/template-length";
+import { findPattern, type PatternFilter } from "../core/lookup/find-pattern";
+import type { InstitutionId } from "../registry/institution-ids";
+import type { AccountPattern, InstitutionIdInput } from "../types";
+import { getInstitution } from "./get-institution";
 
-export interface PickPatternFilter {
-  readonly kind?: AccountKind;
-  /** Template length in digits (hyphens excluded). */
-  readonly length?: number;
-}
+/** Criteria for {@link pickPattern}. */
+export type PickPatternFilter = PatternFilter;
 
 /**
- * Looks up a single matching pattern on a registered institution.
+ * Returns a built-in institution's first pattern matching the filter, or `null`.
  *
  * @example
- * pickPattern("kb", { kind: "new", length: 14 });
- * // → the KB Kookmin 14-digit new-format pattern
+ * pickPattern("kb", { kind: "new", length: 14 }); // KB 14-digit new-format pattern
  */
 export function pickPattern(
-  institutionId: string,
+  institutionId: InstitutionIdInput<InstitutionId>,
   filter: PickPatternFilter = {},
 ): AccountPattern | null {
-  const inst = getInstitution(institutionId);
-  if (!inst) {
-    return null;
-  }
-  return (
-    inst.patterns.find((p) => {
-      if (filter.kind && p.kind !== filter.kind) {
-        return false;
-      }
-
-      if (filter.length !== undefined && templateLength(p.template) !== filter.length) {
-        return false;
-      }
-
-      return true;
-    }) ?? null
-  );
+  const institution = getInstitution(institutionId);
+  return institution === null ? null : findPattern(institution, filter);
 }

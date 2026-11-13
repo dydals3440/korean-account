@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const shinhan = defineInstitution({
   id: "shinhan",
@@ -14,7 +12,7 @@ export const shinhan = defineInstitution({
   successorOf: ["chohung", "shinhan-legacy"],
   patterns: [
     {
-      template: T("XXX-XXX-XXXXXX"),
+      template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: [
@@ -150,7 +148,7 @@ export const shinhan = defineInstitution({
       effectiveFrom: "2006-10-09",
     },
     {
-      template: T("XXX-XXX-XXXXXXX-X"),
+      template: patternTemplate("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
       additionalRules: [(digits) => digits.slice(3, 6) !== "901"],
       subjectPosition: { start: 0, length: 3 },
@@ -173,7 +171,7 @@ export const shinhan = defineInstitution({
       ],
     },
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -191,7 +189,7 @@ export const shinhan = defineInstitution({
       note: "(구)조흥(021)",
     },
     {
-      template: T("XXX-XX-XXXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -202,7 +200,7 @@ export const shinhan = defineInstitution({
       note: "(구)조흥(021) 가상계좌",
     },
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -218,14 +216,14 @@ export const shinhan = defineInstitution({
       note: "(구)신한(026)",
     },
     {
-      template: T("XXX-XX-XXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 2 },
       subjects: [defineSubject({ code: "99", category: "ordinary", virtual: true })],
       note: "(구)신한(026) 가상계좌",
     },
     {
-      template: T("XXX-XXX-XXXXXXX-X"),
+      template: patternTemplate("XXX-XXX-XXXXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 3, length: 3 },
       subjects: [defineSubject({ code: "901", category: "ordinary", virtual: true })],

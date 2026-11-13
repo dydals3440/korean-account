@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import type { Subject } from "../../types";
 import { kb11FirstDigit } from "../branch-rules";
 
@@ -25,7 +23,7 @@ export const kb = defineInstitution({
   userBaseMillions: 32,
   patterns: [
     {
-      template: T("XXX-XXX-XXXX"),
+      template: patternTemplate("XXX-XXX-XXXX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["0"],
@@ -33,7 +31,7 @@ export const kb = defineInstitution({
     },
     // 11d: branchRule forks the kind by first digit (0 = incoming-only, 9 = lifetime).
     {
-      template: T("XXX-XXXX-XXXX"),
+      template: patternTemplate("XXX-XXXX-XXXX"),
       kind: "new",
       branchRule: kb11FirstDigit,
       additionalRules: [(d) => d.length === 11 && (d[0] === "0" || d[0] === "9")],
@@ -42,7 +40,7 @@ export const kb = defineInstitution({
       note: "11자리: 0=입금전용, 9=평생계좌",
     },
     {
-      template: T("XXX-XX-XXXX-XX-X"),
+      template: patternTemplate("XXX-XX-XXXX-XX-X"),
       kind: "old",
       identifierPosition: { start: 3, length: 2 },
       identifiers: ["01", "21", "24", "05", "04", "25", "26"],
@@ -50,7 +48,7 @@ export const kb = defineInstitution({
       subjects: kbSubjectsOld12,
     },
     {
-      template: T("XXXX-XX-XXXXXXX-X"),
+      template: patternTemplate("XXXX-XX-XXXXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 4, length: 2 },
       subjects: [
@@ -65,7 +63,7 @@ export const kb = defineInstitution({
       ],
     },
     {
-      template: T("XXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXX-XX-XXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 4, length: 2 },
       subjects: [
@@ -75,7 +73,7 @@ export const kb = defineInstitution({
       note: "(구)주택 12자리, 연계예금(90) CMS 계약 업체만",
     },
     {
-      template: T("XXXX-XX-XXXXXXX-X"),
+      template: patternTemplate("XXXX-XX-XXXXXXX-X"),
       kind: "merged-legacy",
       subjectPosition: { start: 4, length: 2 },
       subjects: [

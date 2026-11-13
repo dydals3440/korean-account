@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { expandTwoDigitRange } from "../expand-range";
 
 export const kyoboSec = defineInstitution({
@@ -13,7 +11,7 @@ export const kyoboSec = defineInstitution({
   userBaseMillions: 3,
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
       additionalRules: [(digits) => digits[0] === "0"],
       subjectPosition: { start: 3, length: 2 },
@@ -32,7 +30,7 @@ export const kyoboSec = defineInstitution({
     {
       // PDF p.16: 일련번호(4)-일련번호(4)-검증번호(1)-일련번호(2) = 11 digits;
       // the printed boxes show the last serial run as a single box.
-      template: T("XXXX-XXXX-X-XX"),
+      template: patternTemplate("XXXX-XXXX-X-XX"),
       kind: "new",
       additionalRules: [(digits) => digits[0] !== "0"],
       effectiveFrom: "2012-01-25",

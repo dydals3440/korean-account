@@ -1,5 +1,5 @@
-import type { InstitutionId } from "../../registry";
 import { ACCOUNT_KINDS, CONFIDENCE_LEVELS, SUBJECT_CATEGORIES } from "../../constants";
+import type { InstitutionId } from "../../registry/institution-ids";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,

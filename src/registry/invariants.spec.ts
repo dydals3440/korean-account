@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { templateLength } from "../core/account/template-length";
 import { institutions } from ".";
+import { templateLength } from "../core/account/template-length";
 
 // Registry data files are filled in by hand from the PDF. A broken invariant
 // fails silently at runtime (the score bonus just becomes 0), so it is

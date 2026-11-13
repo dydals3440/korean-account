@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const nhInv = defineInstitution({
   id: "nh-inv",
@@ -11,5 +10,7 @@ export const nhInv = defineInstitution({
   aliases: ["NH투자", "NH투자증권", "우리투자증권"],
   userBaseMillions: 10.5,
   successorOf: ["wooriinvest-legacy", "nh-nonghyup-sec"],
-  patterns: [{ template: T("XXXXXXXXXXX"), kind: "new", effectiveFrom: "2009-08-04" }],
+  patterns: [
+    { template: patternTemplate("XXXXXXXXXXX"), kind: "new", effectiveFrom: "2009-08-04" },
+  ],
 });

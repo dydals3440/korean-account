@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 const nhCoopSubjectsNew = [
   defineSubject({ code: "351", category: "ordinary" }),
@@ -26,7 +24,7 @@ export const nhCoop = defineInstitution({
   userBaseMillions: 18,
   patterns: [
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["351", "352", "356", "355"],
@@ -39,7 +37,7 @@ export const nhCoop = defineInstitution({
     },
     // 13d next-gen installment savings (incoming only) — 5 codes listed in the PDF.
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
       additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
@@ -55,7 +53,7 @@ export const nhCoop = defineInstitution({
     },
     // 13d next-gen trust (incoming only) — PDF lists 028.
     {
-      template: T("XXX-XXXX-XXXX-XX"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX"),
       kind: "incoming-only",
       additionalRules: [ACCOUNT_CLASS_3_TO_5],
       identifierPosition: { start: 0, length: 3 },
@@ -70,7 +68,7 @@ export const nhCoop = defineInstitution({
       ],
     },
     {
-      template: T("XXXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 6, length: 2 },
       subjects: [
@@ -81,7 +79,7 @@ export const nhCoop = defineInstitution({
       ],
     },
     {
-      template: T("XXXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "virtual",
       subjectPosition: { start: 6, length: 2 },
       subjects: [
@@ -92,7 +90,7 @@ export const nhCoop = defineInstitution({
       note: "구가상계좌",
     },
     {
-      template: T("XXX-XXXX-XXXX-XX-X"),
+      template: patternTemplate("XXX-XXXX-XXXX-XX-X"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["792"],

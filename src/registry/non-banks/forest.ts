@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const forest = defineInstitution({
   id: "forest",
@@ -12,7 +10,7 @@ export const forest = defineInstitution({
   userBaseMillions: 0.6,
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -24,7 +22,7 @@ export const forest = defineInstitution({
       ],
     },
     {
-      template: T("XXXXX-XX-XXXXXX"),
+      template: patternTemplate("XXXXX-XX-XXXXXX"),
       kind: "new",
       subjectPosition: { start: 5, length: 2 },
       subjects: [

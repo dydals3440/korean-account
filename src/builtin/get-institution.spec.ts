@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getInstitution } from ".";
+import { getInstitution } from "./get-institution";
 
 /**
  * Regression guard for `Institution.commonCode` (KFTC standard bank code).

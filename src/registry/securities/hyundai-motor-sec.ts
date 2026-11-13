@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const hyundaiMotorSec = defineInstitution({
   id: "hyundai-motor-sec",
@@ -9,5 +8,5 @@ export const hyundaiMotorSec = defineInstitution({
   category: "securities",
   aliases: ["현대차증권", "HMC투자증권"],
   userBaseMillions: 2.6,
-  patterns: [{ template: T("XXXXXXXX"), kind: "new" }],
+  patterns: [{ template: patternTemplate("XXXXXXXX"), kind: "new" }],
 });

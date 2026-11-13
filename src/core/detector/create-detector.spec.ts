@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import type { Institution } from "../../types";
-import { createDetector } from "./create-detector";
 import { patternTemplate } from "../define/pattern-template";
+import { createDetector } from "./create-detector";
 
 const SHINHAN: Institution = {
   id: "shinhan",

@@ -1,8 +1,8 @@
 import * as v from "valibot";
 import { describe, expect, test } from "vitest";
 
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import { MESSAGES } from "../contract";
+import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,

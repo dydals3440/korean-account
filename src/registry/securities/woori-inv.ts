@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const wooriInv = defineInstitution({
   id: "woori-inv",
@@ -12,7 +11,7 @@ export const wooriInv = defineInstitution({
   successorOf: ["korea-fos-sec"],
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "new",
       // No `subjects`, so no score bonus — but `matchedPattern` is public output,
       // and dropping this would change what consumers observe. Kept as in the PDF table.

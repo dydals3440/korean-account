@@ -1,53 +1,34 @@
-import { type InstitutionId, institutions, type RegisteredInstitution } from "../registry";
-import type { DetectionResult, DetectOptions } from "../types";
 import { createDetector } from "../core/detector/create-detector";
+import type { InstitutionId } from "../registry/institution-ids";
+import { institutions, type RegisteredInstitution } from "../registry/institutions";
+import type { DetectionResult, DetectOptions } from "../types";
+
+const builtinDetector = createDetector(institutions);
 
 /**
- * Detector over the full built-in registry, shared by {@link detect} and
- * {@link detectBest}.
- *
- * The pure annotation is load-bearing: without it bundlers cannot drop the
- * registry for consumers that never call the default-registry helpers.
- */
-const defaultDetector = createDetector(institutions);
-
-/**
- * Analyzes an account number against the full built-in registry and returns
- * ranked candidates with institution / kind / subject / capabilities.
- *
- * `options.include` / `options.exclude` autocomplete registered
- * `InstitutionId` literals (arbitrary strings are also accepted for
- * user-extended registries).
- *
- * Importing this pulls the entire registry into your bundle. If you only care
- * about specific institutions, build a scoped detector instead:
- * `createDetector([kb, shinhan])`.
+ * Detects candidates against the full built-in registry, best first.
+ * Bundles every institution; prefer `createDetector([kb, shinhan])` for a subset.
  *
  * @example
  * detect("110-436-387740");
- * detect("3333-12-3456789", { categories: ["bank"] });
- * detect("110-436-387740", { include: ["shinhan", "kb", "hana"] });
+ * detect("3333-12-3456789", { categories: ["bank"], limit: 3 });
  */
-export function detect(input: string, options?: DetectOptions<InstitutionId>) {
-  return defaultDetector.detect(input, options);
+export function detect(
+  input: string,
+  options?: DetectOptions<InstitutionId>,
+): readonly DetectionResult<RegisteredInstitution>[] {
+  return builtinDetector.detect(input, options);
 }
 
 /**
- * Returns only the top candidate, or `null` when nothing matches.
- *
- * Shorthand for `detect(input)[0] ?? null` — useful for form validation and
- * direct-debit guards where a single answer is needed.
+ * Returns the top candidate from {@link detect}, or `null` when nothing matches.
  *
  * @example
- * const top = detectBest("110-436-387740");
- * if (top) console.log(top.institution.id, top.kind);
- *
- * @example With filters
- * const top = detectBest("110-436-387740", { categories: ["bank"] });
+ * detectBest("110-436-387740")?.institution.id; // "shinhan"
  */
 export function detectBest(
   input: string,
   options?: DetectOptions<InstitutionId>,
 ): DetectionResult<RegisteredInstitution> | null {
-  return defaultDetector.detect(input, options)[0] ?? null;
+  return builtinDetector.detect(input, options)[0] ?? null;
 }

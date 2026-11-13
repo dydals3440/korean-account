@@ -1,340 +1,164 @@
 import type {
-  AccountKind,
-  AccountPattern,
   CheckDigitVerifier,
-  DetectionCapabilities,
+  CreateDetectorOptions,
   DetectionResult,
   DetectOptions,
   Detector,
+  ExtendDetectorOptions,
   GlobalRule,
   Institution,
+  InstitutionIdInput,
   ScoringWeights,
-  Subject,
 } from "../../types";
-import { scoreToConfidence } from "./confidence";
-import { buildDetectorIndex } from "./length-index";
 import { normalizeAccount } from "../account/normalize-account";
-import { prevalence } from "./prevalence";
+import { applyBranchRule } from "./apply-branch-rule";
+import { resolveCapabilities, toVerifierMap, verifyCheckDigit } from "./capabilities";
+import { scoreToConfidence } from "./confidence";
+import { createLengthIndex } from "./length-index";
+import { normalizeSubject } from "./normalize-subject";
+import { rankDetections } from "./rank";
 import { DEFAULT_WEIGHTS, scoreInstitution } from "./score";
-import { normalizeSubject } from "../define/define-subject";
-
-/** Optional knobs for {@link createDetector}. */
-export interface CreateDetectorOptions<I extends Institution = Institution> {
-  readonly globalRules?: readonly GlobalRule[];
-  /** Partial override of the scoring weights. Missing keys keep their defaults. */
-  readonly scoring?: ScoringWeights;
-  /**
-   * Check-digit verifiers keyed by institution id. When the matched
-   * institution has a verifier and the pattern does not opt out with
-   * `validatesCheckDigit: false`, the result's
-   * `capabilities.validatedCheckDigit` becomes a boolean.
-   *
-   * The algorithms themselves are user-supplied — they are not published by
-   * KFTC and are out of scope for this library.
-   */
-  readonly checkDigitVerifiers?: Readonly<Partial<Record<I["id"], CheckDigitVerifier>>>;
-}
 
 const DEFAULT_LIMIT = 5;
 const DEFAULT_MIN_SCORE = 1;
 
-/** Ranking tie-break order between account kinds. */
-const KIND_ORDER: Record<AccountKind, number> = {
-  new: 6,
-  old: 5,
-  virtual: 4,
-  lifetime: 3,
-  "incoming-only": 2,
-  "merged-legacy": 1,
-};
+/** Options resolved once per detector; `extend` merges these instead of raw options. */
+interface DetectorConfig {
+  readonly globalRules: readonly GlobalRule[];
+  readonly scoring: ScoringWeights;
+  readonly verifiers: ReadonlyMap<string, CheckDigitVerifier>;
+}
 
 /**
- * Builds a detector over the given institutions.
+ * Creates an immutable detector over the given institutions.
+ * Results narrow `institution.id` to the ids you pass in.
  *
- * The element type of `institutions` propagates as the generic `I`, so
- * `detect()` results narrow to exactly the ids you passed in — e.g.
- * `createDetector([kb, shinhan])` yields results whose `institution.id` is
- * `"kb" | "shinhan"`.
- *
- * `extend` / `remove` return new detectors; a detector is never mutated.
- *
- * @example Only the banks you ship with — everything else tree-shakes away
- * import { createDetector, kb, shinhan, toss } from "korean-account";
+ * @example Only the institutions you ship
  * const detector = createDetector([kb, shinhan, toss]);
- * detector.detect("110-436-387740");
+ * detector.detect("110-436-387740")[0]?.institution.id; // "shinhan"
  *
- * @example The full registry
- * import { createDetector, institutions } from "korean-account";
- * const detector = createDetector(institutions);
- *
- * @example Custom scoring and extension
- * const strict = createDetector(institutions, { scoring: { identifierMatch: 6 } });
- * const extended = strict.extend({ institutions: [myCustomInstitution] });
+ * @example Custom weights and institutions
+ * const custom = createDetector(institutions, { scoring: { identifierMatch: 6 } })
+ *   .extend({ institutions: [myInstitution] });
  */
-export function createDetector<I extends Institution>(
-  institutions: readonly I[],
-  options: CreateDetectorOptions<I> = {},
-): Detector<I> {
-  const globalRules = options.globalRules ?? [];
-  const weights = { ...DEFAULT_WEIGHTS, ...options.scoring };
-  const byId = new Map<string, I>(institutions.map((institution) => [institution.id, institution]));
-  const index = buildDetectorIndex(institutions);
-  const verifierByInstitutionId = buildVerifierMap(options.checkDigitVerifiers);
+export function createDetector<TInstitution extends Institution>(
+  institutions: readonly TInstitution[],
+  options: CreateDetectorOptions<TInstitution> = {},
+): Detector<TInstitution> {
+  return buildDetector(institutions, {
+    globalRules: options.globalRules ?? [],
+    scoring: options.scoring ?? {},
+    verifiers: toVerifierMap(options.checkDigitVerifiers),
+  });
+}
+
+function buildDetector<TInstitution extends Institution>(
+  institutions: readonly TInstitution[],
+  config: DetectorConfig,
+): Detector<TInstitution> {
+  const weights = { ...DEFAULT_WEIGHTS, ...config.scoring };
+  const institutionById = new Map(institutions.map((institution) => [institution.id, institution]));
+  const lengthIndex = createLengthIndex(institutions);
 
   const detect = (
-    raw: string,
-    detectOptions: DetectOptions = {},
-  ): readonly DetectionResult<I>[] => {
-    const digits = normalizeAccount(raw);
+    input: string,
+    options: DetectOptions<TInstitution["id"]> = {},
+  ): readonly DetectionResult<TInstitution>[] => {
+    const digits = normalizeAccount(input);
     if (digits.length === 0) {
       return [];
     }
 
-    const limit = detectOptions.limit ?? DEFAULT_LIMIT;
-    const minScore = detectOptions.minScore ?? DEFAULT_MIN_SCORE;
-    const includeSet = detectOptions.include ? new Set<string>(detectOptions.include) : null;
-    const excludeSet = detectOptions.exclude ? new Set<string>(detectOptions.exclude) : null;
+    const minScore = options.minScore ?? DEFAULT_MIN_SCORE;
+    const isRequested = createInstitutionFilter<TInstitution>(options);
+    const results: DetectionResult<TInstitution>[] = [];
 
-    const candidateInstitutions = index.byLengthNear(digits.length);
-    const results: DetectionResult<I>[] = [];
-
-    for (const institution of candidateInstitutions) {
-      const {
-        score: baseScore,
-        matchedPattern,
-        formatted,
-        subject,
-      } = scoreInstitution(digits, institution, globalRules, weights);
-      if (matchedPattern === null) {
+    for (const candidate of lengthIndex.candidatesNear(digits.length)) {
+      const match = scoreInstitution(digits, candidate, config.globalRules, weights);
+      if (match.matchedPattern === null) {
         continue;
       }
 
-      // The branch-rule bonus applies *before* the minScore cutoff. Branch
-      // rules are strong identification signals spelled out by the KFTC PDF,
-      // so a candidate that clears minScore thanks to one must not be culled
-      // early.
-      const branchOutcome = evaluateBranch(
-        matchedPattern,
+      const branch = applyBranchRule(digits, match.matchedPattern, candidate, {
+        institutionById,
+        bonus: weights.branchRuleMatch,
+      });
+      const score = match.score + branch.bonus;
+      const isWantedKind = options.kinds?.includes(branch.kind) ?? true;
+      if (score < minScore || !isWantedKind || !isRequested(branch.institution)) {
+        continue;
+      }
+
+      const subject = match.subject ? normalizeSubject(match.subject, branch.kind) : undefined;
+      const validatedCheckDigit = verifyCheckDigit(
         digits,
-        byId,
-        institution,
-        baseScore,
-        weights.branchRuleMatch,
-      );
-      if (
-        !passesOptionFilters(branchOutcome.routedInstitution, detectOptions, includeSet, excludeSet)
-      ) {
-        continue;
-      }
-      if (branchOutcome.score < minScore) {
-        continue;
-      }
-
-      if (detectOptions.kinds && !detectOptions.kinds.includes(branchOutcome.kind)) {
-        continue;
-      }
-
-      const normalizedSubject = subject ? normalizeSubject(subject, branchOutcome.kind) : undefined;
-      const validatedCheckDigit = resolveCheckDigit(
-        matchedPattern,
-        branchOutcome.routedInstitution.id,
-        digits,
-        verifierByInstitutionId,
-      );
-      const capabilities = computeCapabilities(
-        branchOutcome.kind,
-        normalizedSubject,
-        branchOutcome.virtualOverride,
-        validatedCheckDigit,
+        match.matchedPattern,
+        branch.institution.id,
+        config.verifiers,
       );
 
       results.push({
-        institution: branchOutcome.routedInstitution,
-        matchedPattern,
-        kind: branchOutcome.kind,
-        subject: normalizedSubject,
-        formatted,
-        score: branchOutcome.score,
-        confidence: scoreToConfidence(branchOutcome.score),
-        capabilities,
+        institution: branch.institution,
+        matchedPattern: match.matchedPattern,
+        kind: branch.kind,
+        subject,
+        formatted: match.formatted,
+        score,
+        confidence: scoreToConfidence(score),
+        capabilities: resolveCapabilities({
+          kind: branch.kind,
+          subject,
+          virtualOverride: branch.virtualOverride,
+          validatedCheckDigit,
+        }),
       });
     }
 
-    results.sort(compareDetections);
-    return narrowLowConfidence(results).slice(0, limit);
+    return rankDetections(results).slice(0, options.limit ?? DEFAULT_LIMIT);
   };
 
-  const extend = <E extends Institution>(extra: {
-    readonly institutions?: readonly E[];
-    readonly globalRules?: readonly GlobalRule[];
-    readonly scoring?: ScoringWeights;
-    readonly checkDigitVerifiers?: Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
-  }): Detector<I | E> => {
-    // An incoming id replaces the existing institution (prevents silent duplicates).
-    const incomingIds = new Set((extra.institutions ?? []).map((institution) => institution.id));
-    const merged: readonly (I | E)[] = [
-      ...institutions.filter((institution) => !incomingIds.has(institution.id)),
-      ...(extra.institutions ?? []),
-    ];
-    // Both maps' keys are subsets of `(I | E)["id"]`, but TS cannot narrow the
-    // spread of a mapped type with a generic key back to that type.
-    const checkDigitVerifiers = {
-      ...options.checkDigitVerifiers,
-      ...extra.checkDigitVerifiers,
-    } as Readonly<Partial<Record<(I | E)["id"], CheckDigitVerifier>>>;
+  const extend = <TExtra extends Institution>(
+    extension: ExtendDetectorOptions<TInstitution, TExtra>,
+  ): Detector<TInstitution | TExtra> => {
+    const incoming = extension.institutions ?? [];
+    const incomingIds = new Set(incoming.map((institution) => institution.id));
+    const kept = institutions.filter((institution) => !incomingIds.has(institution.id));
 
-    return createDetector<I | E>(merged, {
-      globalRules: [...globalRules, ...(extra.globalRules ?? [])],
-      scoring: { ...options.scoring, ...extra.scoring },
-      checkDigitVerifiers,
+    return buildDetector<TInstitution | TExtra>([...kept, ...incoming], {
+      globalRules: [...config.globalRules, ...(extension.globalRules ?? [])],
+      scoring: { ...config.scoring, ...extension.scoring },
+      verifiers: new Map([...config.verifiers, ...toVerifierMap(extension.checkDigitVerifiers)]),
     });
   };
 
-  const remove = (target: string | ((institution: Institution) => boolean)): Detector<I> => {
-    const matchesRemoval =
+  const remove = (
+    target: InstitutionIdInput<TInstitution["id"]> | ((institution: TInstitution) => boolean),
+  ): Detector<TInstitution> => {
+    const shouldRemove =
       typeof target === "function"
         ? target
-        : (institution: Institution) => institution.id === target;
-    return createDetector<I>(
-      institutions.filter((institution) => !matchesRemoval(institution)),
-      {
-        globalRules,
-        scoring: options.scoring,
-        checkDigitVerifiers: options.checkDigitVerifiers,
-      },
+        : (institution: TInstitution) => institution.id === target;
+
+    return buildDetector(
+      institutions.filter((institution) => !shouldRemove(institution)),
+      config,
     );
   };
 
   return { institutions, detect, extend, remove };
 }
 
-function passesOptionFilters(
-  institution: Institution,
-  options: DetectOptions,
-  includeSet: ReadonlySet<string> | null,
-  excludeSet: ReadonlySet<string> | null,
-): boolean {
-  if (options.categories && !options.categories.includes(institution.category)) {
-    return false;
-  }
-  if (includeSet && !includeSet.has(institution.id)) {
-    return false;
-  }
-  if (excludeSet?.has(institution.id)) {
-    return false;
-  }
-  return true;
-}
+/** Builds the category/include/exclude predicate for one `detect` call; `exclude` wins. */
+function createInstitutionFilter<TInstitution extends Institution>(
+  options: DetectOptions<TInstitution["id"]>,
+): (institution: TInstitution) => boolean {
+  const includedIds = options.include ? new Set<string>(options.include) : null;
+  const excludedIds = options.exclude ? new Set<string>(options.exclude) : null;
 
-interface BranchOutcome<I extends Institution> {
-  readonly kind: AccountKind;
-  readonly virtualOverride: boolean | null;
-  readonly routedInstitution: I;
-  readonly score: number;
-}
-
-/**
- * Evaluates the matched pattern's `branchRule` to adjust kind / institution /
- * virtual flag / score. A passing branch rule is an *additional* strong
- * identification signal from the KFTC PDF, so it adds `branchRuleMatch`.
- */
-function evaluateBranch<I extends Institution>(
-  matchedPattern: AccountPattern,
-  digits: string,
-  byId: ReadonlyMap<string, I>,
-  initialInstitution: I,
-  baseScore: number,
-  branchRuleMatchWeight: number,
-): BranchOutcome<I> {
-  const branchResult = matchedPattern.branchRule?.evaluate(digits) ?? null;
-  if (branchResult === null) {
-    return {
-      kind: matchedPattern.kind,
-      virtualOverride: null,
-      routedInstitution: initialInstitution,
-      score: baseScore,
-    };
-  }
-
-  const overriddenKind = branchResult.kindOverride ?? matchedPattern.kind;
-  const overriddenVirtual =
-    branchResult.virtualOverride !== undefined ? branchResult.virtualOverride : null;
-  const routedInstitution = branchResult.institutionId
-    ? (byId.get(branchResult.institutionId) ?? initialInstitution)
-    : initialInstitution;
-
-  return {
-    kind: overriddenKind,
-    virtualOverride: overriddenVirtual,
-    routedInstitution,
-    score: baseScore + branchRuleMatchWeight,
+  return (institution) => {
+    const isInCategory = options.categories?.includes(institution.category) ?? true;
+    const isIncluded = includedIds?.has(institution.id) ?? true;
+    const isExcluded = excludedIds?.has(institution.id) ?? false;
+    return isInCategory && isIncluded && !isExcluded;
   };
-}
-
-function computeCapabilities(
-  kind: AccountKind,
-  normalizedSubject: Subject | undefined,
-  virtualOverride: boolean | null,
-  validatedCheckDigit: boolean | null,
-): DetectionCapabilities {
-  const subjectAllowsWithdrawal = normalizedSubject
-    ? (normalizedSubject.allowsWithdrawal ?? true)
-    : true;
-  const subjectIsVirtual = normalizedSubject?.virtual ?? false;
-  const kindBlocksWithdrawal =
-    kind === "virtual" || kind === "incoming-only" || kind === "lifetime";
-  const virtual = virtualOverride ?? (subjectIsVirtual || kind === "virtual");
-  const allowsWithdrawal = subjectAllowsWithdrawal && !kindBlocksWithdrawal && !virtual;
-
-  return { allowsWithdrawal, virtual, validatedCheckDigit };
-}
-
-/** Runs the institution's check-digit verifier; null when the pattern opts out. */
-function resolveCheckDigit(
-  matchedPattern: AccountPattern,
-  institutionId: string,
-  digits: string,
-  verifierByInstitutionId: ReadonlyMap<string, CheckDigitVerifier>,
-): boolean | null {
-  if (matchedPattern.validatesCheckDigit === false) {
-    return null;
-  }
-  const verifier = verifierByInstitutionId.get(institutionId);
-  if (verifier === undefined) {
-    return null;
-  }
-  return verifier(digits);
-}
-
-/** Sort by score (desc), then prevalence prior (desc), then kind order (desc). */
-function compareDetections(a: DetectionResult, b: DetectionResult): number {
-  if (b.score !== a.score) {
-    return b.score - a.score;
-  }
-  const aPrevalence = prevalence(a.institution);
-  const bPrevalence = prevalence(b.institution);
-  if (bPrevalence !== aPrevalence) {
-    return bPrevalence - aPrevalence;
-  }
-  return KIND_ORDER[b.kind] - KIND_ORDER[a.kind];
-}
-
-/** Drops low-confidence candidates when the top result is high/medium. */
-function narrowLowConfidence<I extends Institution>(
-  results: readonly DetectionResult<I>[],
-): readonly DetectionResult<I>[] {
-  const topConfidence = results[0]?.confidence;
-  if (topConfidence !== "high" && topConfidence !== "medium") {
-    return results;
-  }
-  return results.filter((result) => result.confidence !== "low");
-}
-
-function buildVerifierMap<I extends Institution>(
-  verifiers: CreateDetectorOptions<I>["checkDigitVerifiers"],
-): Map<string, CheckDigitVerifier> {
-  const entries = Object.entries(verifiers ?? {}).filter(
-    (entry): entry is [string, CheckDigitVerifier] => entry[1] !== undefined,
-  );
-  return new Map(entries);
 }

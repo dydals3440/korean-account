@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import { suhyup, suhyupCoop } from "../../registry";
 import type { DetectOptions } from "../../types";
 import { defineInstitution } from "../define/define-institution";
-import { createDetector } from "./create-detector";
 import { patternTemplate } from "../define/pattern-template";
+import { createDetector } from "./create-detector";
 
 const detector = createDetector([suhyup, suhyupCoop]);
 

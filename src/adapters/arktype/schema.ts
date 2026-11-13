@@ -1,8 +1,7 @@
 import { type } from "arktype";
 
-import type { InstitutionId } from "../../registry";
-import { INSTITUTION_IDS } from "../../registry/institution-ids";
 import { ACCOUNT_KINDS, SUBJECT_CATEGORIES } from "../../constants";
+import { INSTITUTION_IDS, type InstitutionId } from "../../registry/institution-ids";
 import type { AccountKind, SubjectCategory } from "../../types";
 import {
   ACCOUNT_INPUT_REGEX,

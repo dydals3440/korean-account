@@ -1,10 +1,7 @@
 import { describe, expectTypeOf, test } from "vitest";
 
-import {
-  getInstitution,
-  type InstitutionIdByCategory,
-  type RegisteredInstitution,
-} from "../registry";
+import { type InstitutionIdByCategory, type RegisteredInstitution } from "../registry";
+import { getInstitution } from "./get-institution";
 import { searchInstitutions } from "./search-institutions";
 
 describe("Institution Id/Code/Category generic narrowing", () => {

@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const kfcc = defineInstitution({
   id: "kfcc",
@@ -13,7 +11,7 @@ export const kfcc = defineInstitution({
   userBaseMillions: 17,
   patterns: [
     {
-      template: T("XXXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 4, length: 2 },
       subjects: [
@@ -23,7 +21,7 @@ export const kfcc = defineInstitution({
       ],
     },
     {
-      template: T("XXXX-XX-XXXXXXX"),
+      template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 4 },
       // PDF p.9: "9" + 과목(3) with 002~004, 005, plus virtual account 037 —
@@ -45,7 +43,7 @@ export const kfcc = defineInstitution({
     },
     // 13d new savings (incoming only) — PDF marks X (no withdrawal transfer).
     {
-      template: T("XXXX-XX-XXXXXXX"),
+      template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["9206", "9207", "9210"],
@@ -56,7 +54,7 @@ export const kfcc = defineInstitution({
     },
     // 13d new installment savings (incoming only) — PDF: other, deposit only.
     {
-      template: T("XXXX-XX-XXXXXXX"),
+      template: patternTemplate("XXXX-XX-XXXXXXX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 4 },
       identifiers: ["9200", "9202", "9205", "9208", "9209", "9212"],

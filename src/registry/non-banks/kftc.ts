@@ -1,4 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
+import { defineInstitution } from "../../core/define";
 
 export const kftc = defineInstitution({
   id: "kftc",

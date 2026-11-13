@@ -1,15 +1,4 @@
-import type { AccountKind, Confidence, InstitutionCategory, SubjectCategory } from "./types";
-
-/**
- * `AccountKind` literals as a runtime array.
- *
- * The union in `types.ts` is the single source of truth. Editing only one
- * side is caught both ways: `satisfies` checks array → union, and
- * `toEqualTypeOf` in `constants.types.spec.ts` checks union → array.
- *
- * The zod schema reads this instead of the `.options` accessor — the schema
- * is narrowed to `ZodType<T>` so it works on both zod v3 and v4.
- */
+/** Account kinds, newest format first. Source of truth for `AccountKind`. */
 export const ACCOUNT_KINDS = [
   "new",
   "old",
@@ -17,9 +6,9 @@ export const ACCOUNT_KINDS = [
   "lifetime",
   "incoming-only",
   "merged-legacy",
-] as const satisfies readonly AccountKind[];
+] as const;
 
-/** `SubjectCategory` literals as a runtime array. Same contract as [[ACCOUNT_KINDS]]. */
+/** Ledger subject (계정과목) categories. Source of truth for `SubjectCategory`. */
 export const SUBJECT_CATEGORIES = [
   "ordinary",
   "treasury",
@@ -34,15 +23,10 @@ export const SUBJECT_CATEGORIES = [
   "trust",
   "isa",
   "other",
-] as const satisfies readonly SubjectCategory[];
+] as const;
 
-/** `InstitutionCategory` literals as a runtime array. */
-export const INSTITUTION_CATEGORIES = [
-  "bank",
-  "non-bank",
-  "securities",
-  "clearing",
-] as const satisfies readonly InstitutionCategory[];
+/** Institution categories. Source of truth for `InstitutionCategory`. */
+export const INSTITUTION_CATEGORIES = ["bank", "non-bank", "securities", "clearing"] as const;
 
-/** `Confidence` literals as a runtime array, highest confidence first. */
-export const CONFIDENCE_LEVELS = ["high", "medium", "low"] as const satisfies readonly Confidence[];
+/** Confidence bands, highest first. Source of truth for `Confidence`. */
+export const CONFIDENCE_LEVELS = ["high", "medium", "low"] as const;

@@ -1,7 +1,7 @@
 import type { BranchRule } from "../types";
 
 function inRange(value: number, from: number, to: number): boolean {
-  return value >= from && value <= to;
+  return from <= value && value <= to;
 }
 
 function digitsAt(digits: string, start: number, length: number): string {
@@ -141,7 +141,3 @@ export const toss12First1719: BranchRule = {
     return null;
   },
 };
-
-export function defineBranchRule(input: BranchRule): BranchRule {
-  return input;
-}

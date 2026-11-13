@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const kiwoom = defineInstitution({
   id: "kiwoom",
@@ -12,7 +10,7 @@ export const kiwoom = defineInstitution({
   userBaseMillions: 14,
   patterns: [
     {
-      template: T("XXXX-XXXX-XX"),
+      template: patternTemplate("XXXX-XXXX-XX"),
       kind: "new",
       subjectPosition: { start: 8, length: 2 },
       subjects: [
@@ -87,6 +85,6 @@ export const kiwoom = defineInstitution({
         defineSubject({ code: "98", category: "other" }),
       ],
     },
-    { template: T("XXXXXXXX"), kind: "new" },
+    { template: patternTemplate("XXXXXXXX"), kind: "new" },
   ],
 });

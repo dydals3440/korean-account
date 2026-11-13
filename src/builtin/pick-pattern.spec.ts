@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { pickPattern } from "./pick-pattern";
 import { templateLength } from "../core/account/template-length";
+import { pickPattern } from "./pick-pattern";
 
 describe("pickPattern", () => {
   describe("institution 조회 실패", () => {

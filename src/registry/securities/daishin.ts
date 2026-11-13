@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const daishin = defineInstitution({
   id: "daishin",
@@ -10,7 +9,7 @@ export const daishin = defineInstitution({
   aliases: ["대신", "대신증권"],
   userBaseMillions: 4.6,
   patterns: [
-    { template: T("XXX-XXXXXX"), kind: "new" },
-    { template: T("XXX-XXXXXX-XX"), kind: "new" },
+    { template: patternTemplate("XXX-XXXXXX"), kind: "new" },
+    { template: patternTemplate("XXX-XXXXXX-XX"), kind: "new" },
   ],
 });

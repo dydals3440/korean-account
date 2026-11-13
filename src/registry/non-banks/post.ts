@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { expandTwoDigitRange } from "../expand-range";
 
 export const post = defineInstitution({
@@ -14,7 +12,7 @@ export const post = defineInstitution({
   userBaseMillions: 13,
   patterns: [
     {
-      template: T("XXX-XXXXXXXX-X"),
+      template: patternTemplate("XXX-XXXXXXXX-X"),
       kind: "old",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["100", "530", "190", "110", "120"],
@@ -32,12 +30,12 @@ export const post = defineInstitution({
     // PDF p.11: regular 13d 지점번호(6)-일련번호(6)-검증번호(1). The virtual
     // 13d below stays distinguishable via its 8/9 leading identifier.
     {
-      template: T("XXXXXX-XXXXXX-X"),
+      template: patternTemplate("XXXXXX-XXXXXX-X"),
       kind: "old",
       note: "지점번호-일련번호-검증번호",
     },
     {
-      template: T("X-XXXXXXXXXXX-X"),
+      template: patternTemplate("X-XXXXXXXXXXX-X"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["8", "9"],
@@ -45,7 +43,7 @@ export const post = defineInstitution({
       effectiveFrom: "2023-05-03",
     },
     {
-      template: T("XXXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "new",
       subjectPosition: { start: 6, length: 2 },
       subjects: [
@@ -63,7 +61,7 @@ export const post = defineInstitution({
     },
     // 14d incoming-only "other" — PDF lists: preferential savings (05), 31-33, 49, 40-48, 80-88.
     {
-      template: T("XXXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXXX-XX-XXXXX-X"),
       kind: "incoming-only",
       subjectPosition: { start: 6, length: 2 },
       subjects: [

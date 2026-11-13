@@ -36,10 +36,9 @@ function isIdentifierMatch(identifier: string, pattern: AccountPattern): boolean
     return true;
   }
   if (pattern.identifierRange) {
-    const asNumber = Number(identifier);
-    if (Number.isFinite(asNumber)) {
-      return asNumber >= pattern.identifierRange.from && asNumber <= pattern.identifierRange.to;
-    }
+    const { from, to } = pattern.identifierRange;
+    const value = Number(identifier);
+    return Number.isFinite(value) && from <= value && value <= to;
   }
   return false;
 }

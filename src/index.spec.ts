@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 
-import * as schemaApi from "./adapters/zod";
 import * as publicApi from ".";
+import * as schemaApi from "./adapters/zod";
 
 // This snapshot mechanically guarantees "no impact on existing users": it
 // fails if any export disappears or is renamed. For an intentional addition,

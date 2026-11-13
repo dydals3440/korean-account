@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import { institutions } from "../../registry";
 import type { CheckDigitVerifier } from "../../types";
 import { defineInstitution } from "../define/define-institution";
-import { createDetector } from "./create-detector";
 import { patternTemplate } from "../define/pattern-template";
+import { createDetector } from "./create-detector";
 
 // The test institution carries an identifier on purpose. Without one it
 // stalls at score 3 (lengthExact), confidence low — and the moment a

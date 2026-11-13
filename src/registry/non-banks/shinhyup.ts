@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const shinhyup = defineInstitution({
   id: "shinhyup",
@@ -12,10 +10,10 @@ export const shinhyup = defineInstitution({
   aliases: ["신협", "신용협동조합", "CU"],
   userBaseMillions: 12,
   patterns: [
-    { template: T("XXX-XXX-XXXX"), kind: "new" },
-    { template: T("XXX-XXXX-XXXX"), kind: "new" },
+    { template: patternTemplate("XXX-XXX-XXXX"), kind: "new" },
+    { template: patternTemplate("XXX-XXXX-XXXX"), kind: "new" },
     {
-      template: T("XXX-XXX-XXXXX-X"),
+      template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: [
@@ -78,7 +76,7 @@ export const shinhyup = defineInstitution({
     },
     // 12d installment savings (incoming only) — 6 codes listed in the PDF.
     {
-      template: T("XXX-XXX-XXXXX-X"),
+      template: patternTemplate("XXX-XXX-XXXXX-X"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["170", "171", "172", "173", "174", "178"],
@@ -92,7 +90,7 @@ export const shinhyup = defineInstitution({
       ),
     },
     {
-      template: T("XXXXX-XX-XXXXX-X"),
+      template: patternTemplate("XXXXX-XX-XXXXX-X"),
       kind: "old",
       subjectPosition: { start: 5, length: 2 },
       subjects: [
@@ -101,7 +99,7 @@ export const shinhyup = defineInstitution({
       ],
     },
     {
-      template: T("XXXXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXXXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 5, length: 2 },
       // PDF p.9 marks 14 as deposit-only (××○×).

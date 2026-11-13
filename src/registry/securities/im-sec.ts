@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 
 export const imSec = defineInstitution({
   id: "im-sec",
@@ -14,7 +13,7 @@ export const imSec = defineInstitution({
     {
       // PDF p.16: 일련번호(7)-검증번호(1)-과목코드(2) — the subject code sits
       // at the tail with the full 01~99 range and no per-code categories.
-      template: T("XXXXXXX-X-XX"),
+      template: patternTemplate("XXXXXXX-X-XX"),
       kind: "new",
       // PDF p.16 puts 과목코드(2) 01~99 at the tail, but a full-range code
       // matches every input and carries zero selectivity — deliberately not

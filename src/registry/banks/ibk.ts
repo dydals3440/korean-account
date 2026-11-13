@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const ibk = defineInstitution({
   id: "ibk",
@@ -13,16 +11,16 @@ export const ibk = defineInstitution({
   userBaseMillions: 8,
   patterns: [
     {
-      template: T("XXXXXXXX-XX"),
+      template: patternTemplate("XXXXXXXX-XX"),
       kind: "lifetime",
       note: "자동이체 신규등록 중단 (2012.11.12)",
     },
     {
-      template: T("XXX-XXXXXXXX"),
+      template: patternTemplate("XXX-XXXXXXXX"),
       kind: "lifetime",
     },
     {
-      template: T("XXX-XX-XXXXXX-X"),
+      template: patternTemplate("XXX-XX-XXXXXX-X"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -37,7 +35,7 @@ export const ibk = defineInstitution({
     },
     // The 14d subject set is identical to the 12d legacy set.
     {
-      template: T("XXX-XXXXXX-XX-XX-X"),
+      template: patternTemplate("XXX-XXXXXX-XX-XX-X"),
       kind: "new",
       identifierPosition: { start: 9, length: 2 },
       identifiers: ["01", "02", "03", "04", "06", "07", "13"],

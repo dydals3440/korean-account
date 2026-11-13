@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 
 export const yuanta = defineInstitution({
   id: "yuanta",
@@ -12,7 +10,7 @@ export const yuanta = defineInstitution({
   userBaseMillions: 5,
   patterns: [
     {
-      template: T("XXX-XX-XXXXXX"),
+      template: patternTemplate("XXX-XX-XXXXXX"),
       kind: "old",
       subjectPosition: { start: 3, length: 2 },
       subjects: [
@@ -26,7 +24,7 @@ export const yuanta = defineInstitution({
     {
       // PDF p.14: 고객지정번호(8)-랜덤부여(3)-검증번호(1) = 12 digits; the
       // printed boxes omit the trailing check-digit.
-      template: T("XXXX-XXXX-XXX-X"),
+      template: patternTemplate("XXXX-XXXX-XXX-X"),
       kind: "new",
       effectiveFrom: "2011-01-03",
     },

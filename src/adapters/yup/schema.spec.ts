@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { ValidationError } from "yup";
 
-import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import { MESSAGES } from "../contract";
+import { type ContractSchemaName, describeAdapterContract } from "../contract.fixtures";
 import {
   accountKindSchema,
   accountSchema,

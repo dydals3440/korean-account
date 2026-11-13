@@ -1,5 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
+import { defineInstitution, patternTemplate } from "../../core/define";
 import { kbank10First9, kbank14First79 } from "../branch-rules";
 
 export const kbank = defineInstitution({
@@ -13,12 +12,12 @@ export const kbank = defineInstitution({
   patterns: [
     // PDF p.13: 12 digits = product(4)-random(4)-serial(4), printed format 3-3-6.
     {
-      template: T("XXX-XXX-XXXXXX"),
+      template: patternTemplate("XXX-XXX-XXXXXX"),
       kind: "new",
       note: "개인/법인 실계좌 (3-3-6)",
     },
     {
-      template: T("X-XXXXXXXXX"),
+      template: patternTemplate("X-XXXXXXXXX"),
       kind: "incoming-only",
       identifierPosition: { start: 0, length: 1 },
       identifiers: ["9"],
@@ -27,12 +26,12 @@ export const kbank = defineInstitution({
     },
     // PDF: 13 digits `serial(2)-phone(3-4-4)` — no specific prefix enumerated.
     {
-      template: T("XX-XXX-XXXX-XXXX"),
+      template: patternTemplate("XX-XXX-XXXX-XXXX"),
       kind: "incoming-only",
     },
     // branchRule: prefix 7/9 → easy-transfer virtual account, otherwise → loan (여신)
     {
-      template: T("XXX-XXXX-XXX-XXXX"),
+      template: patternTemplate("XXX-XXXX-XXX-XXXX"),
       kind: "virtual",
       branchRule: kbank14First79,
     },

@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { isNotHanaForeignLegacy14 } from "./hana-foreign-legacy";
 
 // Uses bank code 081 in the CMS participant namespace — registered in the
@@ -22,7 +20,7 @@ export const hanaSecuritiesCma = defineInstitution({
     // merged foreign-exchange prefix set → hana-cma score 8 vs
     // foreign-exchange score 7 → foreign-exchange wins.
     {
-      template: T("XXX-XXXXXXXX-X-XX"),
+      template: patternTemplate("XXX-XXXXXXXX-X-XX"),
       kind: "new",
       additionalRules: [(d) => d.length === 14 && d[3] === "9", isNotHanaForeignLegacy14],
       subjectPosition: { start: 12, length: 2 },

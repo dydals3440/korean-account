@@ -1,6 +1,4 @@
-import { defineInstitution } from "../../core/define/define-institution";
-import { patternTemplate as T } from "../../core/define/pattern-template";
-import { defineSubject } from "../../core/define/define-subject";
+import { defineInstitution, defineSubject, patternTemplate } from "../../core/define";
 import { toss12First1719 } from "../branch-rules";
 
 export const toss = defineInstitution({
@@ -14,7 +12,7 @@ export const toss = defineInstitution({
   patterns: [
     // PDF: `subject(3)-serial(8)-check(1)`. ordinary: 100 / corporate-free: 150.
     {
-      template: T("XXXX-XXXX-XXXX"),
+      template: patternTemplate("XXXX-XXXX-XXXX"),
       kind: "new",
       identifierPosition: { start: 0, length: 3 },
       identifiers: ["100", "150"],
@@ -30,7 +28,7 @@ export const toss = defineInstitution({
     // force a score tie, letting priority (Toss 75 > Shinhyup 40) rank Toss
     // first.
     {
-      template: T("XXXX-XXXX-XXXX"),
+      template: patternTemplate("XXXX-XXXX-XXXX"),
       kind: "virtual",
       identifierPosition: { start: 0, length: 2 },
       identifiers: ["17", "19"],
