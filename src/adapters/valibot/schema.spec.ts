@@ -31,16 +31,25 @@ describe("valibot 한국어 메시지", () => {
     ["110-abc", MESSAGES.charset],
     ["", MESSAGES.required],
   ])("'%s' → %s", (input, message) => {
-    // Given / When
-    const result = v.safeParse(accountSchema, input);
+    // Given
+    const account = input;
+
+    // When
+    const result = v.safeParse(accountSchema, account);
 
     // Then
     expect(result.success).toBe(false);
     expect(result.issues?.[0]?.message).toBe(message);
   });
 
-  test("미등록 기관 id 메시지", () => {
-    const result = v.safeParse(institutionIdSchema, "unknown");
+  test("미등록 기관 id 는 기관 메시지로 거부한다", () => {
+    // Given
+    const institutionId = "unknown";
+
+    // When
+    const result = v.safeParse(institutionIdSchema, institutionId);
+
+    // Then
     expect(result.issues?.[0]?.message).toBe(MESSAGES.institution);
   });
 });

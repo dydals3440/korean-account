@@ -13,6 +13,7 @@ import type {
   DetectionResult,
   DetectOptions,
   Detector,
+  ExtendDetectorOptions,
   GlobalRule,
   Institution,
   InstitutionCategory,
@@ -32,9 +33,7 @@ import type {
 } from ".";
 import type { DetectionPayload } from "./adapters/zod";
 
-// Removing or renaming a type export breaks compilation of this file. Value
-// exports are guarded by the snapshot in `index.spec.ts`; together they cover
-// the whole public surface.
+// Removing or renaming a type export breaks compilation here; value exports are guarded by `index.spec.ts`.
 type PublicTypeSurface = [
   AccountKind,
   AccountPattern,
@@ -48,6 +47,7 @@ type PublicTypeSurface = [
   DetectionCapabilities,
   DetectionResult,
   Detector,
+  ExtendDetectorOptions,
   GlobalRule,
   Institution,
   InstitutionCategory,
@@ -68,6 +68,13 @@ type PublicTypeSurface = [
   DetectionPayload,
 ];
 
-test("공개 타입 export 29개가 모두 존재한다", () => {
-  expectTypeOf<PublicTypeSurface["length"]>().toEqualTypeOf<29>();
+test("공개 타입 export 30개가 모두 존재한다", () => {
+  // Given
+  type Surface = PublicTypeSurface;
+
+  // When
+  type ExportCount = Surface["length"];
+
+  // Then
+  expectTypeOf<ExportCount>().toEqualTypeOf<30>();
 });

@@ -84,10 +84,10 @@ describe("createDetector", () => {
       const detector = createDetector([SHINHAN]);
 
       // When
-      const [r] = detector.detect("110-436-387740");
+      const [result] = detector.detect("110-436-387740");
 
       // Then
-      expect(r?.capabilities).toEqual({
+      expect(result?.capabilities).toEqual({
         allowsWithdrawal: true,
         virtual: false,
         validatedCheckDigit: null,
@@ -96,7 +96,7 @@ describe("createDetector", () => {
   });
 
   describe("옵션 필터", () => {
-    test("minScore — 미만 결과 제외", () => {
+    test("minScore 미만인 결과는 제외한다", () => {
       // Given
       const detector = createDetector([SHINHAN]);
 
@@ -107,7 +107,7 @@ describe("createDetector", () => {
       expect(results).toEqual([]);
     });
 
-    test("minScore = 0 — 모든 매칭 후보 통과", () => {
+    test("minScore 가 0 이면 모든 매칭 후보를 반환한다", () => {
       // Given
       const detector = createDetector([SHINHAN]);
 
@@ -118,7 +118,7 @@ describe("createDetector", () => {
       expect(results.length).toBeGreaterThan(0);
     });
 
-    test("limit — 결과 개수 제한 (limit=1)", () => {
+    test("limit=1 이면 결과를 1개만 반환한다", () => {
       // Given
       const detector = createDetector([SHINHAN, KAKAO]);
 
@@ -141,7 +141,7 @@ describe("createDetector", () => {
       expect(results.length).toBeGreaterThan(0);
     });
 
-    test("categories — 카테고리 일치만", () => {
+    test("categories 와 일치하지 않는 기관은 제외한다", () => {
       // Given
       const detector = createDetector([SHINHAN, KAKAO]);
 
@@ -154,7 +154,7 @@ describe("createDetector", () => {
       expect(results).toEqual([]);
     });
 
-    test("kinds — kind 일치만", () => {
+    test("kinds 와 일치하지 않는 kind 는 제외한다", () => {
       // Given
       const detector = createDetector([SHINHAN, KAKAO]);
 
@@ -176,10 +176,10 @@ describe("createDetector", () => {
       });
 
       // Then
-      expect(results.every((r) => r.institution.id !== "shinhan")).toBe(true);
+      expect(results.every((result) => result.institution.id !== "shinhan")).toBe(true);
     });
 
-    test("categories + kinds 동시 필터", () => {
+    test("categories 와 kinds 를 함께 지정하면 둘 다 만족하는 결과만 반환한다", () => {
       // Given
       const detector = createDetector([SHINHAN, KAKAO]);
 
@@ -190,24 +190,24 @@ describe("createDetector", () => {
       });
 
       // Then
-      expect(results.every((r) => r.institution.category === "bank")).toBe(true);
-      expect(results.every((r) => r.kind === "new")).toBe(true);
+      expect(results.every((result) => result.institution.category === "bank")).toBe(true);
+      expect(results.every((result) => result.kind === "new")).toBe(true);
     });
   });
 
   describe("동점 처리", () => {
     test("점수 동점이면 priority 내림차순으로 정렬한다", () => {
       // Given
-      const a: Institution = { ...SHINHAN, id: "a", priority: 10 };
-      const b: Institution = { ...SHINHAN, id: "b", priority: 50 };
-      const c: Institution = { ...SHINHAN, id: "c", priority: 30 };
-      const detector = createDetector([a, b, c]);
+      const lowPriority: Institution = { ...SHINHAN, id: "a", priority: 10 };
+      const highPriority: Institution = { ...SHINHAN, id: "b", priority: 50 };
+      const midPriority: Institution = { ...SHINHAN, id: "c", priority: 30 };
+      const detector = createDetector([lowPriority, highPriority, midPriority]);
 
       // When
       const results = detector.detect("110-436-387740");
 
       // Then
-      expect(results.map((r) => r.institution.id)).toEqual(["b", "c", "a"]);
+      expect(results.map((result) => result.institution.id)).toEqual(["b", "c", "a"]);
     });
   });
 });
@@ -219,10 +219,11 @@ describe("detector.extend", () => {
 
     // When
     const extended = base.extend({ institutions: [KAKAO] });
+    const results = extended.detect("3333-12-3456789");
 
     // Then
     expect(extended.institutions.length).toBe(2);
-    expect(extended.detect("3333-12-3456789")[0]?.institution.id).toBe("kakao");
+    expect(results[0]?.institution.id).toBe("kakao");
   });
 
   test("원본 detector는 변경되지 않는다 (immutability)", () => {
@@ -236,7 +237,7 @@ describe("detector.extend", () => {
     expect(base.institutions.length).toBe(1);
   });
 
-  test("globalRules 도 누적된다", () => {
+  test("globalRules 를 기존 규칙에 누적한다", () => {
     // Given
     const base = createDetector([SHINHAN], {
       globalRules: [() => true],
@@ -245,11 +246,10 @@ describe("detector.extend", () => {
 
     // When
     const extended = base.extend({ globalRules: [() => true] });
+    const [result] = extended.detect("110-436-387740");
 
-    // Then — 1 existing + 1 added = the globalRule bonus must fire twice:
-    // length 3 + identifier 4 + length bonus (3 digits = 2) + globalRule 5 × 2
-    const [r] = extended.detect("110-436-387740");
-    expect(r?.score).toBe(3 + 4 + 2 + 5 * 2);
+    // Then — length 3 + identifier 4 + length bonus 2 + globalRule 5 × 2 (1 existing + 1 added)
+    expect(result?.score).toBe(3 + 4 + 2 + 5 * 2);
   });
 });
 
@@ -262,7 +262,7 @@ describe("detector.remove", () => {
     const trimmed = base.remove("kakao");
 
     // Then
-    expect(trimmed.institutions.map((i) => i.id)).toEqual(["shinhan"]);
+    expect(trimmed.institutions.map((institution) => institution.id)).toEqual(["shinhan"]);
   });
 
   test("predicate로 institution을 제거한다", () => {
@@ -270,10 +270,10 @@ describe("detector.remove", () => {
     const base = createDetector([SHINHAN, KAKAO]);
 
     // When
-    const trimmed = base.remove((i) => i.priority === 90);
+    const trimmed = base.remove((institution) => institution.priority === 90);
 
     // Then
-    expect(trimmed.institutions.map((i) => i.id)).toEqual(["shinhan"]);
+    expect(trimmed.institutions.map((institution) => institution.id)).toEqual(["shinhan"]);
   });
 
   test("원본은 변경되지 않는다 (immutability)", () => {
@@ -289,17 +289,17 @@ describe("detector.remove", () => {
 });
 
 describe("scoring override", () => {
-  test("identifierMatch override가 적용된다", () => {
+  test("identifierMatch 를 0 으로 override 하면 길이 점수만 남는다", () => {
     // Given
     const detector = createDetector([SHINHAN], {
       scoring: { identifierMatch: 0 },
     });
 
     // When
-    const [r] = detector.detect("110-436-387740");
+    const [result] = detector.detect("110-436-387740");
 
-    // Then — with identifierMatch=0, only length counts: +3
-    expect(r?.score).toBe(3);
+    // Then — lengthExact 3 only
+    expect(result?.score).toBe(3);
   });
 
   test("kindNewBonus override로 신계좌 가산점을 부여한다", () => {
@@ -309,10 +309,10 @@ describe("scoring override", () => {
     });
 
     // When
-    const [r] = detector.detect("110-436-387740");
+    const [result] = detector.detect("110-436-387740");
 
-    // Then — length +3, identifier +4, length bonus (3 digits = 2), kindNew +1
-    expect(r?.score).toBe(3 + 4 + 2 + 1);
+    // Then — length 3 + identifier 4 + length bonus 2 + kindNew 1
+    expect(result?.score).toBe(3 + 4 + 2 + 1);
   });
 
   describe("extend — 같은 id 가 들어오면 기존 institution 을 교체한다", () => {
@@ -334,14 +334,14 @@ describe("scoring override", () => {
       const extended = baseline.extend({ institutions: [replacement] });
 
       // When
-      const replacedHit = extended.detect("999-436-387740");
+      const results = extended.detect("999-436-387740");
 
-      // Then — the replacement matches the 999 prefix and carries the replaced name
-      expect(replacedHit[0]?.institution.id).toBe("shinhan");
-      expect(replacedHit[0]?.institution.nameKo).toBe("신한은행 (교체본)");
+      // Then
+      expect(results[0]?.institution.id).toBe("shinhan");
+      expect(results[0]?.institution.nameKo).toBe("신한은행 (교체본)");
     });
 
-    test("동일 id 로 extend 후 institutions 길이는 1 (중복 없음)", () => {
+    test("동일 id 로 extend 하면 중복 없이 institution 1개만 남는다", () => {
       // Given
       const baseline = createDetector([SHINHAN]);
       const replacement: Institution = { ...SHINHAN, nameKo: "교체본" };
@@ -349,7 +349,7 @@ describe("scoring override", () => {
       // When
       const extended = baseline.extend({ institutions: [replacement] });
 
-      // Then — no silent duplicate; exactly one remains
+      // Then
       expect(extended.institutions.length).toBe(1);
       expect(extended.institutions[0]?.nameKo).toBe("교체본");
     });
@@ -364,7 +364,7 @@ describe("scoring override", () => {
       const shinhanHit = detector.detect("110-436-387740");
       const kakaoHit = detector.detect("3333-12-3456789");
 
-      // Then — both match
+      // Then
       expect(shinhanHit[0]?.institution.id).toBe("shinhan");
       expect(kakaoHit[0]?.institution.id).toBe("kakao");
     });
@@ -376,7 +376,7 @@ describe("scoring override", () => {
       // When
       baseline.extend({ institutions: [KAKAO] });
 
-      // Then — the original detector still holds exactly 1 institution
+      // Then
       expect(baseline.institutions.length).toBe(1);
       expect(baseline.institutions[0]?.id).toBe("shinhan");
     });

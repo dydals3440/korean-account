@@ -114,11 +114,25 @@ export function describeAdapterContract(adapterName: string, accepts: Accepts): 
   describe(`adapter contract — ${adapterName}`, () => {
     for (const [name, cases] of Object.entries(ADAPTER_CONTRACT)) {
       const schemaName = name as ContractSchemaName;
-      test.each([...cases.valid])(`${name} accepts %j`, (value) => {
-        expect(accepts(schemaName, value)).toBe(true);
+      test.each([...cases.valid])(`${name} 은 유효한 값 %j 를 통과시킨다`, (value) => {
+        // Given
+        const input = value;
+
+        // When
+        const accepted = accepts(schemaName, input);
+
+        // Then
+        expect(accepted).toBe(true);
       });
-      test.each([...cases.invalid])(`${name} rejects %j`, (value) => {
-        expect(accepts(schemaName, value)).toBe(false);
+      test.each([...cases.invalid])(`${name} 은 무효한 값 %j 를 거부한다`, (value) => {
+        // Given
+        const input = value;
+
+        // When
+        const accepted = accepts(schemaName, input);
+
+        // Then
+        expect(accepted).toBe(false);
       });
     }
   });

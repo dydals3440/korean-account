@@ -6,11 +6,14 @@ import { searchInstitutions } from "./search-institutions";
 describe("searchInstitutions", () => {
   describe("필터 없는 호출", () => {
     test("필터 없이 호출하면 전체 institution 을 반환한다", () => {
-      // Given / When
+      // Given
+      const registry = institutions;
+
+      // When
       const result = searchInstitutions();
 
       // Then
-      expect(result).toEqual(institutions);
+      expect(result).toEqual(registry);
     });
   });
 
@@ -23,7 +26,7 @@ describe("searchInstitutions", () => {
       const banks = searchInstitutions(filter);
 
       // Then
-      expect(banks.every((i) => i.category === "bank")).toBe(true);
+      expect(banks.every((institution) => institution.category === "bank")).toBe(true);
       expect(banks.length).toBeLessThan(institutions.length);
     });
 
@@ -32,10 +35,10 @@ describe("searchInstitutions", () => {
       const filter = { categories: ["securities"] } as const;
 
       // When
-      const sec = searchInstitutions(filter);
+      const securities = searchInstitutions(filter);
 
       // Then
-      expect(sec.every((i) => i.category === "securities")).toBe(true);
+      expect(securities.every((institution) => institution.category === "securities")).toBe(true);
     });
 
     test("['non-bank'] — 비은행만 반환한다", () => {
@@ -43,10 +46,10 @@ describe("searchInstitutions", () => {
       const filter = { categories: ["non-bank"] } as const;
 
       // When
-      const nb = searchInstitutions(filter);
+      const nonBanks = searchInstitutions(filter);
 
       // Then
-      expect(nb.every((i) => i.category === "non-bank")).toBe(true);
+      expect(nonBanks.every((institution) => institution.category === "non-bank")).toBe(true);
     });
 
     test("['bank', 'non-bank'] — 두 카테고리 모두 반환한다", () => {
@@ -54,51 +57,52 @@ describe("searchInstitutions", () => {
       const filter = { categories: ["bank", "non-bank"] } as const;
 
       // When
-      const both = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const categories: readonly string[] = results.map((institution) => institution.category);
 
       // Then
-      const categories: readonly string[] = both.map((i) => i.category);
       expect(categories).not.toContain("securities");
-      expect(both.length).toBeGreaterThan(0);
+      expect(results.length).toBeGreaterThan(0);
     });
   });
 
   describe("include 화이트리스트", () => {
-    test("두 개 id 만 추려진다", () => {
+    test("include 에 지정한 두 id 만 반환한다", () => {
       // Given
       const filter = { include: ["shinhan", "kakao"] } as const;
 
       // When
-      const picked = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const ids = results.map((institution) => institution.id).toSorted();
 
       // Then
-      expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "shinhan"]);
+      expect(ids).toEqual(["kakao", "shinhan"]);
     });
 
-    test("5대 시중은행 동시 포함", () => {
+    test("5대 시중은행을 include 하면 5개 기관을 반환한다", () => {
       // Given
       const filter = {
         include: ["kb", "shinhan", "hana", "woori", "nh"],
       } as const;
 
       // When
-      const big5 = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
 
       // Then
-      expect(big5.length).toBe(5);
+      expect(results.length).toBe(5);
     });
   });
 
   describe("exclude 블랙리스트", () => {
-    test("특정 id 가 제외된다", () => {
+    test("exclude 에 지정한 id 를 제외한다", () => {
       // Given
       const filter = { exclude: ["shinhan"] } as const;
 
-      // When
-      const picked = searchInstitutions(filter);
+      // When — widen ids to string for the runtime check (the type is already narrow)
+      const results = searchInstitutions(filter);
+      const ids: readonly string[] = results.map((institution) => institution.id);
 
-      // Then — widen ids to string for the runtime check (the type is already narrow)
-      const ids: readonly string[] = picked.map((i) => i.id);
+      // Then
       expect(ids).not.toContain("shinhan");
     });
 
@@ -107,10 +111,10 @@ describe("searchInstitutions", () => {
       const filter = { exclude: ["kakao", "toss", "kbank"] } as const;
 
       // When
-      const picked = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const ids: readonly string[] = results.map((institution) => institution.id);
 
       // Then
-      const ids: readonly string[] = picked.map((i) => i.id);
       expect(ids).not.toContain("kakao");
       expect(ids).not.toContain("toss");
       expect(ids).not.toContain("kbank");
@@ -118,7 +122,7 @@ describe("searchInstitutions", () => {
   });
 
   describe("필터 결합 (AND)", () => {
-    test("categories + exclude 동시 적용", () => {
+    test("categories 와 exclude 를 함께 적용한다", () => {
       // Given
       const filter = {
         categories: ["bank"],
@@ -126,28 +130,28 @@ describe("searchInstitutions", () => {
       } as const;
 
       // When
-      const picked = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const ids: readonly string[] = results.map((institution) => institution.id);
 
       // Then
-      expect(picked.every((i) => i.category === "bank")).toBe(true);
-      const ids: readonly string[] = picked.map((i) => i.id);
+      expect(results.every((institution) => institution.category === "bank")).toBe(true);
       expect(ids).not.toContain("shinhan");
       expect(ids).not.toContain("kb");
     });
 
     test("categories + include — include 는 카테고리 안의 id 로 제한된다", () => {
-      // Given — putting kis (securities) into the bank category would be a
-      // compile error; only ids within bank compile.
+      // Given — a securities id such as kis would not compile in this include
       const filter = {
         categories: ["bank"],
         include: ["shinhan", "kakao", "kb"],
       } as const;
 
       // When
-      const picked = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const ids = results.map((institution) => institution.id).toSorted();
 
       // Then
-      expect(picked.map((i) => i.id).toSorted()).toEqual(["kakao", "kb", "shinhan"]);
+      expect(ids).toEqual(["kakao", "kb", "shinhan"]);
     });
 
     test("include + exclude — exclude 가 우선 적용된다", () => {
@@ -158,10 +162,11 @@ describe("searchInstitutions", () => {
       } as const;
 
       // When
-      const picked = searchInstitutions(filter);
+      const results = searchInstitutions(filter);
+      const ids = results.map((institution) => institution.id).toSorted();
 
       // Then
-      expect(picked.map((i) => i.id).toSorted()).toEqual(["hana", "shinhan"]);
+      expect(ids).toEqual(["hana", "shinhan"]);
     });
   });
 
@@ -171,12 +176,12 @@ describe("searchInstitutions", () => {
       const filter = { categories: ["bank"] } as const;
 
       // When
-      const a = searchInstitutions(filter);
-      const b = searchInstitutions(filter);
+      const first = searchInstitutions(filter);
+      const second = searchInstitutions(filter);
 
       // Then
-      expect(a).toEqual(b);
-      expect(a).not.toBe(b);
+      expect(first).toEqual(second);
+      expect(first).not.toBe(second);
     });
   });
 });

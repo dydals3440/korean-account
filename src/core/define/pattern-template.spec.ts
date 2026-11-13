@@ -25,16 +25,16 @@ describe("patternTemplate", () => {
   });
 
   describe("빈 문자열 거부", () => {
-    test("빈 문자열은 throw 한다", () => {
+    test("빈 문자열이면 TypeError 를 던진다", () => {
       // Given
       const input = "";
 
       // When
-      const create = () => patternTemplate(input);
+      const act = () => patternTemplate(input);
 
       // Then
-      expect(create).toThrow(TypeError);
-      expect(create).toThrow(/non-empty/);
+      expect(act).toThrow(TypeError);
+      expect(act).toThrow(/non-empty/);
     });
   });
 
@@ -52,30 +52,30 @@ describe("patternTemplate", () => {
       "1234",
       "XXX.YY",
       "XXX/YY",
-    ])("'%s' 는 throw 한다", (template) => {
+    ])("'%s' 이면 TypeError 를 던진다", (template) => {
       // Given
       const input = template;
 
       // When
-      const create = () => patternTemplate(input);
+      const act = () => patternTemplate(input);
 
       // Then
-      expect(create).toThrow(TypeError);
-      expect(create).toThrow(/invalid pattern template/);
+      expect(act).toThrow(TypeError);
+      expect(act).toThrow(/invalid pattern template/);
     });
   });
 
   describe("브랜드 타입", () => {
-    test("런타임 동등성은 단순 string 이다", () => {
+    test("런타임 값은 입력과 같은 길이의 string 이다", () => {
       // Given
       const input = "XXX-XXX-XXXXXX";
 
       // When
-      const tpl = patternTemplate(input);
+      const result = patternTemplate(input);
 
       // Then
-      expect(typeof tpl).toBe("string");
-      expect(tpl.length).toBe(14);
+      expect(typeof result).toBe("string");
+      expect(result.length).toBe(14);
     });
   });
 });

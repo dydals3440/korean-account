@@ -6,9 +6,7 @@ import { defineInstitution } from "../define/define-institution";
 import { patternTemplate } from "../define/pattern-template";
 import { createDetector } from "./create-detector";
 
-// The test institution carries an identifier on purpose. Without one it
-// stalls at score 3 (lengthExact), confidence low — and the moment a
-// same-length real bank scores high, `narrowLowConfidence` filters it out.
+// Carries an identifier on purpose: without one it stalls at low confidence and `narrowLowConfidence` filters it out.
 const myBank = defineInstitution({
   id: "my-bank",
   code: "999",
@@ -27,18 +25,20 @@ const myBank = defineInstitution({
 
 describe("Detector.extend — scoring / checkDigitVerifiers", () => {
   test("새로 추가한 institution 의 checkDigitVerifier 를 extend 에서 바로 등록할 수 있다", () => {
-    // Given — extend previously did not accept a verifier, forcing a fallback to createDetector.
+    // Given
     const detector = createDetector(institutions).extend({
       institutions: [myBank],
       checkDigitVerifiers: { "my-bank": () => true },
     });
 
     // When
-    const r = detector.detect("99912345678901").find((x) => x.institution.id === "my-bank");
+    const result = detector
+      .detect("99912345678901")
+      .find((candidate) => candidate.institution.id === "my-bank");
 
     // Then
-    expect(r).toBeDefined();
-    expect(r?.capabilities.validatedCheckDigit).toBe(true);
+    expect(result).toBeDefined();
+    expect(result?.capabilities.validatedCheckDigit).toBe(true);
   });
 
   test("verifier 가 false 를 반환하면 validatedCheckDigit 가 false", () => {
@@ -49,10 +49,12 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
     });
 
     // When
-    const r = detector.detect("99912345678901").find((x) => x.institution.id === "my-bank");
+    const result = detector
+      .detect("99912345678901")
+      .find((candidate) => candidate.institution.id === "my-bank");
 
     // Then
-    expect(r?.capabilities.validatedCheckDigit).toBe(false);
+    expect(result?.capabilities.validatedCheckDigit).toBe(false);
   });
 
   test("기존 verifier 는 유지되고 같은 id 는 새 verifier 로 교체된다", () => {
@@ -61,17 +63,20 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
       checkDigitVerifiers: { shinhan: (() => false) as CheckDigitVerifier },
     });
 
-    // When — replace shinhan and add kb
+    // When
     const extended = base.extend({
       checkDigitVerifiers: { shinhan: () => true, kb: () => true },
     });
+    const extendedShinhan = extended
+      .detect("110-436-387740")
+      .find((result) => result.institution.id === "shinhan");
+    const baseShinhan = base
+      .detect("110-436-387740")
+      .find((result) => result.institution.id === "shinhan");
 
-    // Then
-    const shinhan = extended.detect("110-436-387740").find((r) => r.institution.id === "shinhan");
-    expect(shinhan?.capabilities.validatedCheckDigit).toBe(true);
-    // The pre-replacement detector is unaffected (immutable).
-    const before = base.detect("110-436-387740").find((r) => r.institution.id === "shinhan");
-    expect(before?.capabilities.validatedCheckDigit).toBe(false);
+    // Then — the pre-replacement detector is unaffected (immutable)
+    expect(extendedShinhan?.capabilities.validatedCheckDigit).toBe(true);
+    expect(baseShinhan?.capabilities.validatedCheckDigit).toBe(false);
   });
 
   test("scoring 은 기존 가중치 위에 얕게 병합된다", () => {
@@ -96,18 +101,19 @@ describe("Detector.extend — scoring / checkDigitVerifiers", () => {
 
     // When
     const extended = base.extend({ institutions: [myBank] });
+    const extendedResults = extended.detect("110-436-387740");
+    const baseResults = base.detect("110-436-387740");
+    const shinhan = extendedResults.find((result) => result.institution.id === "shinhan");
 
     // Then
-    const r = extended.detect("110-436-387740").find((x) => x.institution.id === "shinhan");
-    expect(r?.capabilities.validatedCheckDigit).toBe(true);
-    expect(extended.detect("110-436-387740")[0]?.score).toBe(
-      base.detect("110-436-387740")[0]?.score,
-    );
+    expect(shinhan?.capabilities.validatedCheckDigit).toBe(true);
+    expect(extendedResults[0]?.score).toBe(baseResults[0]?.score);
   });
 });
 
 describe("확장 규칙과 날짜 메타데이터의 사용 계약", () => {
   test("false global rule은 후보를 거부하지 않으며 추가 규칙은 기존 순서 뒤에서 평가한다", () => {
+    // Given
     const order: string[] = [];
     const base = createDetector([myBank], {
       globalRules: [
@@ -125,20 +131,32 @@ describe("확장 규칙과 날짜 메타데이터의 사용 계약", () => {
         },
       ],
     });
-    expect(base.detect("99912345678901")[0]?.score).toBe(9);
-    expect(order).toEqual(["base"]);
-    order.length = 0;
-    expect(extended.detect("99912345678901")[0]?.score).toBe(10);
-    expect(order).toEqual(["base", "extra"]);
+
+    // When
+    const baseScore = base.detect("99912345678901")[0]?.score;
+    const baseOrder = order.splice(0);
+    const extendedScore = extended.detect("99912345678901")[0]?.score;
+    const extendedOrder = order.splice(0);
+
+    // Then
+    expect(baseScore).toBe(9);
+    expect(baseOrder).toEqual(["base"]);
+    expect(extendedScore).toBe(10);
+    expect(extendedOrder).toEqual(["base", "extra"]);
   });
 
   test("미래 effectiveFrom은 자동 제외하지 않고 undefined 검증 설정에서도 등록 verifier가 실행된다", () => {
+    // Given
     const future = defineInstitution({
       ...myBank,
       patterns: myBank.patterns.map((pattern) => ({ ...pattern, effectiveFrom: "2999-01-01" })),
     });
     const detector = createDetector([future], { checkDigitVerifiers: { "my-bank": () => false } });
+
+    // When
     const results = detector.detect("99912345678901");
+
+    // Then
     expect(results).toHaveLength(1);
     expect(results[0]?.matchedPattern.effectiveFrom).toBe("2999-01-01");
     expect(results[0]?.capabilities.validatedCheckDigit).toBe(false);
