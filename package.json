@@ -163,7 +163,7 @@
     "@vitest/coverage-v8": "^5.1.0",
     "arktype": "^2.2.9",
     "cross-spawn": "^7.0.6",
-    "oxfmt": "^0.78.0",
+    "oxfmt": "^0.79.0",
     "oxlint": "^1.93.0",
     "publint": "^0.3.25",
     "size-limit": "^14.3.0",
