@@ -24,7 +24,7 @@ const check = (label, fn) => {
 
 const [major, minor] = process.versions.node.split(".").map(Number);
 const [reqMajor, reqMinor] = pkg.engines.node
-  .replace(/[^\d.]/g, "")
+  .replaceAll(/[^\d.]/g, "")
   .split(".")
   .map(Number);
 if (major < reqMajor || (major === reqMajor && minor < (reqMinor ?? 0))) {
@@ -106,8 +106,8 @@ check("standard-schema adapter imports no external module", () => {
   for (const file of files) {
     // JSDoc examples show `import … from "korean-account"`; only code counts.
     const code = readFileSync(file, "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/^\s*\/\/.*$/gm, "");
+      .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+      .replaceAll(/^\s*\/\/.*$/gm, "");
     if (/from\s*["'][^./]|require\(\s*["'][^./]/.test(code)) {
       throw new Error(`${file} imports an external module`);
     }

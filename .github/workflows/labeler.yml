@@ -2,7 +2,8 @@ name: Metadata
 
 # Runs the base repository's workflow only; PR code is never checked out or executed.
 on:
-  pull_request_target:
+  # Labels need a write token on fork PRs too. Safe only while no step checks out or runs PR code.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, edited, synchronize, reopened]
   issues:
     types: [opened, edited, reopened]

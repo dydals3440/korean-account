@@ -187,9 +187,10 @@ jobs:
       - name: Check packed consumer
         run: pnpm check:consumer "${PEER_INSTALL:-none}"
 
+      # The matrix swaps peer versions on purpose, so this install bypasses the lockfile.
       - name: Install ${{ matrix.install }}
         if: matrix.install != ''
-        run: pnpm add -D "$PEER_INSTALL"
+        run: pnpm add -D "$PEER_INSTALL" # zizmor: ignore[adhoc-packages]
 
       - name: Typecheck
         run: pnpm typecheck

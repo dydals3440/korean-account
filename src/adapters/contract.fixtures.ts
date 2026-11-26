@@ -102,7 +102,10 @@ export const ADAPTER_CONTRACT = {
       { ...baseDetection, kind: "weird" },
       { ...baseDetection, institutionId: "unknown" },
       { ...baseDetection, score: -1 },
-      ...[NaN, Infinity, -Infinity].map((score) => ({ ...baseDetection, score })),
+      ...[Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY].map((score) => ({
+        ...baseDetection,
+        score,
+      })),
       { ...baseDetection, score: "7" },
       { ...baseDetection, capabilities: undefined },
       {
