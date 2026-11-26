@@ -7,7 +7,7 @@
 | 항목                         | 버전                                | 기준                                               |
 | ---------------------------- | ----------------------------------- | -------------------------------------------------- |
 | Node.js (개발·빌드·릴리스)   | 26.13.1                             | `.nvmrc`                                           |
-| pnpm                         | 12.18.0                             | `package.json`의 `packageManager`                  |
+| pnpm                         | 12.23.0                             | `package.json`의 `packageManager`                  |
 | Node.js (사용자 런타임 하한) | 22.12.0                             | `engines`. CI가 22.12.0·22·24·26에서 `dist`를 실행 |
 | TypeScript (개발)            | 7.x                                 | `devDependencies`                                  |
 | TypeScript (사용자)          | 5.1.6 · 5.9.3 · 6.0.3에서 타입 검사 | CI `consumer-types`                                |
@@ -199,7 +199,7 @@ PR마다 제목·changeset 규칙은 같습니다. 스택이 필요 없는 작�
 
 ## English summary
 
-- **Toolchain**: Node.js 26.13.1 (`.nvmrc`) and pnpm 12.18.0 (`packageManager`) for development; the published library supports Node.js 22.12+. Run `pnpm install` then `pnpm check`.
+- **Toolchain**: Node.js 26.13.1 (`.nvmrc`) and pnpm 12.23.0 (`packageManager`) for development; the published library supports Node.js 22.12+. Run `pnpm install` then `pnpm check`.
 - **Checks**: `pnpm build && pnpm check:dist` for the package; `pnpm check:consumer` installs the packed tarball next to 0.4.1 with every peer at its floor and latest version, and checks exports, top candidates, adapter behaviour, drop-in types and inferred adapter types.
 - **Layers**: `types ← constants ← core ← registry (core/define only) ← builtin ← index`; adapters import only types, constants and `registry/institution-ids`. Enforced by oxlint (`no-restricted-imports`, `import/no-cycle`).
 - **Code**: kebab-case files with one main export; `create*/define*/get*/find*/is*/to*` verbs; `T*` generics; pure functions with explicit return types; `null` for "not found", empty arrays for empty lists, omitted optional result fields, `undefined` options mean the default; errors read `korean-account: <subject> <condition> (received <value>)`. Public exports carry English JSDoc with verified examples.

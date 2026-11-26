@@ -35,6 +35,8 @@ Dependabot·Changesets가 관리하는 생성 본문은 자동화 원문을 유�
 
 Metadata workflow(`.github/workflows/labeler.yml`)는 제목에서 type과 비호환 표시(`!`)를 분류하고, PR이 바꾼 파일에서 area를 [labeler.yml](./labeler.yml) 기준으로 동기화합니다. Dependabot·deps scope·lockfile 변경에는 의존성 표시를 추가합니다. 수동 의존성 표시를 자동 제거하지 않으므로 철회된 업데이트는 리뷰에서 해제합니다. 이슈의 area는 트리아지 때 지정합니다. 이 workflow는 `pull_request_target`으로 기본 브랜치의 정의만 실행하며 PR 코드를 checkout하거나 실행하지 않습니다. GitHub의 Generate release notes는 [release.yml](./release.yml)의 라벨 분류를 씁니다.
 
+`.github/**`를 바꾸는 PR은 Workflow security workflow(`.github/workflows/workflow-security.yml`)가 zizmor로 검사합니다. 의도된 예외(`pull_request_target`, peer 매트릭스의 lockfile 밖 설치, 게시용 npm 설치)는 해당 줄의 `# zizmor: ignore[...]`와 사유 주석으로만 허용합니다.
+
 라벨 개편 순서: 기준 파일·템플릿·자동화 수정 → 새 라벨 생성 → 기존 이슈/PR 이관 → 이전 라벨의 사용·설정 참조가 0인지 확인 → 이전 라벨 삭제. 기존 이력의 백업을 먼저 보관합니다.
 
 ## 쌓인 PR
@@ -83,7 +85,7 @@ Git 태그는 `vX.Y.Z`, GitHub Release 제목도 `vX.Y.Z`로 통일합니다. Ch
 3. 게시 후 npm `latest`, provenance(attestations), 실제 설치, 태그, GitHub Release를 확인한 뒤 완료로 기록합니다.
 
 - 게시는 npm Trusted Publishing(OIDC)과 provenance를 씁니다. npm의 `korean-account`에 GitHub `dydals3440/korean-account`와 workflow `release.yml`이 연결되어 있어 `NPM_TOKEN`이 필요 없습니다. workflow 파일 이름을 바꾸면 npm 설정도 함께 바꿉니다. npm의 trusted publisher에 environment `npm`을 지정하면 승인 없이는 게시할 수 없게 됩니다(이 workflow가 main에 들어간 뒤 지정).
-- 릴리스 도구는 `.nvmrc`의 Node, `packageManager`의 pnpm, npm 12.2.2입니다. `prepublishOnly`가 게시 직전에 `build`와 `check:dist`를 다시 실행합니다.
+- 릴리스 도구는 `.nvmrc`의 Node, `packageManager`의 pnpm, npm 12.2.3입니다. `prepublishOnly`가 게시 직전에 `build`와 `check:dist`를 다시 실행합니다.
 - `publish` job은 취소하지 않습니다(부분 게시는 되돌릴 수 없음). 실패하면 원인을 고친 뒤 main에서 workflow를 수동 실행(`workflow_dispatch`)합니다. 재시도 전 npm에 같은 버전이 이미 있는지 확인하고, 게시된 버전은 덮어쓰지 않습니다.
 - npm 게시는 성공했는데 태그나 Release 생성만 실패하면, 재실행해도 `select-mode`가 `none`을 고르므로 다시 시도하지 않습니다. `gh release create vX.Y.Z --target <커밋 SHA> --notes-file <CHANGELOG 발췌>`로 직접 만듭니다.
 

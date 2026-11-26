@@ -160,7 +160,7 @@ jobs:
 
       # Trusted publishing needs npm 11.5 or newer.
       - name: Setup npm
-        run: npm install --global npm@12.2.2
+        run: npm install --global npm@12.2.3 # zizmor: ignore[adhoc-packages]
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -93,7 +93,7 @@ describe("제주 — PDF p.8의 열거 식별자", () => {
     "접두어 %i 는 열거되었으면 9점과 과목을, 아니면 3점을 받는다",
     (prefix) => {
       // Given
-      const digits = String(prefix) + "111111111";
+      const digits = `${prefix}111111111`;
       const isListed = listed.has(prefix);
 
       // When
@@ -143,9 +143,9 @@ describe("신한 통합 14자리 — PDF p.12", () => {
       // Given
       const shinhan = getInstitution("shinhan");
       const integratedInputs = ["900", "902"].map(
-        (accountType) => prefix + accountType + "11111111",
+        (accountType) => `${prefix}${accountType}11111111`,
       );
-      const legacyInput = prefix + "90111111111";
+      const legacyInput = `${prefix}90111111111`;
 
       // When
       const integratedResults = integratedInputs.map((digits) => scoped("shinhan", digits));
@@ -211,7 +211,7 @@ test.each([
   ["177", "savings"],
 ] as const)("신협 %s — PDF p.9의 입금전용 각주", (code, category) => {
   // Given
-  const digits = code + "111111111";
+  const digits = `${code}111111111`;
 
   // When
   const result = scoped("shinhyup", digits);
@@ -246,7 +246,7 @@ describe("HSBC — PDF p.10의 과목과 부가서비스", () => {
     );
     test.each(codes)(`${category} 과목 %s 는 출금 가능 과목으로 8점을 받는다`, (code) => {
       // Given
-      const digits = "123123451" + code;
+      const digits = `123123451${code}`;
 
       // When
       const result = scoped("hsbc", digits);
@@ -274,7 +274,7 @@ describe("HSBC — PDF p.10의 과목과 부가서비스", () => {
     "995",
   ])("미열거 %s는 과목 가산점을 받지 않는다", (code) => {
     // Given
-    const digits = "123123451" + code;
+    const digits = `123123451${code}`;
 
     // When
     const result = scoped("hsbc", digits);

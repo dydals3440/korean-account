@@ -68,9 +68,9 @@ export function sampleIdentifiablePatterns(
 function buildSample(pattern: AccountPattern, random: () => number): string {
   const digits = [...randomDigits(random, templateLength(pattern.template))];
   const place = (start: number, code: string): void => {
-    [...code].forEach((digit, offset) => {
+    for (const [offset, digit] of [...code].entries()) {
       digits[start + offset] = digit;
-    });
+    }
   };
   const pick = <T>(items: readonly T[]): T | undefined =>
     items[Math.floor(random() * items.length)];

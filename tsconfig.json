@@ -13,11 +13,9 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "verbatimModuleSyntax": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "declaration": true,
     "declarationMap": true
